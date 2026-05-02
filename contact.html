@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — MCA Software</title>
+  <meta name="description" content="Contact information for MCA Software S.a.s. di Sirna Carlo & C.">
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { font-family: 'IBM Plex Sans', var(--font); }
+
+    .contact-page {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 72px 24px 96px;
+    }
+
+    .contact-page h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.75rem, 3vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 8px;
+    }
+
+    .contact-page .intro {
+      color: var(--text-muted);
+      margin-bottom: 48px;
+      font-size: 1rem;
+    }
+
+    .contact-block {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .contact-row {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 12px;
+      align-items: baseline;
+    }
+
+    .contact-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .contact-value {
+      font-size: 0.9375rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .contact-value a {
+      color: var(--accent);
+      word-break: break-all;
+    }
+
+    .contact-value a:hover { color: var(--accent-hover); }
+
+    .pec-note {
+      background: rgba(47,129,247,0.07);
+      border: 1px solid rgba(47,129,247,0.2);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .pec-note strong { color: var(--text); }
+
+    @media (max-width: 520px) {
+      .contact-row { grid-template-columns: 1fr; gap: 4px; }
+      .contact-label { font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="index.html" class="nav-logo">
+        <img src="assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="products/cvs-treegraph/index.html">CVSTreeGraph</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="contact-page">
+      <h1>Contact</h1>
+      <p class="intro">For purchase inquiries, support, or licensing questions.</p>
+
+      <div class="contact-block">
+
+        <div class="contact-row">
+          <span class="contact-label">Company</span>
+          <span class="contact-value">MCA Software S.a.s. di Sirna Carlo &amp; C.</span>
+        </div>
+
+        <div class="contact-row">
+          <span class="contact-label">VAT number</span>
+          <span class="contact-value">IT03727730164</span>
+        </div>
+
+        <div class="contact-row">
+          <span class="contact-label">Email</span>
+          <span class="contact-value">
+            <a href="mailto:carlo.sirna@gmail.com">carlo.sirna@gmail.com</a>
+          </span>
+        </div>
+
+        <div class="contact-row">
+          <span class="contact-label">PEC</span>
+          <span class="contact-value">
+            <a href="mailto:mcasoftwaresas@legalmail.it">mcasoftwaresas@legalmail.it</a>
+          </span>
+        </div>
+
+      </div>
+
+      <div class="pec-note">
+        <strong>What is PEC?</strong> PEC (<em>Posta Elettronica Certificata</em>) is Italy's certified electronic mail system.
+        It carries the same legal weight as registered postal mail and is used for official and administrative communications with Italian entities.
+        For general inquiries, use the standard email address above.
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="index.html" class="footer-logo">
+        <img src="assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="products/cvs-treegraph/index.html">CVSTreeGraph</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <p class="footer-copy">© 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

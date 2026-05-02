@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCA Software — Professional Tools for Developers</title>
+  <meta name="description" content="MCA Software builds focused tools that solve real developer workflow problems. CVSTreeGraph brings clarity to complex CVS repositories.">
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { font-family: 'IBM Plex Sans', var(--font); }
+
+    /* ── Hero ── */
+    .homepage-hero {
+      position: relative;
+      overflow: hidden;
+      padding: 72px 24px 0;
+    }
+
+    .homepage-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(47,129,247,0.18) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: radial-gradient(ellipse 90% 70% at 60% 0%, black 30%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 90% 70% at 60% 0%, black 30%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .homepage-hero::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 55%;
+      height: 100%;
+      background: radial-gradient(ellipse at 60% 30%, rgba(47,129,247,0.1) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 56px;
+      align-items: flex-start;
+    }
+
+    /* Left */
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding-top: 24px;
+    }
+
+    .product-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(47,129,247,0.1);
+      border: 1px solid rgba(47,129,247,0.28);
+      border-radius: 40px;
+      padding: 5px 14px 5px 6px;
+      width: fit-content;
+      animation: riseUp 0.5s ease both;
+    }
+
+    .product-badge img {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+    }
+
+    .product-badge span {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .hero-headline {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.4rem, 4.5vw, 3.75rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      animation: riseUp 0.5s 0.08s ease both;
+    }
+
+    .hero-headline em {
+      font-style: normal;
+      background: linear-gradient(90deg, #2f81f7 0%, #79c0ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 1.0625rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      max-width: 420px;
+      animation: riseUp 0.5s 0.16s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      animation: riseUp 0.5s 0.24s ease both;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 20px;
+      animation: riseUp 0.5s 0.32s ease both;
+    }
+
+    .hero-meta span {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .hero-meta span::before {
+      content: '';
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    /* Right — screenshot */
+    .hero-right {
+      animation: riseUp 0.6s 0.12s ease both;
+    }
+
+    .screenshot-frame {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow:
+        0 0 0 1px rgba(47,129,247,0.12),
+        0 40px 90px rgba(0,0,0,0.65),
+        0 8px 24px rgba(0,0,0,0.35);
+      transform: perspective(1800px) rotateY(-5deg) rotateX(1.5deg);
+      transform-origin: left center;
+      transition: transform 0.5s ease;
+    }
+
+    .screenshot-frame:hover {
+      transform: perspective(1800px) rotateY(-1deg) rotateX(0deg);
+    }
+
+    .screenshot-chrome {
+      background: #1e2430;
+      border-bottom: 1px solid var(--border);
+      padding: 7px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chrome-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+
+    .chrome-winbtns {
+      display: flex;
+      gap: 0;
+    }
+
+    .chrome-winbtns span {
+      width: 36px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      cursor: default;
+      border-radius: 2px;
+      transition: background 0.1s;
+    }
+
+    .chrome-winbtns span:hover { background: rgba(255,255,255,0.08); }
+    .chrome-winbtns span.close:hover { background: #c42b1c; color: #fff; }
+
+    .screenshot-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* ── Feature strip ── */
+    .features-strip {
+      margin-top: 80px;
+      padding: 60px 24px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-surface);
+    }
+
+    .features-strip-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 36px;
+    }
+
+    .feat {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .feat-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: rgba(47,129,247,0.1);
+      border: 1px solid rgba(47,129,247,0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .feat h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .feat p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* ── CTA band ── */
+    .cta-band {
+      padding: 88px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-band::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 50% 90% at 50% 50%, rgba(47,129,247,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .cta-inner h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.75rem, 3vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 12px;
+    }
+
+    .cta-inner p {
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      line-height: 1.65;
+    }
+
+    .cta-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── Animation ── */
+    @keyframes riseUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+      .homepage-hero { padding-bottom: 0; }
+      .screenshot-frame { transform: none; }
+      .screenshot-frame:hover { transform: none; }
+      .features-strip-inner { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 580px) {
+      .features-strip-inner { grid-template-columns: 1fr; gap: 28px; }
+      .hero-actions { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="index.html" class="nav-logo">
+        <img src="assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="products/cvs-treegraph/index.html">CVSTreeGraph</a></li>
+        <li><a href="products/cvs-treegraph/index.html#pricing">Pricing</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="products/cvs-treegraph/index.html#download" class="btn btn-primary" style="padding:6px 16px;font-size:13px;">Download</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+
+    <section class="homepage-hero">
+      <div class="hero-inner">
+
+        <div class="hero-left">
+          <div class="product-badge">
+            <img src="assets/cvs-treegraph-icon.png" alt="">
+            <span>CVSTreeGraph</span>
+          </div>
+
+          <h1 class="hero-headline">
+            CVS history.<br>
+            <em>Finally readable.</em>
+          </h1>
+
+          <p class="hero-sub">
+            A revision graph built for CVS repositories that aren't small anymore.
+            Integrated graph, annotate, and diff — all in one focused Windows application.
+          </p>
+
+          <div class="hero-actions">
+            <a href="products/cvs-treegraph/index.html#download" class="btn btn-secondary">Download Free</a>
+            <a href="products/cvs-treegraph/index.html" class="btn btn-primary">Learn More →</a>
+          </div>
+
+          <div class="hero-meta">
+            <span>Windows 10 / 11 · 64-bit</span>
+            <span>Free for personal use</span>
+            <span>No installer required</span>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="screenshot-frame">
+            <div class="screenshot-chrome">
+              <span class="chrome-label">CVSTreeGraph</span>
+              <div class="chrome-winbtns">
+                <span title="Minimize">&#x2013;</span>
+                <span title="Maximize">&#x25A1;</span>
+                <span class="close" title="Close">&#x2715;</span>
+              </div>
+            </div>
+            <img src="assets/screenshots/hero.png"
+                 alt="CVSTreeGraph — revision graph, annotate, and diff views"
+                 width="1541" height="1276"
+                 loading="eager">
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="features-strip">
+      <div class="features-strip-inner">
+
+        <div class="feat">
+          <div class="feat-icon">⎇</div>
+          <h3>Revision Graph</h3>
+          <p>Compact and extended layouts, collapsible branches, automatic tag grouping. Stays readable on repositories with decades of history.</p>
+        </div>
+
+        <div class="feat">
+          <div class="feat-icon">◈</div>
+          <h3>Annotate Viewer</h3>
+          <p>Syntax-highlighted blame with revision info in the gutter. Click any line to jump directly to that node in the graph.</p>
+        </div>
+
+        <div class="feat">
+          <div class="feat-icon">⊟</div>
+          <h3>Integrated Diff</h3>
+          <p>Side-by-side or unified diff, always in sync with the graph. Pin any revision as a baseline to compare across branches.</p>
+        </div>
+
+        <div class="feat">
+          <div class="feat-icon">⇄</div>
+          <h3>Merge Workflow</h3>
+          <p>Pin a merge interval once, reuse it across all target branches. No manual revision reconstruction, no context loss.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="cta-band">
+      <div class="cta-inner">
+        <h2>Built for real CVS work.</h2>
+        <p>Free for personal use. Commercial licenses for professional and team use — one price, perpetual access.</p>
+        <div class="cta-btns">
+          <a href="products/cvs-treegraph/index.html#download" class="btn btn-secondary">Download Free</a>
+          <a href="products/cvs-treegraph/index.html#pricing" class="btn btn-primary">See Pricing</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="index.html" class="footer-logo">
+        <img src="assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="products/cvs-treegraph/index.html">CVSTreeGraph</a>
+        <a href="products/cvs-treegraph/index.html#pricing">Pricing</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <p class="footer-copy">© 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
