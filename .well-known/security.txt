@@ -1,0 +1,5 @@
+Contact: mailto:info@mcasoftware.dev
+Contact: https://mcasoftware.dev/contact.html
+Expires: 2027-05-05T23:59:59Z
+Canonical: https://mcasoftware.dev/.well-known/security.txt
+Preferred-Languages: en, it
