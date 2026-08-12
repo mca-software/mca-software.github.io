@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MCA Software — Professional Tools for Developers</title>
-  <meta name="description" content="MCA Software builds focused tools that solve real developer workflow problems. CVSTreeGraph brings clarity to complex CVS repositories.">
+  <title>MCA Software — Free Tools for Delphi and Windows Developers</title>
+  <meta name="description" content="MCA Software builds focused developer tools for Delphi and Windows — a CVS revision graph, a Delphi debugger for VS Code, and IDE plugins. All free.">
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/style.css">
@@ -12,87 +12,42 @@
     body { font-family: 'IBM Plex Sans', var(--font); }
 
     /* ── Hero ── */
-    .homepage-hero {
+    .portfolio-hero {
       position: relative;
       overflow: hidden;
-      padding: 72px 24px 0;
+      padding: 96px 24px 72px;
     }
 
-    .homepage-hero::before {
+    .portfolio-hero::before {
       content: '';
       position: absolute;
       inset: 0;
       background-image: radial-gradient(circle, rgba(47,129,247,0.18) 1px, transparent 1px);
       background-size: 28px 28px;
-      mask-image: radial-gradient(ellipse 90% 70% at 60% 0%, black 30%, transparent 100%);
-      -webkit-mask-image: radial-gradient(ellipse 90% 70% at 60% 0%, black 30%, transparent 100%);
+      mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 25%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 25%, transparent 100%);
       pointer-events: none;
     }
 
-    .homepage-hero::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 0;
-      width: 55%;
-      height: 100%;
-      background: radial-gradient(ellipse at 60% 30%, rgba(47,129,247,0.1) 0%, transparent 65%);
-      pointer-events: none;
-    }
-
-    .hero-inner {
+    .portfolio-hero-inner {
       position: relative;
       z-index: 1;
-      max-width: var(--max-w);
+      max-width: 760px;
       margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1.15fr;
-      gap: 56px;
-      align-items: flex-start;
-    }
-
-    /* Left */
-    .hero-left {
+      text-align: center;
       display: flex;
       flex-direction: column;
       gap: 24px;
-      padding-top: 24px;
-    }
-
-    .product-badge {
-      display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: rgba(47,129,247,0.1);
-      border: 1px solid rgba(47,129,247,0.28);
-      border-radius: 40px;
-      padding: 5px 14px 5px 6px;
-      width: fit-content;
-      animation: riseUp 0.5s ease both;
-    }
-
-    .product-badge img {
-      width: 22px;
-      height: 22px;
-      border-radius: 4px;
-    }
-
-    .product-badge span {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent);
     }
 
     .hero-headline {
       font-family: 'Syne', sans-serif;
-      font-size: clamp(2.4rem, 4.5vw, 3.75rem);
+      font-size: clamp(2.2rem, 4.5vw, 3.5rem);
       font-weight: 800;
-      line-height: 1.08;
+      line-height: 1.1;
       letter-spacing: -0.03em;
-      color: var(--text);
-      animation: riseUp 0.5s 0.08s ease both;
+      animation: riseUp 0.5s ease both;
     }
 
     .hero-headline em {
@@ -106,23 +61,17 @@
     .hero-sub {
       font-size: 1.0625rem;
       color: var(--text-muted);
-      line-height: 1.75;
-      max-width: 420px;
-      animation: riseUp 0.5s 0.16s ease both;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      animation: riseUp 0.5s 0.24s ease both;
+      line-height: 1.8;
+      max-width: 620px;
+      animation: riseUp 0.5s 0.08s ease both;
     }
 
     .hero-meta {
       display: flex;
       flex-wrap: wrap;
+      justify-content: center;
       gap: 6px 20px;
-      animation: riseUp 0.5s 0.32s ease both;
+      animation: riseUp 0.5s 0.16s ease both;
     }
 
     .hero-meta span {
@@ -143,121 +92,37 @@
       flex-shrink: 0;
     }
 
-    /* Right — screenshot */
-    .hero-right {
-      animation: riseUp 0.6s 0.12s ease both;
-    }
+    /* ── Projects ── */
+    .projects-section { padding: 24px 24px 72px; }
+    .projects-inner { max-width: var(--max-w); margin: 0 auto; }
 
-    .screenshot-frame {
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      box-shadow:
-        0 0 0 1px rgba(47,129,247,0.12),
-        0 40px 90px rgba(0,0,0,0.65),
-        0 8px 24px rgba(0,0,0,0.35);
-      transform: perspective(1800px) rotateY(-5deg) rotateX(1.5deg);
-      transform-origin: left center;
-      transition: transform 0.5s ease;
-    }
-
-    .screenshot-frame:hover {
-      transform: perspective(1800px) rotateY(-1deg) rotateX(0deg);
-    }
-
-    .screenshot-chrome {
-      background: #1e2430;
-      border-bottom: 1px solid var(--border);
-      padding: 7px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .chrome-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-family: 'IBM Plex Sans', sans-serif;
-    }
-
-    .chrome-winbtns {
-      display: flex;
-      gap: 0;
-    }
-
-    .chrome-winbtns span {
-      width: 36px;
-      height: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      color: var(--text-muted);
-      cursor: default;
-      border-radius: 2px;
-      transition: background 0.1s;
-    }
-
-    .chrome-winbtns span:hover { background: rgba(255,255,255,0.08); }
-    .chrome-winbtns span.close:hover { background: #c42b1c; color: #fff; }
-
-    .screenshot-frame img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    /* ── Feature strip ── */
-    .features-strip {
-      margin-top: 80px;
-      padding: 60px 24px;
-      border-top: 1px solid var(--border);
-      background: var(--bg-surface);
-    }
-
-    .features-strip-inner {
-      max-width: var(--max-w);
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 36px;
-    }
-
-    .feat {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .feat-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
-      background: rgba(47,129,247,0.1);
-      border: 1px solid rgba(47,129,247,0.22);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 17px;
-      flex-shrink: 0;
-    }
-
-    .feat h3 {
+    .projects-inner > h2 {
       font-family: 'Syne', sans-serif;
-      font-size: 0.9375rem;
-      font-weight: 700;
-      color: var(--text);
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      scroll-margin-top: 92px;
     }
 
-    .feat p {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.65;
+    .projects-lead { color: var(--text-muted); margin-bottom: 36px; }
+
+    .product-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+
+    .product-card.highlight { border-color: rgba(47,129,247,0.45); }
+
+    .contrib-inner > h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      scroll-margin-top: 92px;
     }
 
     /* ── CTA band ── */
     .cta-band {
-      padding: 88px 24px;
+      padding: 80px 24px;
       text-align: center;
       position: relative;
       overflow: hidden;
@@ -271,52 +136,27 @@
       pointer-events: none;
     }
 
-    .cta-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 520px;
-      margin: 0 auto;
-    }
+    .cta-inner { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; }
 
     .cta-inner h2 {
       font-family: 'Syne', sans-serif;
-      font-size: clamp(1.75rem, 3vw, 2.5rem);
+      font-size: clamp(1.6rem, 3vw, 2.25rem);
       font-weight: 800;
       letter-spacing: -0.025em;
       margin-bottom: 12px;
     }
 
-    .cta-inner p {
-      color: var(--text-muted);
-      margin-bottom: 32px;
-      line-height: 1.65;
-    }
+    .cta-inner p { color: var(--text-muted); margin-bottom: 32px; line-height: 1.7; }
 
-    .cta-btns {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
+    .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
-    /* ── Animation ── */
     @keyframes riseUp {
       from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── Responsive ── */
-    @media (max-width: 900px) {
-      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
-      .homepage-hero { padding-bottom: 0; }
-      .screenshot-frame { transform: none; }
-      .screenshot-frame:hover { transform: none; }
-      .features-strip-inner { grid-template-columns: repeat(2, 1fr); }
-    }
-
     @media (max-width: 580px) {
-      .features-strip-inner { grid-template-columns: 1fr; gap: 28px; }
-      .hero-actions { flex-direction: column; align-items: flex-start; }
+      .portfolio-hero { padding: 64px 24px 48px; }
     }
   </style>
 </head>
@@ -328,98 +168,261 @@
         <img src="assets/logo-mca-software.png" alt="MCA Software">
       </a>
       <ul>
-        <li><a href="products/cvs-treegraph/index.html">CVSTreeGraph</a></li>
-        <li><a href="products/cvs-treegraph/index.html#pricing">Pricing</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#contributions">Contributions</a></li>
         <li><a href="contact.html">Contact</a></li>
-        <li><a href="products/cvs-treegraph/index.html#download" class="btn btn-primary" style="padding:6px 16px;font-size:13px;">Download</a></li>
+        <li><a href="https://github.com/csm101" target="_blank" rel="noopener">GitHub</a></li>
       </ul>
     </nav>
   </header>
 
   <main>
 
-    <section class="homepage-hero">
-      <div class="hero-inner">
+    <section class="portfolio-hero">
+      <div class="portfolio-hero-inner">
+        <h1 class="hero-headline">
+          Developer tools for Delphi and Windows.<br>
+          <em>All free.</em>
+        </h1>
 
-        <div class="hero-left">
-          <div class="product-badge">
-            <img src="assets/cvs-treegraph-icon.png" alt="">
-            <span>CVSTreeGraph</span>
-          </div>
+        <p class="hero-sub">
+          MCA Software is a one-person shop building the tools it needed and could not find:
+          a CVS revision graph that stays readable on decades of history, a real Delphi debugger
+          inside VS Code, and a handful of IDE plugins that remove daily friction.
+          Everything on this page is free to use — freeware or open source.
+        </p>
 
-          <h1 class="hero-headline">
-            CVS history.<br>
-            <em>Finally readable.</em>
-          </h1>
-
-          <p class="hero-sub">
-            A revision graph built for CVS repositories that aren't small anymore.
-            Integrated graph, annotate, and diff — all in one focused Windows application.
-            Used in production environments by teams maintaining long-lived CVS codebases.
-          </p>
-
-          <div class="hero-actions">
-            <a href="https://github.com/mca-software/cvs-treegraph/releases/latest"
-               class="btn btn-secondary"
-               target="_blank" rel="noopener">Download Trial</a>
-            <a href="https://mcasoftware.lemonsqueezy.com/checkout/buy/74d977d8-42da-4455-8127-b01af73c388e"
-               class="btn btn-primary"
-               target="_blank" rel="noopener">Buy License — €79/yr</a>
-          </div>
-          <a href="products/cvs-treegraph/index.html" class="btn btn-ghost">Learn more →</a>
-
-          <div class="hero-meta">
-            <span>Windows 10 / 11 · 64-bit</span>
-            <span>30-day trial · No credit card</span>
-            <span>No installer required</span>
-          </div>
+        <div class="hero-meta">
+          <span>Windows · Delphi · VS Code</span>
+          <span>29 merged pull requests upstream</span>
+          <span>No accounts, no telemetry</span>
         </div>
-
-        <div class="hero-right">
-          <div class="screenshot-frame">
-            <div class="screenshot-chrome">
-              <span class="chrome-label">CVSTreeGraph</span>
-              <div class="chrome-winbtns">
-                <span title="Minimize">&#x2013;</span>
-                <span title="Maximize">&#x25A1;</span>
-                <span class="close" title="Close">&#x2715;</span>
-              </div>
-            </div>
-            <img src="assets/screenshots/hero.png"
-                 alt="CVSTreeGraph — revision graph, annotate, and diff views"
-                 width="1541" height="1276"
-                 loading="eager">
-          </div>
-        </div>
-
       </div>
     </section>
 
-    <section class="features-strip">
-      <div class="features-strip-inner">
+    <section class="projects-section" id="projects">
+      <div class="projects-inner">
+        <h2>Projects</h2>
+        <p class="projects-lead">Built here, maintained here.</p>
 
-        <div class="feat">
-          <div class="feat-icon">⎇</div>
-          <h3>Revision Graph</h3>
-          <p>Compact and extended layouts, collapsible branches, automatic tag grouping. Stays readable on repositories with decades of history.</p>
+        <div class="product-grid">
+
+          <div class="product-card highlight">
+            <div class="card-head">
+              <img src="assets/cvs-treegraph-icon.png" alt="" class="card-icon">
+              <h3>CVSTreeGraph</h3>
+            </div>
+            <div class="card-tags">
+              <span class="tag tag-free">Freeware</span>
+              <span class="tag">Windows x64</span>
+              <span class="tag">Delphi</span>
+            </div>
+            <p>
+              A revision graph for CVS repositories that aren't small anymore, with integrated
+              annotate and diff. Built as a replacement for the TortoiseCVS and WinCVS graphs,
+              which stop being usable long before a real history ends.
+            </p>
+            <div class="card-links">
+              <a href="products/cvs-treegraph/index.html">Details →</a>
+              <a href="https://github.com/mca-software/cvs-treegraph/releases/latest" target="_blank" rel="noopener">Download</a>
+            </div>
+          </div>
+
+          <div class="product-card highlight">
+            <div class="card-head">
+              <img src="assets/delphi-debugger-icon.png" alt="" class="card-icon">
+              <h3>Delphi Debugger for VS Code</h3>
+            </div>
+            <div class="card-tags">
+              <span class="tag tag-free">Open source</span>
+              <span class="tag">VS Code</span>
+              <span class="tag">Win32 &amp; Win64</span>
+              <span class="tag">MCP</span>
+            </div>
+            <p>
+              A real debugger for Delphi applications outside the Embarcadero IDE — breakpoints,
+              stepping, call stacks, variable inspection and a full Pascal expression evaluator,
+              built on the Windows Debug API. The same engine is exposed over MCP, so an AI agent
+              can run your program and read its actual state instead of guessing from the source.
+            </p>
+            <div class="card-links">
+              <a href="products/delphi-debugger/index.html">Documentation →</a>
+              <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+              <span class="stars">★ 17</span>
+            </div>
+          </div>
+
+          <div class="product-card">
+            <div class="card-head">
+              <h3>Edit in VS Code</h3>
+            </div>
+            <div class="card-tags">
+              <span class="tag tag-free">Open source</span>
+              <span class="tag">Delphi IDE plugin</span>
+            </div>
+            <p>
+              Adds an <em>Open in Visual Studio Code</em> command to the Delphi Tools menu. It
+              generates the workspace and launch configuration from the current project — output
+              paths, source root, unit search paths, package list — which is what makes VS Code
+              (and its AI extensions) practical on a real Delphi project.
+            </p>
+            <div class="card-links">
+              <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">GitHub →</a>
+              <span class="stars">★ 74</span>
+            </div>
+          </div>
+
+          <div class="product-card">
+            <div class="card-head">
+              <h3>DFMTextStabilizer</h3>
+            </div>
+            <div class="card-tags">
+              <span class="tag tag-free">Open source</span>
+              <span class="tag">Delphi IDE plugin</span>
+            </div>
+            <p>
+              Fixes how the Delphi IDE serializes DFM files: UTF-8 output, non-ASCII text left
+              readable instead of escaped into byte soup, and stable formatting. The point is
+              version control — DFM diffs become reviewable and merges stop exploding.
+            </p>
+            <div class="card-links">
+              <a href="https://github.com/csm101/DFMTextStabilizer" target="_blank" rel="noopener">GitHub →</a>
+              <span class="stars">★ 5</span>
+            </div>
+          </div>
+
+          <div class="product-card">
+            <div class="card-head">
+              <h3>StopDelphiJumpAround</h3>
+            </div>
+            <div class="card-tags">
+              <span class="tag tag-free">Open source</span>
+              <span class="tag">Delphi IDE plugin</span>
+            </div>
+            <p>
+              A small plugin that stops the Delphi IDE from throwing its main window across the
+              screen every time it switches between the debug and default layouts. One irritation,
+              removed permanently.
+            </p>
+            <div class="card-links">
+              <a href="https://github.com/csm101/StopDelphiJumpAround" target="_blank" rel="noopener">GitHub →</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="contrib-section" id="contributions">
+      <div class="contrib-inner">
+        <h2>Open Source Contributions</h2>
+        <p class="contrib-intro">
+          29 pull requests merged into other people's projects — mostly memory leaks, 64-bit
+          correctness and threading bugs found while using those libraries in production, then
+          fixed upstream so the next person does not hit them.
+        </p>
+
+        <div class="contrib-group">
+          <h3>Delphi</h3>
+
+          <div class="contrib-item">
+            <div class="contrib-head">
+              <a href="https://github.com/Spelt/ZXing.Delphi" target="_blank" rel="noopener">Spelt/ZXing.Delphi</a>
+              <span class="contrib-what">Barcode and QR scanning library · 10 PRs merged</span>
+            </div>
+            <ul class="contrib-list">
+              <li>Fixed nearly all memory leaks under Win32 and Win64, across two separate passes</li>
+              <li>Added support for VCL applications, removing the dependency on <code>FMX.Graphics.TBitmap</code></li>
+              <li>Fixed handling of UTF-8 text in QR codes</li>
+              <li><code>TCharacterSetECI</code> was never initialized correctly and caused access violations</li>
+              <li><code>TDetector.findAlignmentInRegion</code> returned a dangling pointer</li>
+              <li>Moved the units left in the global namespace under <code>ZXing</code></li>
+              <li>Fixed a range check error in the test app, and an <code>if</code> whose <code>then</code> branch was an empty statement</li>
+            </ul>
+          </div>
+
+          <div class="contrib-item">
+            <div class="contrib-head">
+              <a href="https://github.com/TurboPack/SynEdit" target="_blank" rel="noopener">TurboPack/SynEdit</a>
+              <span class="contrib-what">Syntax-highlighting editor component · 2 PRs merged</span>
+            </div>
+            <ul class="contrib-list">
+              <li>SQL highlighter support for Oracle-dialect q-quoted string literals</li>
+              <li>Fixed a Win64 type mismatch in <code>IDataObject.HasFormat</code></li>
+            </ul>
+          </div>
+
+          <div class="contrib-item">
+            <div class="contrib-head">
+              <a href="https://github.com/hgourvest/superobject" target="_blank" rel="noopener">hgourvest/superobject</a>
+              <span class="contrib-what">JSON library for Delphi · 2 PRs merged</span>
+            </div>
+            <ul class="contrib-list">
+              <li>File locking bugfix</li>
+              <li>Fixed access violations with the 64-bit compilers, and updated the IFDEFs</li>
+            </ul>
+          </div>
+
+          <div class="contrib-item">
+            <div class="contrib-head">
+              <a href="https://github.com/csm101/x-superobject" target="_blank" rel="noopener">x-superobject</a>
+              <span class="contrib-what">Maintained fork · upstream PR open</span>
+            </div>
+            <p class="contrib-desc">
+              Fixed issue #141: access violations under concurrent access from multiple threads.
+              The fork exists because the fix is still waiting upstream.
+            </p>
+          </div>
+
+          <div class="contrib-item">
+            <div class="contrib-head">
+              <a href="https://github.com/stijnsanders/TSQLite" target="_blank" rel="noopener">stijnsanders/TSQLite</a>
+              <span class="contrib-what">Delphi wrapper for sqlite3.dll · 1 PR merged, 1 open</span>
+            </div>
+            <ul class="contrib-list">
+              <li>On-demand loading of <code>sqlite3.dll</code> — the library is loaded on first actual use, not at startup</li>
+              <li>Open: reference-counted <code>ISQLiteConnection</code> and <code>ISQLiteStatement</code></li>
+            </ul>
+          </div>
+
+          <div class="contrib-item">
+            <div class="contrib-head">
+              <a href="https://github.com/valentin-baron/delphi-devkit" target="_blank" rel="noopener">valentin-baron/delphi-devkit</a>
+              <span class="contrib-what">VS Code extension for Delphi · 3 PRs merged</span>
+            </div>
+            <ul class="contrib-list">
+              <li>Worked around the 32k command-line limit by passing DCC paths through the <code>.cmds</code> file</li>
+              <li>DelphiLSP integration: generate <code>.delphilsp.json</code> from the <code>.dproj</code> and keep code insight synced with the active project</li>
+              <li>Host Application support, making package (<code>.dpk</code>) and DLL projects runnable</li>
+            </ul>
+          </div>
         </div>
 
-        <div class="feat">
-          <div class="feat-icon">◈</div>
-          <h3>Annotate Viewer</h3>
-          <p>Syntax-highlighted blame with revision info in the gutter. Click any line to jump directly to that node in the graph.</p>
-        </div>
+        <div class="contrib-group">
+          <h3>.NET</h3>
 
-        <div class="feat">
-          <div class="feat-icon">⊟</div>
-          <h3>Integrated Diff</h3>
-          <p>Side-by-side or unified diff, always in sync with the graph. Pin any revision as a baseline to compare across branches.</p>
-        </div>
+          <div class="contrib-item">
+            <div class="contrib-head">
+              <a href="https://github.com/praeclarum/sqlite-net" target="_blank" rel="noopener">praeclarum/sqlite-net</a>
+              <span class="contrib-what">SQLite wrapper for .NET · 4 PRs merged, 1 open</span>
+            </div>
+            <ul class="contrib-list">
+              <li><code>ISqliteConnection</code> now derives from <code>IDisposable</code></li>
+              <li>Made <code>AsyncTests</code> runnable in parallel without interfering with each other</li>
+              <li>Fixed <code>ReadmeTest</code> under parallel and continuous execution, and the tests for issue #950</li>
+              <li>Open: cancelable queries</li>
+            </ul>
+          </div>
 
-        <div class="feat">
-          <div class="feat-icon">⇄</div>
-          <h3>Merge Workflow</h3>
-          <p>Pin a merge interval once, reuse it across all target branches. No manual revision reconstruction, no context loss.</p>
+          <div class="contrib-item">
+            <div class="contrib-head">
+              <a href="https://github.com/thecoderok/Unidecode.NET" target="_blank" rel="noopener">thecoderok/Unidecode.NET</a>
+              <span class="contrib-what">ASCII transliteration of Unicode text · 1 PR merged</span>
+            </div>
+            <ul class="contrib-list">
+              <li>3× faster, memory allocation problem resolved, and correct handling of double-character codepoints</li>
+            </ul>
+          </div>
         </div>
 
       </div>
@@ -427,13 +430,14 @@
 
     <section class="cta-band">
       <div class="cta-inner">
-        <h2>Built for real CVS work.</h2>
-        <p>30-day free trial. €79/year subscription for continued updates — your last downloaded version stays functional forever.</p>
+        <h2>Nothing to buy here.</h2>
+        <p>
+          Everything above is free. If a tool saves you an afternoon, a bug report or a pull
+          request is the best possible thank-you.
+        </p>
         <div class="cta-btns">
-          <a href="https://github.com/mca-software/cvs-treegraph/releases/latest"
-             class="btn btn-secondary"
-             target="_blank" rel="noopener">Download Trial</a>
-          <a href="products/cvs-treegraph/index.html#pricing" class="btn btn-primary">See Pricing</a>
+          <a href="https://github.com/csm101" class="btn btn-primary" target="_blank" rel="noopener">All repositories</a>
+          <a href="contact.html" class="btn btn-secondary">Get in touch</a>
         </div>
       </div>
     </section>
@@ -446,8 +450,9 @@
         <img src="assets/logo-mca-software.png" alt="MCA Software">
       </a>
       <div class="footer-links">
-        <a href="products/cvs-treegraph/index.html">CVSTreeGraph</a>
-        <a href="products/cvs-treegraph/index.html#pricing">Pricing</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101" target="_blank" rel="noopener">GitHub</a>
         <a href="contact.html">Contact</a>
         <a href="privacy.html">Privacy Policy</a>
       </div>
