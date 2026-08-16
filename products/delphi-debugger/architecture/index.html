@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architecture &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="How the debug adapter, the MCP server and the debug engine fit together, and where symbol resolution plugs in.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html" aria-current="page">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>In this section</span>
+        <a href="index.html" aria-current="page">Overview</a>
+        <a href="engine-overview.html">Engine overview</a>
+        <a href="dap-vs-mcp-frontends.html">DAP and MCP frontends</a>
+        <a href="symbol-formats.html">Symbol formats</a>
+        <a href="breakpoints-and-exceptions-internals.html">Breakpoints and exceptions</a>
+        <a href="threading-model.html">Threading model</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Architecture</span>
+        </nav>
+
+        <h1>Architecture</h1>
+
+        <p>
+          This section is for anyone reading or extending the source. It is not needed to use the
+          debugger — <a href="../vscode-tutorial/index.html">the tutorial</a> is that. It is here
+          because the shape of the thing explains several of its behaviours, including the ones that
+          look like limitations and are not.
+        </p>
+
+        <section id="shape">
+          <h2>The shape of it</h2>
+          <p>
+            One engine, two frontends, and a symbol layer feeding both. Nothing in the engine knows
+            which frontend is driving it.
+          </p>
+          <pre class="mermaid">
+flowchart TD
+  VSC["VS Code extension"] -- "DAP over stdio" --> DAP["Debug adapter<br/>VisualStudioCodeDelphiDebugger.exe"]
+  AGENT["AI agent"] -- "MCP protocol" --> MCP["MCP server<br/>DelphiDebuggerMcp.exe"]
+  DAP --> SESSION
+  MCP --> SESSION
+  SESSION["TDebugSession<br/><i>facade: state machine, source resolution</i>"] --> ITARGET["IDebugTarget<br/><i>engine interface</i>"]
+  ITARGET -- "target PE header<br/>says x64" --> W64["TWinDebugger<br/>64-bit target"]
+  ITARGET -- "target PE header<br/>says x86" --> W32["TWin32Debugger<br/>32-bit target, via WOW64"]
+  SYM["Symbol resolution<br/>TD32 · MAP · RSM · DCP · JCL"] --> ITARGET
+  W64 --> OS[("Windows Debug API")]
+  W32 --> OS
+          </pre>
+          <p>
+            The one decision made before anything else exists is which engine class to instantiate,
+            and it is read from the target executable&rsquo;s PE header — not from a setting, not from
+            the adapter&rsquo;s own bitness.
+          </p>
+        </section>
+
+        <section id="pages">
+          <h2>In this section</h2>
+          <ul>
+            <li>
+              <a href="engine-overview.html">Engine overview</a> — <code>DebuggerCore</code>, the
+              <code>IDebugTarget</code> interface, and why the adapter is always a 64-bit process
+              whatever it debugs.
+            </li>
+            <li>
+              <a href="dap-vs-mcp-frontends.html">DAP and MCP frontends</a> — what each frontend adds,
+              and the sequence they share below <code>TDebugSession</code>.
+            </li>
+            <li>
+              <a href="symbol-formats.html">Symbol formats</a> — five debug-information formats, what
+              each actually contributes, and why it is not a precedence list.
+            </li>
+            <li>
+              <a href="breakpoints-and-exceptions-internals.html">Breakpoints and exceptions
+              internals</a> — <code>INT3</code> patching, the four hardware debug registers, and the
+              exception rule engine&rsquo;s evaluation order.
+            </li>
+            <li>
+              <a href="threading-model.html">Threading model</a> — per-thread stepping, and what
+              stops together.
+            </li>
+          </ul>
+        </section>
+
+        <section id="principle">
+          <h2>One principle worth stating up front</h2>
+          <p>
+            A recurring decision throughout this codebase: <strong>where the debugger cannot prove an
+            answer, it refuses rather than guesses.</strong> Backward disassembly, instruction-level
+            step out, stepping to an exception handler, an address breakpoint in an unloaded module,
+            a hardware watchpoint on a local, a misaligned watch width — each of these returns a
+            stated reason instead of a plausible result.
+          </p>
+          <p>
+            That is not conservatism for its own sake. A debugger is a measuring instrument, and a
+            wrong reading from a measuring instrument is worse than no reading, because nothing
+            downstream reveals it was wrong — you simply go and debug the wrong thing for an hour.
+            The refusals are listed in
+            <a href="../vscode-tutorial/11-known-limitations.html">Known limitations</a> for exactly
+            that reason: they are a feature that reads like a defect.
+          </p>
+        </section>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: '#0d1117',
+        primaryColor: '#161b22',
+        primaryTextColor: '#e6edf3',
+        lineColor: '#2f81f7'
+      }
+    });
+  </script>
+
+</body>
+</html>

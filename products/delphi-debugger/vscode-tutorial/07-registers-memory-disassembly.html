@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7. Registers, memory and disassembly &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="The registers scope, the custom View Memory panel and the symbolicated Disassembly View.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html" aria-current="page">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">7. Registers, memory and disassembly</span>
+        </nav>
+
+        <h1>7. Registers, memory and disassembly</h1>
+
+        <p>
+          Three views for when the source-level picture has run out: a module without debug
+          information, a crash inside the RTL, a value that is wrong before any of your code touched
+          it.
+        </p>
+
+        <section id="registers">
+          <h2>Registers</h2>
+          <p>
+            A dedicated registers scope, readable and writable, named for the bitness of the target
+            rather than the bitness of the adapter:
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Target</th><th>Registers shown</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>x64</td>
+                  <td><code>RIP</code>, <code>RSP</code>, <code>RBP</code>, <code>RAX</code>–<code>RDI</code>, <code>R8</code>–<code>R15</code>, <code>EFlags</code></td>
+                </tr>
+                <tr>
+                  <td>x86</td>
+                  <td><code>EIP</code>, <code>ESP</code>, <code>EBP</code>, <code>EAX</code>–<code>EDI</code>, <code>EFlags</code> — no <code>R8</code>–<code>R15</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Writing a register on a 64-bit target accepts either the 32-bit or the 64-bit spelling,
+            and the value returned afterwards is re-read from the thread rather than echoed back — so
+            what you see is what the write actually achieved.
+          </p>
+        </section>
+
+        <section id="memory">
+          <h2>The memory view</h2>
+          <p>
+            The extension ships its own memory panel, <em>View Memory (Delphi)</em>, because the
+            stock VS Code hex pane cannot do three things that matter when you are chasing a
+            corrupted structure: scroll to <em>before</em> a value&rsquo;s start address, show where a
+            value begins and ends, and show what changed.
+          </p>
+          <ul>
+            <li>Reads at negative offsets, so you can look at what sits in front of a buffer.</li>
+            <li>Marks the exact byte extent of the value you opened it on.</li>
+            <li>Flashes the bytes that changed since the previous stop.</li>
+            <li>Writes individual bytes, behind an explicit toggle rather than by accident.</li>
+          </ul>
+          <p>
+            The stock pane can be brought back alongside it with the
+            <code>delphi-win64.stockMemoryView</code> setting, which is the only reason to still have
+            the Hex Editor extension installed.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-07-memory-view.png">
+            <p>Screenshot: the custom &ldquo;View Memory (Delphi)&rdquo; panel with a byte-extent marker and at least one flashed (changed-since-last-stop) byte visible.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-07-memory-view.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="disassembly">
+          <h2>The Disassembly View</h2>
+          <p>
+            Real x86 and x64 decoding, through a bundled Zydis, symbolicated against the loaded
+            modules: each instruction is labelled with the nearest function and an offset, plus the
+            source file and line wherever the line table has one. Bytes that do not decode are shown
+            honestly as <code>db XX</code> rather than as a plausible-looking instruction.
+          </p>
+          <p>
+            This is also where <a href="03-breakpoints.html#address">address breakpoints</a> are set.
+          </p>
+          <p>
+            Disassembling <em>backwards</em> from an address is refused unless it can be done
+            correctly. x86 instructions are variable-length, so scanning backwards is guesswork:
+            starting one byte off produces a completely different, entirely plausible instruction
+            stream. Instead, the view looks for a known boundary — a function start, an export entry,
+            or a nearer line boundary — and decodes forward from it. If forward decoding from that
+            boundary does not land exactly on the target address, the view says so rather than
+            showing you fiction.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-07-disassembly-view.png">
+            <p>Screenshot: the Disassembly View with the current-instruction marker and a symbolicated function+offset label.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-07-disassembly-view.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="no-symbols">
+          <h2>When the symbols run out</h2>
+          <p>
+            A stop at an address with no source — OS code, a module built without debug information,
+            an address the debug info does not cover — does not go silent. You get the address, the
+            module it belongs to, and the reason there is no source, alongside the disassembly around
+            the stop.
+          </p>
+          <p>
+            From there, instruction-granularity stepping (see
+            <a href="02-your-first-session.html#instruction-stepping">chapter 2</a>) is what moves you
+            forward, since it needs no line table at all.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="06-threads-and-call-stack.html">&larr; 6. Threads and the call stack</a>
+          <a class="doc-next" href="08-expression-evaluation.html">8. Expression evaluation &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

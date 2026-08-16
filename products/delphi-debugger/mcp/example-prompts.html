@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Example prompts &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="Concrete prompts you can type to an AI agent that has the Delphi debugger MCP server registered, with the tool sequence each one triggers.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html">VS Code Tutorial</a>
+    <a href="../mcp/index.html" aria-current="page">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>In this section</span>
+        <a href="index.html">Overview</a>
+        <a href="installing-and-registering.html">Installing and registering</a>
+        <a href="tool-reference.html">Tool reference</a>
+        <a href="example-prompts.html" aria-current="page">Example prompts</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">MCP &amp; AI Agents</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Example prompts</span>
+        </nav>
+
+        <h1>Example prompts</h1>
+
+        <p>
+          Eleven things you can type to an agent that has the server
+          <a href="installing-and-registering.html">registered</a>, with the tools each one triggers.
+          The first four build in complexity; the rest are there for when you need them.
+        </p>
+
+        <section id="start-here">
+          <h2>Start here</h2>
+
+          <h3>1. The minimal loop</h3>
+          <blockquote class="doc-note">
+            &ldquo;Set a breakpoint at <code>TFoo.Bar</code> and show me the locals when it&rsquo;s
+            hit.&rdquo;
+          </blockquote>
+          <p>
+            <code>launch_debuggee</code> (or <code>launch_from_config</code>) &rarr;
+            <code>set_breakpoint</code> at the source line &rarr; <code>continue_and_wait</code>
+            &rarr; <code>get_locals</code>.
+          </p>
+          <p>
+            The shortest useful session, and the one everything else is a variation on. If the agent
+            guesses the file name wrong, <code>get_source_files</code> gives it the spelling
+            <code>set_breakpoint</code> expects.
+          </p>
+
+          <h3>2. Crash triage</h3>
+          <blockquote class="doc-note">
+            &ldquo;Launch <code>Foo.exe</code> and tell me why it&rsquo;s crashing.&rdquo;
+          </blockquote>
+          <p>
+            <code>launch_debuggee</code> &rarr; <code>set_exception_filters(["unhandled"])</code>
+            (usually already the default) &rarr; <code>continue_and_wait</code> &rarr; on the stop,
+            <code>get_exception_details</code> and <code>get_call_stack</code> — or
+            <code>get_compact_debug_snapshot</code> for state, exception, top frames and top-frame
+            locals in one call.
+          </p>
+
+          <h3>3. Watching a value evolve</h3>
+          <blockquote class="doc-note">
+            &ldquo;Set a breakpoint at <code>TOrderProcessor.ProcessBatch</code>, run to it, then step
+            over 10 times and show me <code>Order.Total</code> after each step.&rdquo;
+          </blockquote>
+          <p>
+            <code>set_breakpoint</code> &rarr; <code>continue_and_wait</code> &rarr; then ten times:
+            <code>step_over</code> followed by
+            <code>evaluate_expression("Order.Total")</code>.
+          </p>
+
+          <h3>4. Attach and ask</h3>
+          <blockquote class="doc-note">
+            &ldquo;Attach to the already-running <code>MyApp.exe</code>, tell me exactly where it&rsquo;s
+            stopped right now, and evaluate <code>Customer.Orders.Count</code>.&rdquo;
+          </blockquote>
+          <p>
+            <code>attach_to_process(processName="MyApp.exe")</code> &rarr;
+            <code>get_current_source_location</code> &rarr;
+            <code>evaluate_expression("Customer.Orders.Count")</code>.
+          </p>
+          <p>
+            If more than one instance is running the attach fails and lists the candidates with their
+            command lines, so the agent can pick a pid rather than guess.
+          </p>
+        </section>
+
+        <section id="finding-corruption">
+          <h2>Finding out who wrote that</h2>
+
+          <h3>5. A field that keeps getting corrupted</h3>
+          <blockquote class="doc-note">
+            &ldquo;Watch <code>TCustomer(FCustomer).FBalance</code> and tell me which thread writes it
+            and what the old and new values are each time.&rdquo;
+          </blockquote>
+          <p>
+            <code>set_data_breakpoint(expression="TCustomer(FCustomer).FBalance", size=8, access="write")</code>
+            &rarr; <code>continue_and_wait</code>, repeatedly. On each hit,
+            <code>dataBreakpointDescription</code> in the snapshot names the old value, the new value
+            and the writing thread directly — no manual diffing.
+          </p>
+          <div class="doc-note">
+            Watch a field or a global, not a bare local — a local is refused over MCP, because its
+            address is only valid while its frame lives. See the
+            <a href="tool-reference.html#data-breakpoints">tool reference</a>.
+          </div>
+
+          <h3>6. Checking the slot budget</h3>
+          <blockquote class="doc-note">
+            &ldquo;Watch the global <code>ActiveConnection</code> for both reads and writes, then show
+            me how many of the 4 hardware watchpoint slots are still free.&rdquo;
+          </blockquote>
+          <p>
+            <code>set_data_breakpoint(expression="ActiveConnection", size=8, access="readWrite")</code>
+            &rarr; <code>list_data_breakpoints</code>, which reports the slot each watchpoint holds.
+          </p>
+          <p>
+            Worth knowing before you ask: <code>readWrite</code> also fires on plain writes. There is
+            no watch-reads-only mode on x86 or x64.
+          </p>
+        </section>
+
+        <section id="going-lower">
+          <h2>Below the source level</h2>
+
+          <h3>7. Registers and instructions at a crash</h3>
+          <blockquote class="doc-note">
+            &ldquo;Run until it crashes with an access violation, then show me the registers and the
+            instructions around the crash point.&rdquo;
+          </blockquote>
+          <p>
+            <code>set_exception_filters(["av"])</code> &rarr; <code>continue_and_wait</code> &rarr;
+            <code>get_registers</code> and <code>disassemble(address=&lt;crash RIP&gt;, count=20)</code>.
+          </p>
+
+          <h3>8. Reading a structure by hand</h3>
+          <blockquote class="doc-note">
+            &ldquo;Evaluate <code>Self.FBuffer</code> to get its address, then dump the first 64 bytes
+            and tell me what the header fields look like.&rdquo;
+          </blockquote>
+          <p>
+            <code>evaluate_expression("Self.FBuffer")</code> — or <code>@Self.FBuffer</code> for the
+            address explicitly — &rarr; <code>read_memory(address, count=64)</code>, which returns hex
+            plus little-endian integer views.
+          </p>
+        </section>
+
+        <section id="bigger-targets">
+          <h2>Bigger targets</h2>
+
+          <h3>9. Which package exports this?</h3>
+          <blockquote class="doc-note">
+            &ldquo;Launch <code>Hydra2.exe</code>, wait for the business-logic packages to load, and
+            tell me which BPL exports <code>TInvoiceEngine.Calculate</code>.&rdquo;
+          </blockquote>
+          <p>
+            <code>launch_from_config</code> &rarr; <code>continue_and_wait</code> until the packages
+            are loaded &rarr; <code>get_loaded_modules</code>, checking each module&rsquo;s symbol state
+            and loaded debug-info formats &rarr; cross-reference with
+            <code>get_source_files</code>, or with a breakpoint that resolves against the right
+            module.
+          </p>
+
+          <h3>10. Quieting handled exceptions</h3>
+          <blockquote class="doc-note">
+            &ldquo;I keep getting interrupted by <code>EFileNotFound</code> that the app catches
+            itself. Only stop me on exceptions that actually crash the program.&rdquo;
+          </blockquote>
+          <p>
+            <code>set_exception_filters(filters=["unhandled"])</code> — turns off the first-chance
+            <code>delphi</code>, <code>av</code> and <code>all</code> breaks and leaves only the
+            second-chance stop. For anything finer-grained than a whole category, the rule engine in
+            <code>launch.json</code> is the right tool; see
+            <a href="../vscode-tutorial/04-exception-handling.html">Exception handling</a>.
+          </p>
+        </section>
+
+        <section id="hygiene">
+          <h2>Finishing cleanly</h2>
+
+          <h3>11. Detach, do not kill</h3>
+          <blockquote class="doc-note">
+            &ldquo;When you&rsquo;re done inspecting, detach cleanly — don&rsquo;t kill the process, it&rsquo;s
+            attached, not launched by you.&rdquo;
+          </blockquote>
+          <p>
+            <code>detach_debugger</code>, not <code>terminate_debuggee</code>. Detaching leaves the
+            process running, which is the default for an attached session.
+          </p>
+          <div class="doc-note">
+            This prompt exists to teach one distinction. Breakpoints are <code>INT3</code> bytes
+            patched into the target, and only the debugger that planted them can put the originals
+            back. A clean detach does that; an agent that kills the session instead leaves those bytes
+            behind, and the program later dies with a mystifying
+            <code>External exception 80000003</code> that nothing connects back to the debugging
+            session. See
+            <a href="../vscode-tutorial/10-attach-to-a-running-process.html#detaching">chapter 10</a>.
+          </div>
+        </section>
+
+        <section id="not-possible">
+          <h2>Two things not to ask for</h2>
+          <p>
+            Neither of these exists over MCP, however reasonably an agent might attempt them:
+            <strong>Set Next Statement</strong>, and <strong>writing a variable by name</strong>.
+            Mutating state over MCP means <code>write_memory</code> or <code>set_register</code> and
+            nothing else. Both are available in the VS Code debugger — see
+            <a href="../vscode-tutorial/05-inspecting-variables.html#writing">chapter 5</a>.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="tool-reference.html">&larr; MCP tool reference</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

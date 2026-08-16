@@ -12,6 +12,7 @@
     .hero-product .card-tags { justify-content: center; margin-bottom: 28px; }
     .hero-product .card-tags { display: flex; flex-wrap: wrap; gap: 8px; }
     .hero-icon { width: 64px; height: 64px; margin: 0 auto 18px; border-radius: 12px; }
+    .doc-body .product-grid { margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -23,12 +24,20 @@
       </a>
       <ul>
         <li><a href="../../index.html#projects">Projects</a></li>
-        <li><a href="#install">Install</a></li>
+        <li><a href="getting-started/index.html">Install</a></li>
         <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
         <li><a href="../../contact.html">Contact</a></li>
       </ul>
     </nav>
   </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="index.html" aria-current="page">Overview</a>
+    <a href="getting-started/index.html">Getting Started</a>
+    <a href="vscode-tutorial/index.html">VS Code Tutorial</a>
+    <a href="mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="architecture/index.html">Architecture</a>
+  </nav>
 
   <main>
 
@@ -41,7 +50,7 @@
         <span class="tag tag-free">Free &amp; open source</span>
         <span class="tag">Debug Adapter Protocol</span>
         <span class="tag">MCP server included</span>
-        <span class="tag">★ 17 on GitHub</span>
+        <span class="tag" data-stars-repo="csm101/delphi-visual-studio-code-debugger">★ 19 on GitHub</span>
       </div>
       <div class="hero-cta">
         <a href="https://github.com/csm101/delphi-visual-studio-code-debugger/releases"
@@ -56,14 +65,9 @@
       <aside class="doc-toc">
         <span>On this page</span>
         <a href="#what">What it is</a>
-        <a href="#install">Installation</a>
-        <a href="#debug-info">Compiler settings</a>
-        <a href="#launch">Launch configuration</a>
-        <a href="#session">Your first session</a>
-        <a href="#inspect">Inspecting state</a>
-        <a href="#exceptions">Exception handling</a>
-        <a href="#mcp">AI agents (MCP)</a>
-        <a href="#limits">Known limitations</a>
+        <a href="#capabilities">What it does</a>
+        <a href="#targets">What it debugs</a>
+        <a href="#manual">The manual</a>
       </aside>
 
       <div class="doc-body">
@@ -72,13 +76,16 @@
           <h2>What it is</h2>
           <p>
             This is a debugger for Delphi applications, written in Delphi, built directly on the
-            Windows Debug API. It plugs into Visual Studio Code through the Debug Adapter Protocol,
-            so you get the editor's normal debugging experience — gutter breakpoints, the Variables
-            and Watch panes, hover data tips, the call stack — against a Delphi executable that the
-            Embarcadero IDE never has to open.
+            Windows Debug API — not a wrapper around the Embarcadero IDE debugger. It plugs into
+            Visual Studio Code through the Debug Adapter Protocol, so you get the editor's normal
+            debugging experience — gutter breakpoints, the Variables and Watch panes, hover data
+            tips, the call stack — against a Delphi executable that the Embarcadero IDE never has
+            to open.
           </p>
           <p>
-            The repository ships three programs that share one engine:
+            Three programs share one engine, <code>DebuggerCore</code>: the Windows debug-event
+            loop, the TD32 / <code>.map</code> / <code>.rsm</code> / <code>.dcp</code> / JCL symbol
+            readers, and the Pascal expression evaluator.
           </p>
           <div class="doc-scroll">
             <table class="doc-table">
@@ -87,316 +94,154 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Debug adapter</strong></td>
-                  <td>The debugger itself, speaking DAP: breakpoints, stepping, call stacks, variables, expression evaluation. Any DAP client can drive it.</td>
+                  <td><strong>Debug adapter</strong><br><code>VisualStudioCodeDelphiDebugger.exe</code></td>
+                  <td>The debugger itself, speaking DAP: breakpoints, stepping, call stacks, variables, expression evaluation, memory, registers, disassembly. Any DAP client can drive it.</td>
                 </tr>
                 <tr>
                   <td><strong>VS Code extension</strong></td>
-                  <td>The client that makes it usable in the editor — the <code>delphi-win64</code> debug type, the process picker for attaching, status-bar progress, and an editor for the exception rules.</td>
+                  <td>The client that makes it usable in the editor — the <code>delphi-win64</code> debug type, the process picker for attaching, the Delphi Modules tree view, a custom memory view, status-bar progress, and an editor for the exception rules.</td>
                 </tr>
                 <tr>
-                  <td><strong>MCP server</strong></td>
-                  <td>The same engine exposed to an AI agent over the Model Context Protocol, so the agent can run a program and read its real state. See <a href="#mcp">AI agents</a>.</td>
+                  <td><strong>MCP server</strong><br><code>DelphiDebuggerMcp.exe</code></td>
+                  <td>The same engine exposed to an AI agent over the Model Context Protocol, as semantic tools, so the agent can run a program and read its real state. See <a href="mcp/index.html">MCP &amp; AI agents</a>.</td>
                 </tr>
               </tbody>
             </table>
           </div>
-
-          <h3>32-bit and 64-bit, one binary</h3>
           <p>
-            The debugger is always a 64-bit process, whichever target it debugs. A 32-bit
-            application is debugged across the WOW64 boundary, so the debugger never competes with
-            the debuggee for a 32-bit address space — which matters on large projects, where symbol
-            data is the memory hog: indexing a 523 MB <code>.rsm</code> from a real single-exe build
-            peaks at 692 MB of working set. The target's PE header decides the machine model before
-            the process starts; there is nothing to choose and no second adapter to install.
+            The two frontends are thin. <code>TDebugSession</code> is the shared facade — it owns the
+            engine behind the <code>IDebugTarget</code> interface, the symbol providers, source
+            resolution and the state machine; <code>TDapServer</code> and <code>TMcpServer</code> sit
+            on top of it and share every step below.
+            <a href="architecture/dap-vs-mcp-frontends.html">How that is wired</a>.
           </p>
 
-          <figure class="doc-figure">
-            Screenshot: a debug session stopped on a breakpoint, with the call stack and Variables pane
-            <figcaption>(screenshot to be added)</figcaption>
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/overview-session.png">
+            <p>Screenshot: a debug session stopped on a breakpoint — editor with the highlighted stop line, Variables panel open, Call Stack panel visible.</p>
+            <figcaption>(screenshot to be added — <code>overview-session.png</code>)</figcaption>
           </figure>
         </section>
 
-        <section id="install">
-          <h2>Installation</h2>
+        <section id="capabilities">
+          <h2>What it does</h2>
           <p>
-            If you only want to <em>use</em> the debugger, do not build anything. Grab
-            <code>delphi-win64-debugger-setup-*.zip</code> from the
-            <a href="https://github.com/csm101/delphi-visual-studio-code-debugger/releases" target="_blank" rel="noopener">latest release</a>,
-            extract it anywhere and run <code>Setup.exe</code>. The debug adapter, the MCP server and
-            the VS Code extension are already compiled inside it — no Delphi toolchain and no build
-            step are needed on that machine.
+            The short version, with the chapter that covers each in full:
+          </p>
+          <ul>
+            <li>
+              <strong><a href="vscode-tutorial/03-breakpoints.html">Breakpoints</a></strong> — source
+              line, conditional, hit count, logpoints, address breakpoints from the Disassembly View,
+              hardware data breakpoints on the CPU's four debug registers, and Set Next Statement.
+            </li>
+            <li>
+              <strong><a href="vscode-tutorial/02-your-first-session.html">Stepping</a></strong> —
+              over, into and out, per thread, optionally at instruction granularity for code with no
+              line table at all.
+            </li>
+            <li>
+              <strong><a href="vscode-tutorial/04-exception-handling.html">Exception handling</a></strong>
+              — first-chance breaks with correct passthrough, four filters, and an ordered rule engine
+              that can ignore, log or break per exception class, message, unit or line.
+            </li>
+            <li>
+              <strong><a href="vscode-tutorial/05-inspecting-variables.html">Variable inspection</a></strong>
+              — locals, parameters and globals; objects, records and dynamic arrays expand; generic
+              collections enumerate; closures show their captured state; values can be written back.
+            </li>
+            <li>
+              <strong><a href="vscode-tutorial/06-threads-and-call-stack.html">Threads and call stack</a></strong>
+              — every thread listed with its announced name, any thread's stack and locals readable
+              while stopped, and an opt-in raw stack scan for code the unwinder cannot get through.
+            </li>
+            <li>
+              <strong><a href="vscode-tutorial/07-registers-memory-disassembly.html">Registers, memory and disassembly</a></strong>
+              — a read/write registers scope, a memory view that marks a value's byte extent and
+              flashes what changed, and a real x86/x64 Disassembly View.
+            </li>
+            <li>
+              <strong><a href="vscode-tutorial/08-expression-evaluation.html">Expression evaluation</a></strong>
+              — a full Pascal grammar in Watch, hover and the Debug Console, including method and
+              property-getter calls that execute live in the debuggee.
+            </li>
+            <li>
+              <strong><a href="vscode-tutorial/09-multi-bpl-and-modules.html">Multi-BPL applications</a></strong>
+              — per-module symbols loaded as each package maps, breakpoints inside a package that has
+              not loaded yet, and unwinding across host and package boundaries.
+            </li>
+            <li>
+              <strong><a href="vscode-tutorial/10-attach-to-a-running-process.html">Attach</a></strong>
+              — attach to a process that is already running, by id or by name, and detach leaving it
+              alive.
+            </li>
+            <li>
+              <strong><a href="mcp/index.html">Debugging from an AI agent</a></strong> — the same
+              engine over MCP, so an agent sets a breakpoint and looks instead of inferring behaviour
+              from the source.
+            </li>
+          </ul>
+        </section>
+
+        <section id="targets">
+          <h2>What it debugs</h2>
+          <p>
+            Win32 and Win64 Delphi applications, single-EXE or multi-BPL. The adapter is always a
+            64-bit process whichever target it debugs: a 32-bit application is debugged across the
+            WOW64 boundary, and the machine model is chosen from the target's PE header before the
+            process is even created. One binary, nothing to pick at install time.
+            <a href="architecture/engine-overview.html">Why that matters on large projects</a>.
+          </p>
+          <p>
+            Applications built as a host EXE plus runtime packages loaded with
+            <code>LoadPackage</code> are the project's core use case, not an afterthought — see
+            <a href="vscode-tutorial/09-multi-bpl-and-modules.html">Multi-BPL and modules</a>.
           </p>
           <div class="doc-note">
-            Windows will warn that the executables are unsigned. Code signing certificates cost more
-            per year than this project will ever make, which is nothing.
-          </div>
-
-          <h3>What else you want installed</h3>
-          <div class="doc-scroll">
-            <table class="doc-table">
-              <thead>
-                <tr><th>Tool</th><th>Why</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a> (Delphi IDE plugin)</td>
-                  <td>Generates the VS Code workspace and the launch configuration from a Delphi project — output paths, source root, unit search paths, package list. A real project carries a couple of hundred search paths and nobody wants to write that by hand. Not strictly required, but it is what makes the debugger practical.</td>
-                </tr>
-                <tr>
-                  <td>DelphiLSP extension (<code>embarcaderotechnologies.delphilsp</code>)</td>
-                  <td>Delphi language support in VS Code — syntax, autocomplete. A separate Embarcadero extension; this one only debugs.</td>
-                </tr>
-                <tr>
-                  <td>Delphi 10.3 Rio or later</td>
-                  <td>Only needed to build the adapter from source, or to compile the program you want to debug.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section id="debug-info">
-          <h2>Compiler settings for the target</h2>
-          <p>
-            A debugger can only show what the compiler emitted. Compile the program you want to
-            debug with full debug information, or most of this will not work. In the Delphi project
-            options, for the <strong>Debug</strong> configuration of the platform you are building:
-          </p>
-          <ul>
-            <li><em>Compiling</em> → Optimization <strong>off</strong>, Debug information <strong>on</strong>, Local symbols <strong>on</strong></li>
-            <li><em>Linking</em> → Debug information <strong>on</strong>, Include remote debug symbols <strong>on</strong> (this is the <code>.rsm</code>), Map file <strong>Detailed</strong></li>
-            <li><em>Compiling</em> → Use debug .dcus, if you want to step <strong>into</strong> the RTL and VCL rather than over them</li>
-          </ul>
-          <p>On the command line that is:</p>
-          <pre><code>dcc64 -$O- -V -VN -VR MyApp.dpr</code></pre>
-          <p>Keep the <code>.map</code> and <code>.rsm</code> next to the <code>.exe</code>. What each artefact buys you:</p>
-          <div class="doc-scroll">
-            <table class="doc-table">
-              <thead>
-                <tr><th>Artefact</th><th>Without it</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>TD32 section, <code>.map</code>, or JCL data — <strong>any one</strong></td><td>No source lines: no breakpoints, no stepping</td></tr>
-                <tr><td><code>.rsm</code></td><td>Breakpoints and stepping still work, but local variables, types and expression evaluation are severely limited</td></tr>
-                <tr><td>Optimizations off</td><td>Breakpoints land on the wrong line and locals read as garbage, because the code no longer matches the source</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="doc-note">
-            The same applies to every runtime package you want to step into: a BPL compiled without
-            debug information stays a black box even when the host has full symbols.
-          </div>
-        </section>
-
-        <section id="launch">
-          <h2>Launch configuration</h2>
-          <p>
-            <code>.vscode/launch.json</code> in the project being debugged. The IDE plugin writes
-            this for you; here is the minimum by hand:
-          </p>
-          <pre><code>{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Debug Delphi Win64",
-      "type": "delphi-win64",
-      "request": "launch",
-      "program": "${workspaceFolder}/Win64/Debug/MyApp.exe",
-      "mapFile": "${workspaceFolder}/Win64/Debug/MyApp.map",
-      "sourceRoot": "${workspaceFolder}",
-      "stopAtEntry": true
-    }
-  ]
-}</code></pre>
-          <div class="doc-scroll">
-            <table class="doc-table">
-              <thead>
-                <tr><th>Property</th><th>Default</th><th>Description</th></tr>
-              </thead>
-              <tbody>
-                <tr><td><code>program</code></td><td><em>required</em></td><td>Path to the <code>.exe</code> to debug</td></tr>
-                <tr><td><code>mapFile</code></td><td>same path, <code>.map</code> extension</td><td>Delphi MAP file</td></tr>
-                <tr><td><code>sourceRoot</code></td><td><em>empty</em></td><td>Root directory for source file lookup (searched one level deep)</td></tr>
-                <tr><td><code>stopAtEntry</code></td><td><code>false</code></td><td>Break at the process entry point before any user code runs</td></tr>
-                <tr><td><code>exceptionRules</code></td><td><em>empty</em></td><td>Per-exception rule table — see <a href="#exceptions">Exception handling</a></td></tr>
-                <tr><td><code>useGlobalExceptionRules</code></td><td><code>true</code></td><td>Also load the shared machine-wide rules file</td></tr>
-              </tbody>
-            </table>
+            A debugger can only show what the compiler emitted. Build the target — and every runtime
+            package you want to step into — with optimisation off and full debug information, or most
+            of this will not work. The exact settings are in
+            <a href="vscode-tutorial/01-preparing-your-project.html">Preparing your project</a>.
           </div>
           <p>
-            To attach to a process that is already running, use <code>"request": "attach"</code> —
-            the extension then shows a process picker. Attaching requires SeDebugPrivilege and
-            auto-elevates when it can.
+            On a 32-bit target there is one hard limit: local variables and parameters need an
+            unoptimised (<code>-$O-</code>) build. Run control — breakpoints, stepping, call stacks —
+            works on optimised 32-bit builds either way; only variable readout does not.
+          </p>
+          <p>
+            Building the debugger from source needs Delphi 10.3 Rio or later. For the application
+            being debugged there is no stated minimum version: the debug-information layouts the
+            engine reads were developed and measured against recent Delphi releases, and older
+            compilers' layouts have not been verified. What the debugger deliberately does not do is
+            listed under <a href="vscode-tutorial/11-known-limitations.html">Known limitations</a>.
           </p>
         </section>
 
-        <section id="session">
-          <h2>Your first session</h2>
-          <ol>
-            <li>Compile your project with the settings above, so the <code>.map</code> and <code>.rsm</code> land next to the <code>.exe</code>.</li>
-            <li>From the Delphi IDE, run <em>Tools → Open in Visual Studio Code</em> (the IDE plugin) — or open the folder in VS Code and write <code>launch.json</code> yourself.</li>
-            <li>Set a breakpoint in the editor gutter, exactly as you would for any other language.</li>
-            <li>Open <strong>Run and Debug</strong> (<code>Ctrl+Shift+D</code>), pick your configuration and press <code>F5</code>.</li>
-            <li>Step with <code>F10</code> (over), <code>F11</code> (into), <code>Shift+F11</code> (out); continue with <code>F5</code>.</li>
-          </ol>
-          <p>Breakpoints are not limited to plain line stops:</p>
-          <ul>
-            <li><strong>Conditional breakpoints</strong> — a Pascal expression evaluated in the debuggee</li>
-            <li><strong>Hit-count breakpoints</strong> and <strong>log points</strong>, which print instead of stopping</li>
-            <li><strong>Data breakpoints</strong> (hardware watchpoints) via <em>Break on Value Change</em> / <em>Break on Value Access</em> in the Variables context menu — on a global, a unit variable or a local. The stop names the thread that wrote the cell and shows <code>old -&gt; new</code>. There are four hardware slots, so the fifth request is refused by name rather than silently dropped; a watchpoint on a local is withdrawn the moment its frame exits, instead of quietly watching reused stack.</li>
-            <li><strong>Address breakpoints</strong> from the Disassembly View gutter, which survive a runtime package unloading and reloading</li>
-            <li><strong>Set next statement</strong>, to move execution without re-running</li>
-          </ul>
-
-          <figure class="doc-figure">
-            Screenshot: conditional breakpoint and log point in the BREAKPOINTS view
-            <figcaption>(screenshot to be added)</figcaption>
-          </figure>
-        </section>
-
-        <section id="inspect">
-          <h2>Inspecting state</h2>
+        <section id="manual">
+          <h2>The manual</h2>
           <p>
-            Local variables come out of the reverse-engineered Delphi <code>.rsm</code> format, which
-            is where most of the work went. What that gets you:
+            Everything above is a summary. The documentation itself is in four sections.
           </p>
-          <ul>
-            <li>Objects, records and dynamic arrays expand in the Variables tree — all fields, all ancestor classes, nested</li>
-            <li>Generic collections: <code>TList&lt;T&gt;</code> and <code>TDictionary&lt;...&gt;</code> enumerate their elements</li>
-            <li>Parent-procedure locals are visible from inside nested procedures; anonymous-method parameters and closure-captured variables are inspectable (the captured <code>$ActRec</code> fields expand like a normal object)</li>
-            <li>Type-aware formatting for integers, floats, <code>TDateTime</code>, chars, strings, Variants, C-string pointers and dynamic arrays</li>
-            <li>Globals with decoded <code>typeId</code>, and a Registers scope</li>
-            <li>Per-thread inspection: selecting any thread shows that thread's own stack, with its frames' locals and watches readable</li>
-          </ul>
-
-          <h3>Expression evaluator</h3>
-          <p>
-            Watch, hover and the Debug Console share a full Pascal expression evaluator: qualified
-            identifiers, arithmetic, comparison, boolean and set operators, string concatenation,
-            indexing, type casts, <code>is</code> / <code>as</code>, <code>Length</code> /
-            <code>SizeOf</code> / <code>Ord</code> / <code>Low</code> / <code>High</code>, enum and
-            set literals, and method and property calls — executed in the debuggee, with raised
-            exceptions aborted cleanly.
-          </p>
-          <p>
-            Writing back works too: <code>setVariable</code> handles primitives, floats, dates and
-            chars, enums by name or ordinal, sets by bitmask at the correct storage width, strings
-            through in-process <code>@UStrAsg</code> / <code>@LStrAsg</code> without leaking a
-            reference, and writes through the pointer for <code>var</code> parameters.
-          </p>
-
-          <h3>When the symbols run out</h3>
-          <p>
-            A stop with no source — OS code, a module built without debug information, an address the
-            debug info does not cover — opens a real document instead of going silent: the address,
-            module and reason, the disassembly around the stop with the current instruction marked,
-            and the source file and line per instruction wherever the line table has one.
-            The Disassembly View decodes real x86/x64 (Zydis) with symbolication, and shows
-            undecodable bytes honestly as <code>db XX</code> rather than guessing.
-          </p>
-          <p>
-            When the unwinder cannot get through code built without frame pointers, an opt-in
-            <strong>raw stack scan</strong> — toggled from the Call Stack title bar — sweeps the
-            thread's stack for your own routines, resolved against every loaded module and marked
-            <code>[raw]</code> / <code>[raw?]</code> so they are never mistaken for real callers.
-          </p>
-
-          <figure class="doc-figure">
-            Screenshot: Variables pane with an expanded object graph, and a watch expression
-            <figcaption>(screenshot to be added)</figcaption>
-          </figure>
-        </section>
-
-        <section id="exceptions">
-          <h2>Exception handling</h2>
-          <p>
-            The BREAKPOINTS view exposes four exception filters — <code>delphi</code>,
-            <code>av</code>, <code>all</code>, <code>unhandled</code> — each with an optional
-            per-class condition. On a stop you get the exception class name and message, and the
-            live exception object is inspectable as the <code>$exception</code> pseudo-variable in
-            Locals and Watch.
-          </p>
-          <p>
-            Beyond the filters there is a rule engine. Rules match on class, message, regex, unit or
-            line, and act with <code>ignore</code>, <code>log</code>, <code>logStack</code> or
-            <code>break</code> — which is how you survive a codebase that raises handled exceptions
-            in a loop:
-          </p>
-          <pre><code>"exceptionRules": [
-  { "match": { "class": "EFileNotFound" }, "action": "ignore" },
-  { "match": { "class": "EDatabaseError", "message": "deadlock" },
-    "action": "logStack" },
-  { "match": { "unit": "MyRiskyUnit" }, "action": "break" }
-]</code></pre>
-          <p>
-            Rules can live in the project's <code>launch.json</code> or in a shared machine-wide file
-            (<code>%USERPROFILE%\.DelphiWinDebugger\exceptionRules.json</code>) applied across
-            projects, and can be edited from a UI in the extension rather than by hand.
-          </p>
-        </section>
-
-        <section id="mcp">
-          <h2>Debugging from an AI agent (MCP)</h2>
-          <p>
-            The same engine is exposed over the Model Context Protocol, so an agent can debug a
-            Delphi program the way a developer does — run it, stop it, and read the real state —
-            instead of inferring behaviour from the source. In practice this is the difference
-            between an agent that guesses why a value is wrong and one that sets a breakpoint and
-            looks.
-          </p>
-          <p>
-            <code>Install.exe</code> offers to register the server at the end of an install;
-            from a source checkout it is one script:
-          </p>
-          <pre><code>cmd /c build_mcp.bat
-powershell -ExecutionPolicy Bypass -File register-mcp.ps1 ^
-  MCPDebugger\Win64\Debug\DelphiDebuggerMcp.exe</code></pre>
-          <p>
-            That registers the server as <code>delphi-win64-debugger</code> with Claude Code (user
-            scope) and with VS Code by merging the user <code>mcp.json</code>. It is idempotent, and
-            <code>-Unregister</code> removes it.
-          </p>
-          <p>The tools cover the whole debugging cycle:</p>
-          <div class="doc-scroll">
-            <table class="doc-table">
-              <thead>
-                <tr><th>Group</th><th>Tools</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Session</td><td><code>launch_debuggee</code>, <code>launch_from_config</code>, <code>attach_to_process</code>, <code>attach_from_config</code>, <code>list_debuggable_processes</code>, <code>detach_debugger</code>, <code>terminate_debuggee</code>, <code>stop_debugging</code>, <code>get_debug_session_status</code></td></tr>
-                <tr><td>Breakpoints</td><td><code>set_breakpoint</code>, <code>set_breakpoints</code>, <code>list_breakpoints</code>, <code>remove_all_breakpoints</code>, <code>set_exception_filters</code></td></tr>
-                <tr><td>Execution</td><td><code>continue_and_wait</code>, <code>step_over</code>, <code>step_into</code>, <code>step_out</code>, <code>pause_execution</code>, <code>wait_until_stopped</code></td></tr>
-                <tr><td>State</td><td><code>get_call_stack</code>, <code>get_threads</code>, <code>get_locals</code>, <code>get_variable</code>, <code>expand_variable</code>, <code>evaluate_expression</code>, <code>get_current_source_location</code>, <code>get_exception_details</code>, <code>get_compact_debug_snapshot</code></td></tr>
-                <tr><td>Memory</td><td><code>read_memory</code>, <code>write_memory</code></td></tr>
-                <tr><td>Output</td><td><code>get_debuggee_output</code>, <code>get_debugger_output</code></td></tr>
-              </tbody>
-            </table>
+          <div class="product-grid">
+            <div class="product-card">
+              <div class="card-head"><h3>Getting started</h3></div>
+              <p>Download the setup, install the extension and the adapter, and see what else is worth having alongside it.</p>
+              <div class="card-links"><a href="getting-started/index.html">Read &rarr;</a></div>
+            </div>
+            <div class="product-card">
+              <div class="card-head"><h3>VS Code tutorial</h3></div>
+              <p>Twelve chapters, from compiler settings and <code>launch.json</code> to breakpoints, exceptions, memory and the settings reference.</p>
+              <div class="card-links"><a href="vscode-tutorial/index.html">Read &rarr;</a></div>
+            </div>
+            <div class="product-card">
+              <div class="card-head"><h3>MCP &amp; AI agents</h3></div>
+              <p>Register the MCP server, read the tool reference, and see the prompts that make an agent debug instead of guess.</p>
+              <div class="card-links"><a href="mcp/index.html">Read &rarr;</a></div>
+            </div>
+            <div class="product-card">
+              <div class="card-head"><h3>Architecture</h3></div>
+              <p>How the engine, the two frontends and the symbol readers fit together, for anyone reading or extending the source.</p>
+              <div class="card-links"><a href="architecture/index.html">Read &rarr;</a></div>
+            </div>
           </div>
-          <p>
-            Two of them matter more than the rest. <code>launch_from_config</code> and
-            <code>attach_from_config</code> read the <code>launch.json</code> the IDE plugin
-            generated, so an agent starts a session with the project's real symbol and source paths
-            rather than a hand-built approximation. <code>get_compact_debug_snapshot</code> returns
-            location, stack and locals in one call — usually what an agent wants after a stop, at a
-            fraction of the tokens three round trips would cost.
-          </p>
-        </section>
-
-        <section id="limits">
-          <h2>Known limitations</h2>
-          <ul>
-            <li>Child processes are not tracked — the debugger launches with <code>DEBUG_ONLY_THIS_PROCESS</code></li>
-            <li>On a 32-bit target, locals are unavailable in optimised (<code>-$O+</code>) builds</li>
-            <li>Source files are resolved by searching <code>sourceRoot</code> and one level of subdirectories; if a file name appears twice, the first match wins</li>
-            <li>The shipped executables are unsigned, so SmartScreen will complain on first run</li>
-          </ul>
-          <p>
-            The full and current list, along with the roadmap, lives in the
-            <a href="https://github.com/csm101/delphi-visual-studio-code-debugger#known-limitations" target="_blank" rel="noopener">repository README</a>,
-            which is also where bug reports belong.
-          </p>
         </section>
 
       </div>

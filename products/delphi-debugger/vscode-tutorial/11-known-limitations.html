@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>11. Known limitations &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="What the debugger does not do, stated plainly: child processes, optimised 32 bit locals, threadvars and source name collisions.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html" aria-current="page">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">11. Known limitations</span>
+        </nav>
+
+        <h1>11. Known limitations</h1>
+
+        <p>
+          What this debugger does not do. Some of these are limits of the underlying debug-info
+          format, some are deliberate refusals to guess, and some are simply not built yet — they are
+          marked as such, because which one it is changes what you should do about it.
+        </p>
+
+        <section id="targets">
+          <h2>Targets and processes</h2>
+          <ul>
+            <li>
+              <strong>Child processes are not tracked.</strong> The debuggee is launched with
+              <code>DEBUG_ONLY_THIS_PROCESS</code>; anything it spawns runs without a debugger.
+              Attach to the child separately if you need it.
+            </li>
+            <li>
+              <strong>Locals and parameters are unavailable on optimized 32-bit builds.</strong> With
+              <code>-$O+</code> the compiler routinely omits the frame pointer and there is nothing
+              left to resolve them against. Run control — breakpoints, stepping, call stacks — works
+              on optimized 32-bit builds either way. Build 32-bit targets with <code>-$O-</code> if
+              you want to see variables.
+            </li>
+          </ul>
+        </section>
+
+        <section id="symbols">
+          <h2>Symbols and sources</h2>
+          <ul>
+            <li>
+              <strong><code>threadvar</code> variables are not resolved</strong>, on either bitness.
+              A threadvar has no fixed address in the image. The debugger reports this rather than
+              displaying a wrong value.
+            </li>
+            <li>
+              <strong>Same-basename source files in different directories can resolve to the wrong
+              file.</strong> TD32&rsquo;s names table stores only the basename, with no directory, so two
+              <code>Oracle.pas</code> files in different folders are indistinguishable to the
+              debugger. This is a property of the compiler&rsquo;s debug information; it cannot be fixed
+              downstream.
+            </li>
+          </ul>
+        </section>
+
+        <section id="not-implemented">
+          <h2>Not implemented</h2>
+          <ul>
+            <li>
+              <strong>Watch-panel inline editing.</strong> The DAP <code>setExpression</code> request
+              is not implemented — values can be edited in the Variables panel only. See
+              <a href="05-inspecting-variables.html#writing">chapter 5</a>.
+            </li>
+            <li>
+              <strong>Function breakpoints</strong> — breaking by routine name rather than by
+              location — are not supported.
+            </li>
+            <li>
+              <strong>No &ldquo;step into a specific call target&rdquo; chooser</strong> when a line
+              contains several calls.
+            </li>
+            <li>
+              <strong>The DAP <code>modules</code> request is not implemented</strong>, deliberately:
+              the same information is already attached to every stack frame. Use the
+              <a href="09-multi-bpl-and-modules.html#modules-view">Delphi Modules view</a>, or
+              <code>get_loaded_modules</code> over
+              <a href="../mcp/tool-reference.html">MCP</a>.
+            </li>
+          </ul>
+        </section>
+
+        <section id="refusals">
+          <h2>Deliberate refusals</h2>
+          <p>
+            These look like limitations and are reported as failures, but they are the debugger
+            declining to give you an answer it cannot prove. A wrong answer here would be worse than
+            no answer, because nothing downstream would reveal it was wrong.
+          </p>
+          <ul>
+            <li>
+              <strong>Stepping out of an exception</strong> is refused where the enclosing handler
+              cannot be proven from the binary — which covers every <code>try/finally</code>, and
+              every bare <code>except</code> on a 32-bit target. See
+              <a href="04-exception-handling.html#stepping-through">chapter 4</a>.
+            </li>
+            <li>
+              <strong>Instruction-granularity step out</strong> is refused without a provable return
+              address (<code>.pdata</code> on x64, <code>[EBP+4]</code> on x86).
+            </li>
+            <li>
+              <strong>Backward disassembly</strong> is refused unless a known boundary decodes forward
+              onto the target address exactly. See
+              <a href="07-registers-memory-disassembly.html#disassembly">chapter 7</a>.
+            </li>
+            <li>
+              <strong>An address breakpoint in a module that is not loaded</strong> is refused with a
+              reason rather than planted speculatively.
+            </li>
+            <li>
+              <strong>A fifth hardware watchpoint</strong> is refused by name — there are four CPU
+              debug registers and no software fallback. So is a read-only watch, which x86 and x64 do
+              not implement. See <a href="03-breakpoints.html#data">chapter 3</a>.
+            </li>
+          </ul>
+        </section>
+
+        <section id="hazards">
+          <h2>Things that are easy to trip over</h2>
+          <ul>
+            <li>
+              <strong>Hovering evaluates, with no guard.</strong> Hovering an identifier that is a
+              function or a getter runs it in the debuggee, with its side effects, without asking. The
+              safelist that protects the Variables panel does not apply to hover. See
+              <a href="05-inspecting-variables.html#getters">chapter 5</a>.
+            </li>
+            <li>
+              <strong>Force-killing an attached session leaves <code>INT3</code> bytes behind</strong>
+              in the target process, surfacing much later as
+              <code>External exception 80000003</code>. Always detach. See
+              <a href="10-attach-to-a-running-process.html#detaching">chapter 10</a>.
+            </li>
+            <li>
+              <strong>The shared exception-rules file is strict JSON.</strong> A comment or a trailing
+              comma silently yields zero rules. See
+              <a href="04-exception-handling.html#shared-rules">chapter 4</a>.
+            </li>
+            <li>
+              <strong>The shipped executables are unsigned</strong>, so SmartScreen warns on first
+              run.
+            </li>
+          </ul>
+        </section>
+
+        <section id="elsewhere">
+          <h2>The current list</h2>
+          <p>
+            This page is the user-facing subset and is written by hand, so it lags reality. The
+            complete and current list of known issues, along with the roadmap, lives in the
+            <a href="https://github.com/csm101/delphi-visual-studio-code-debugger#known-limitations" target="_blank" rel="noopener">repository README</a>
+            — which is also where bug reports belong. Attach the adapter log from
+            <a href="08-expression-evaluation.html#troubleshooting">chapter 8</a> when you file one.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="10-attach-to-a-running-process.html">&larr; 10. Attach to a running process</a>
+          <a class="doc-next" href="12-settings-and-commands-reference.html">12. Settings and commands reference &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

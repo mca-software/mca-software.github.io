@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VS Code tutorial &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="A twelve chapter tutorial covering the Delphi debugger inside Visual Studio Code, from compiler settings to the full settings and commands reference.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">VS Code Tutorial</span>
+        </nav>
+
+        <h1>VS Code tutorial</h1>
+
+        <p>
+          Twelve chapters, in the order you would actually hit them: get the project compiled so the
+          debugger has something to read, get a session running, then work outward through
+          breakpoints, exceptions, state inspection, and the things that only show up on bigger
+          targets.
+        </p>
+
+        <section id="before-you-start">
+          <h2>Before you start</h2>
+          <p>
+            Two prerequisites, both covered elsewhere:
+          </p>
+          <ul>
+            <li>
+              The debugger installed and the <code>delphi-win64</code> debug type available in your
+              editor — see <a href="../getting-started/index.html">Getting started</a>.
+            </li>
+            <li>
+              The program you want to debug compiled with full debug information. This is the one
+              that catches people out: without it there are no source lines, and without source lines
+              there are no breakpoints and no stepping. Chapter 1 is entirely about getting this
+              right.
+            </li>
+          </ul>
+          <p>
+            The tutorial assumes you already know how to use a debugger. It explains what this one
+            does, where it differs from what you expect, and where it deliberately refuses to guess.
+          </p>
+        </section>
+
+        <section id="chapters">
+          <h2>The chapters</h2>
+
+          <h3>Setting up</h3>
+          <ul>
+            <li>
+              <a href="01-preparing-your-project.html">1. Preparing your project</a> — the compiler
+              and linker settings the debugger needs, what each debug-info artefact buys you, and the
+              <code>launch.json</code> configuration.
+            </li>
+          </ul>
+
+          <h3>Running and stopping</h3>
+          <ul>
+            <li>
+              <a href="02-your-first-session.html">2. Your first session</a> — the Run and Debug view,
+              starting and stopping, and what each stepping command actually does.
+            </li>
+            <li>
+              <a href="03-breakpoints.html">3. Breakpoints</a> — all of them: conditional, hit count,
+              logpoints, address breakpoints, hardware watchpoints, Set Next Statement.
+            </li>
+            <li>
+              <a href="04-exception-handling.html">4. Exception handling</a> — the four filters, and
+              the rule engine you need once the codebase raises handled exceptions in a loop.
+            </li>
+          </ul>
+
+          <h3>Reading the state</h3>
+          <ul>
+            <li>
+              <a href="05-inspecting-variables.html">5. Inspecting variables</a> — locals, objects,
+              generic collections, closures, writing values back, and one real hazard to know about.
+            </li>
+            <li>
+              <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a> — per-thread
+              inspection, and the fallback for stacks the unwinder cannot walk.
+            </li>
+            <li>
+              <a href="07-registers-memory-disassembly.html">7. Registers, memory and disassembly</a>
+              — for when the source-level view has run out.
+            </li>
+            <li>
+              <a href="08-expression-evaluation.html">8. Expression evaluation</a> — the Pascal
+              grammar available in Watch, hover and the Debug Console, and where the output goes.
+            </li>
+          </ul>
+
+          <h3>Real projects</h3>
+          <ul>
+            <li>
+              <a href="09-multi-bpl-and-modules.html">9. Multi-BPL applications and modules</a> — a
+              host EXE plus runtime packages, which is what this debugger was built for.
+            </li>
+            <li>
+              <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a> —
+              attaching, the process picker, and the one mistake that leaves a mess behind.
+            </li>
+          </ul>
+
+          <h3>Reference</h3>
+          <ul>
+            <li>
+              <a href="11-known-limitations.html">11. Known limitations</a> — what it does not do,
+              stated plainly.
+            </li>
+            <li>
+              <a href="12-settings-and-commands-reference.html">12. Settings and commands
+              reference</a> — every launch property, command and setting in one place.
+            </li>
+          </ul>
+        </section>
+
+        <section id="elsewhere">
+          <h2>Not in this tutorial</h2>
+          <p>
+            Driving the debugger from an AI coding agent is its own section —
+            <a href="../mcp/index.html">MCP &amp; AI agents</a>. How the engine is built, for anyone
+            reading or extending the source, is in
+            <a href="../architecture/index.html">Architecture</a>.
+          </p>
+        </section>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

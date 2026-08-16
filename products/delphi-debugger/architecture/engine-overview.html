@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engine overview &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="DebuggerCore, the IDebugTarget interface and the TWinDebugger and TWin32Debugger implementations behind one always 64 bit adapter.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html" aria-current="page">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>In this section</span>
+        <a href="index.html">Overview</a>
+        <a href="engine-overview.html" aria-current="page">Engine overview</a>
+        <a href="dap-vs-mcp-frontends.html">DAP and MCP frontends</a>
+        <a href="symbol-formats.html">Symbol formats</a>
+        <a href="breakpoints-and-exceptions-internals.html">Breakpoints and exceptions</a>
+        <a href="threading-model.html">Threading model</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">Architecture</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Engine overview</span>
+        </nav>
+
+        <h1>Engine overview</h1>
+
+        <p>
+          <code>DebuggerCore</code> is the part that would still be a debugger if both frontends were
+          deleted: the Windows debug-event loop, the symbol readers, and the Pascal expression
+          evaluator.
+        </p>
+
+        <section id="core">
+          <h2>DebuggerCore</h2>
+          <p>Three responsibilities, none of which know anything about DAP or MCP:</p>
+          <ul>
+            <li>
+              <strong>The debug-event loop</strong> — the Win32 debug API, process and thread events,
+              module load and unload, exceptions.
+            </li>
+            <li>
+              <strong>Symbol readers</strong> for TD32, <code>.map</code>, <code>.rsm</code>,
+              <code>.dcp</code> and JCL debug information. See
+              <a href="symbol-formats.html">Symbol formats</a>.
+            </li>
+            <li>
+              <strong>The Pascal expression evaluator</strong>, which is what Watch, hover, the Debug
+              Console, conditional breakpoints, logpoint substitutions and MCP
+              <code>evaluate_expression</code> all go through — one implementation, not five.
+            </li>
+          </ul>
+        </section>
+
+        <section id="idebugtarget">
+          <h2>IDebugTarget and the two engines</h2>
+          <p>
+            <code>IDebugTarget</code> is the interface the rest of the system talks to. Two classes
+            implement it:
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Class</th><th>Target</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>TWinDebugger</code></td><td>64-bit debuggee, debugged natively</td></tr>
+                <tr><td><code>TWin32Debugger</code></td><td>32-bit debuggee, debugged across the WOW64 boundary</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Which one is constructed is decided by reading the machine type from the target
+            executable&rsquo;s <strong>PE header</strong>, before the process is created. There is no
+            setting, no probing of the running process, and no second adapter to install.
+          </p>
+          <p>
+            Once the process exists, its actual architecture is cross-checked against that decision.
+            A disagreement produces an explicit <code>[FATAL]</code>-prefixed diagnostic rather than a
+            session that misbehaves in ways that are hard to attribute.
+          </p>
+        </section>
+
+        <section id="always-64">
+          <h2>Why the adapter is always a 64-bit process</h2>
+          <p>
+            The debug adapter itself is a 64-bit executable no matter what it debugs. Debugging a
+            32-bit target across WOW64 is more work than running a 32-bit adapter would be, and it is
+            done deliberately, for one reason: <strong>symbol data is the memory hog, and it lives in
+            the debugger&rsquo;s address space, not the debuggee&rsquo;s.</strong>
+          </p>
+          <p>
+            The scale is not theoretical. Indexing a 523 MB <code>.rsm</code> from a real single-EXE
+            build peaks at 692 MB of working set. A 32-bit debugger has a 2 GB user address space to
+            fit that into, alongside everything else it needs, and on a large Delphi project that is a
+            wall you hit rather than approach. A 64-bit debugger does not compete with its debuggee
+            for address space at all.
+          </p>
+          <p>
+            The visible consequence for a user is that there is one binary and nothing to choose at
+            install time — see
+            <a href="../vscode-tutorial/01-preparing-your-project.html">Preparing your project</a>.
+          </p>
+        </section>
+
+        <section id="constraints">
+          <h2>Constraints that follow from the design</h2>
+          <ul>
+            <li>
+              <strong>One process per session.</strong> The debuggee is created with
+              <code>DEBUG_ONLY_THIS_PROCESS</code>, so processes it spawns are not tracked.
+            </li>
+            <li>
+              <strong>Locals on 32-bit targets need <code>-$O-</code>.</strong> Not an engine choice —
+              an optimized 32-bit build routinely has no frame pointer, and there is then nothing to
+              resolve a local against. Run control is unaffected.
+            </li>
+            <li>
+              <strong>The whole process stops as a unit</strong> at a breakpoint or exception.
+              Stepping is the one place threads are treated individually — see
+              <a href="threading-model.html">the threading model</a>.
+            </li>
+          </ul>
+        </section>
+
+        <section id="session">
+          <h2>TDebugSession</h2>
+          <p>
+            Above <code>IDebugTarget</code> sits <code>TDebugSession</code>, the facade both frontends
+            use. It owns the engine, the symbol providers, source-file resolution and the session
+            state machine — so state handling exists once rather than twice, and a behaviour fixed for
+            VS Code is fixed for an agent at the same time.
+          </p>
+          <p>
+            What each frontend adds on top is
+            <a href="dap-vs-mcp-frontends.html">the next page</a>.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-next" href="dap-vs-mcp-frontends.html">DAP and MCP frontends &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: '#0d1117',
+        primaryColor: '#161b22',
+        primaryTextColor: '#e6edf3',
+        lineColor: '#2f81f7'
+      }
+    });
+  </script>
+
+</body>
+</html>

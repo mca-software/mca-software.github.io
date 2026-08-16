@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>9. Multi-BPL applications and modules &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="The Delphi Modules view, pre binding debug info for runtime loaded packages, and architecture mismatch detection.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html" aria-current="page">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">9. Multi-BPL applications and modules</span>
+        </nav>
+
+        <h1>9. Multi-BPL applications and modules</h1>
+
+        <p>
+          A host EXE that loads its business logic from runtime packages at startup is the case this
+          debugger was built for, not an afterthought bolted on later. Everything here works on a
+          single-EXE build too — it just has nothing to do.
+        </p>
+
+        <section id="what-works">
+          <h2>What works across package boundaries</h2>
+          <ul>
+            <li>
+              <strong>Lazy per-module symbol loading.</strong> Each DLL or BPL has its debug
+              information read as it loads at runtime, not up front.
+            </li>
+            <li>
+              <strong>Breakpoints in packages that have not loaded yet.</strong> Set one in a unit
+              belonging to a BPL that <code>LoadPackage</code> has not reached; the binding is
+              deferred and applied the moment the package maps.
+            </li>
+            <li>
+              <strong>Stack unwinding across host and package.</strong> A call that goes from the EXE
+              into a BPL and back produces one continuous call stack.
+            </li>
+            <li>
+              <strong>Symbols resolved from the owning binary.</strong> Two loaded binaries can
+              contain a unit of the same name, or a class of the same name, and locals and globals
+              still resolve against the right one.
+            </li>
+            <li>
+              <strong>A BPL&rsquo;s <code>.dcp</code> supplies its debug information</strong> — the same
+              format as an <code>.rsm</code>, in the file the package build already produces.
+            </li>
+            <li>
+              <strong>Address and data breakpoints survive an unload and reload.</strong> Address
+              breakpoints are stored per module and RVA (see
+              <a href="03-breakpoints.html#address">chapter 3</a>), so a package that is rebased on
+              reload does not lose them.
+            </li>
+          </ul>
+          <div class="doc-note">
+            All of this depends on the packages being <em>compiled</em> with debug information. A BPL
+            built without it is a black box regardless of how complete the host&rsquo;s symbols are — see
+            <a href="01-preparing-your-project.html">chapter 1</a>.
+          </div>
+        </section>
+
+        <section id="modules-view">
+          <h2>The Delphi Modules view</h2>
+          <p>
+            A tree view in the Run &amp; Debug sidebar listing what is currently loaded and the state
+            of each module&rsquo;s symbols. It contributes commands to refresh the list, filter it, clear
+            the filter, and copy a module&rsquo;s path — the last one being how you check that the BPL
+            being debugged is the one you think it is, rather than an older copy earlier on the search
+            path.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-09-modules-view.png">
+            <p>Screenshot: the &ldquo;Delphi Modules&rdquo; tree view panel listing the host EXE plus at least one loaded BPL, with symbol state indicators.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-09-modules-view.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="pre-binding">
+          <h2>Pointing the debugger at the right debug info</h2>
+          <p>
+            By default the adapter probes for debug-information files beside each module as it loads.
+            When they live somewhere else, name them explicitly with the <code>modules</code> array,
+            which works in both launch and attach configurations:
+          </p>
+          <pre><code>"modules": [
+  {
+    "name": "InvoiceEngine.bpl",
+    "map": "${workspaceFolder}/packages/Win64/Debug/InvoiceEngine.map",
+    "dcp": "${workspaceFolder}/packages/Win64/Debug/InvoiceEngine.dcp"
+  }
+]</code></pre>
+          <p>
+            <code>name</code> is required; <code>map</code>, <code>rsm</code> and <code>dcp</code> are
+            each optional. The IDE plugin generates this from the project&rsquo;s package list, which is
+            the sane way to get it for a real application.
+          </p>
+        </section>
+
+        <section id="sources">
+          <h2>Finding the sources</h2>
+          <p>
+            <code>sourceRoot</code> plus <code>sourceSearchPaths</code>, each searched two levels
+            deep, and <code>${env:BDS}/source</code> automatically for RTL and VCL units.
+          </p>
+          <div class="doc-note">
+            <strong>Same-basename source files cannot be told apart.</strong> If two directories both
+            contain an <code>Oracle.pas</code>, a frame may open the wrong one at the &ldquo;same&rdquo;
+            line. This is a limitation of the compiler&rsquo;s debug information, not of the debugger:
+            TD32&rsquo;s names table stores only the basename, with no directory. See
+            <a href="11-known-limitations.html">Known limitations</a>.
+          </div>
+        </section>
+
+        <section id="arch-mismatch">
+          <h2>Architecture mismatch</h2>
+          <p>
+            The debugger picks its engine — 64-bit or 32-bit — from the target&rsquo;s PE header before
+            the process exists. Once the process is running, its actual architecture is cross-checked
+            against that decision, and a disagreement produces an explicit <code>[FATAL]</code>
+            diagnostic rather than a session that misbehaves in confusing ways.
+          </p>
+          <p>
+            <a href="../architecture/engine-overview.html">Engine overview</a> explains how the choice
+            is made.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="08-expression-evaluation.html">&larr; 8. Expression evaluation</a>
+          <a class="doc-next" href="10-attach-to-a-running-process.html">10. Attach to a running process &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

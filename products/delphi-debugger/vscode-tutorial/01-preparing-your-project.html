@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1. Preparing your project &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="Compiler and linker settings the debugger needs, and the launch.json and attach configuration schema.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html" aria-current="page">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">1. Preparing your project</span>
+        </nav>
+
+        <h1>1. Preparing your project</h1>
+
+        <p>
+          A debugger can only show what the compiler emitted. Almost every &ldquo;it does not work&rdquo;
+          report against this debugger turns out to be a build without the debug information it needs,
+          so this chapter comes first.
+        </p>
+
+        <section id="compiler-settings">
+          <h2>Compiler and linker settings</h2>
+          <p>
+            In the Delphi project options, for the <strong>Debug</strong> configuration of the
+            platform you are building:
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Setting</th><th>Where</th><th>Value</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Optimization</td><td>Compiling</td><td>Off (<code>-$O-</code>)</td></tr>
+                <tr><td>Debug information</td><td>Compiling</td><td>On</td></tr>
+                <tr><td>Local symbols</td><td>Compiling</td><td>On</td></tr>
+                <tr><td>Debug information</td><td>Linking</td><td>On</td></tr>
+                <tr><td>Include remote debug symbols</td><td>Linking</td><td>On — this is what emits the <code>.rsm</code></td></tr>
+                <tr><td>Map file</td><td>Linking</td><td>Detailed</td></tr>
+                <tr><td>Use debug .dcus</td><td>Compiling</td><td>On — optional, lets you step <em>into</em> RTL and VCL source instead of over it</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>On the command line that is:</p>
+          <pre><code>dcc64 -$O- -V -VN -VR MyApp.dpr</code></pre>
+          <p>
+            Keep the <code>.map</code> and <code>.rsm</code> next to the <code>.exe</code>. The
+            adapter looks for them there by default.
+          </p>
+          <div class="doc-note">
+            The same settings apply to <strong>every runtime package</strong> you want to step into. A
+            BPL compiled without debug information stays a black box even when the host EXE has full
+            symbols — see <a href="09-multi-bpl-and-modules.html">Multi-BPL applications and
+            modules</a>.
+          </div>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-01-project-settings.png">
+            <p>Screenshot: the Delphi project options dialog with the Optimization, Debug information, Local symbols and Map file settings visible.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-01-project-settings.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="what-each-artefact-buys">
+          <h2>What each artefact buys you</h2>
+          <p>
+            The settings above produce several separate pieces of debug information, and they do not
+            all do the same job. What happens when one is missing:
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Missing artefact</th><th>Effect</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>TD32 section, <code>.map</code>, or JCL data — <strong>any one</strong> of the three</td>
+                  <td>No source lines: no breakpoints, no stepping</td>
+                </tr>
+                <tr>
+                  <td><code>.rsm</code></td>
+                  <td>Breakpoints and stepping still work, but local variables, types and expression evaluation are severely limited</td>
+                </tr>
+                <tr>
+                  <td>Optimizations left on</td>
+                  <td>Breakpoints land on the wrong lines and locals read as garbage, because the code no longer matches the source</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            The <code>.rsm</code> is genuinely optional — the debugger works without it, just with
+            reduced fidelity on locals and types. The source-line sources are not.
+            <a href="../architecture/symbol-formats.html">Symbol formats</a> explains how the layers
+            fit together.
+          </p>
+          <div class="doc-note">
+            On a <strong>32-bit</strong> target there is one hard limit: locals and parameters require
+            an unoptimized (<code>-$O-</code>) build. With <code>-$O+</code> the compiler routinely
+            omits the frame pointer and locals cannot be resolved at all. Run control — breakpoints,
+            stepping, call stacks — works on optimized 32-bit builds either way.
+          </div>
+        </section>
+
+        <section id="launch-json">
+          <h2>The launch configuration</h2>
+          <p>
+            <code>.vscode/launch.json</code> in the project being debugged. The
+            <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a>
+            IDE plugin writes this for you from the real Delphi project, which is what you want on
+            anything with a non-trivial search path. Here is the minimum by hand:
+          </p>
+          <pre><code>{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Delphi Win64",
+      "type": "delphi-win64",
+      "request": "launch",
+      "program": "${workspaceFolder}/Win64/Debug/MyApp.exe",
+      "sourceRoot": "${workspaceFolder}",
+      "stopAtEntry": true
+    }
+  ]
+}</code></pre>
+          <p>The properties you will actually reach for:</p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Property</th><th>Default</th><th>What it does</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>program</code></td><td><em>required</em></td><td>Path to the <code>.exe</code> to debug</td></tr>
+                <tr><td><code>mapFile</code></td><td>same path as <code>program</code>, <code>.map</code></td><td>Only needed when the MAP file is not beside the executable</td></tr>
+                <tr><td><code>rsmFile</code></td><td>same path, <code>.rsm</code></td><td>Same, for the file that carries local-variable information</td></tr>
+                <tr><td><code>sourceRoot</code></td><td><em>empty</em></td><td>Root directory for source lookup</td></tr>
+                <tr><td><code>sourceSearchPaths</code></td><td><em>empty</em></td><td>Extra source directories, each searched two levels deep</td></tr>
+                <tr><td><code>args</code></td><td><em>empty</em></td><td>Command-line arguments passed to the debuggee</td></tr>
+                <tr><td><code>stopAtEntry</code></td><td><code>false</code></td><td>Break at the process entry point before any user code runs</td></tr>
+                <tr><td><code>modules</code></td><td><em>empty</em></td><td>Pre-binds debug-info files for runtime-loaded DLLs and BPLs — see <a href="09-multi-bpl-and-modules.html">chapter 9</a></td></tr>
+                <tr><td><code>exceptionRules</code></td><td><em>empty</em></td><td>Per-exception rule table — see <a href="04-exception-handling.html">chapter 4</a></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            That is the working subset. The complete schema — including <code>rawStackScan</code>,
+            <code>progressLocation</code>, <code>diagnosticLog</code>,
+            <code>diagnosticsLocation</code> and the global exception-rules properties — is in the
+            <a href="12-settings-and-commands-reference.html">settings and commands reference</a>.
+          </p>
+          <p>
+            <code>${env:BDS}/source</code> is searched automatically, so RTL and VCL sources resolve
+            without listing them.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-01-launch-json.png">
+            <p>Screenshot: VS Code with <code>launch.json</code> open beside the project in Explorer, the <code>delphi-win64</code> configuration visible.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-01-launch-json.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="attaching">
+          <h2>Attaching instead of launching</h2>
+          <p>
+            Set <code>"request": "attach"</code> and give a <code>processId</code> or
+            <code>processName</code> instead of launching the program yourself. The attach
+            configuration shares <code>program</code>, <code>sourceRoot</code>,
+            <code>sourceSearchPaths</code>, <code>modules</code> and <code>exceptionRules</code> with
+            launch, and adds <code>killOnDetach</code>.
+            <a href="10-attach-to-a-running-process.html">Chapter 10</a> covers it, including one
+            mistake worth knowing about before you try it.
+          </p>
+        </section>
+
+        <section id="generating-it">
+          <h2>Letting the IDE write it</h2>
+          <p>
+            A real Delphi project carries a couple of hundred unit search paths, an output directory
+            that depends on the configuration, and a list of runtime packages. Transcribing that by
+            hand is not a good use of an afternoon. The
+            <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a>
+            plugin adds an <em>Open in Visual Studio Code</em> command to the Delphi IDE that
+            generates the workspace file, <code>launch.json</code> and <code>tasks.json</code> from
+            the currently open project.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-01-ide-plugin.png">
+            <p>Screenshot: the Delphi IDE&rsquo;s &ldquo;Open in Visual Studio Code&rdquo; command generating the workspace and launch configuration.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-01-ide-plugin.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-next" href="02-your-first-session.html">2. Your first session &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Symbol formats &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="How TD32, MAP, RSM, DCP and JCL debug information each contribute to source lines, types and locals.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html" aria-current="page">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>In this section</span>
+        <a href="index.html">Overview</a>
+        <a href="engine-overview.html">Engine overview</a>
+        <a href="dap-vs-mcp-frontends.html">DAP and MCP frontends</a>
+        <a href="symbol-formats.html" aria-current="page">Symbol formats</a>
+        <a href="breakpoints-and-exceptions-internals.html">Breakpoints and exceptions</a>
+        <a href="threading-model.html">Threading model</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">Architecture</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Symbol formats</span>
+        </nav>
+
+        <h1>Symbol formats</h1>
+
+        <p>
+          Delphi does not emit one debug-info format. It emits several, into different places, each
+          carrying a different part of the picture — and the debugger reads all of them because no
+          single one is sufficient.
+        </p>
+
+        <section id="consequences">
+          <h2>What each artefact buys you</h2>
+          <p>
+            The plain-language version first, because it is what actually matters when a build is
+            misconfigured:
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Artefact</th><th>Without it</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>TD32 section, <code>.map</code>, or JCL data — <strong>any one</strong></td>
+                  <td>No source lines: no breakpoints, no stepping</td>
+                </tr>
+                <tr>
+                  <td><code>.rsm</code></td>
+                  <td>Breakpoints and stepping still work, but local variables, types and expression evaluation are severely limited</td>
+                </tr>
+                <tr>
+                  <td>Optimizations off</td>
+                  <td>Breakpoints land on the wrong line and locals read as garbage, because the code no longer matches the source</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Note the shape of the first row: <em>any one</em> of three sources will give you source
+            lines. That is the whole reason this is not a precedence list.
+          </p>
+        </section>
+
+        <section id="formats">
+          <h2>The five formats</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Format</th><th>Where it lives</th><th>What it carries</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>TD32</strong></td>
+                  <td>Embedded in the binary — Borland&rsquo;s <code>.debug</code> PE section, magic <code>FB09</code></td>
+                  <td>Source lines, file names, symbols. The primary line source when present.</td>
+                </tr>
+                <tr>
+                  <td><strong><code>.map</code></strong></td>
+                  <td>Sidecar file, emitted by the linker at <em>Detailed</em></td>
+                  <td>Line numbers and segment/symbol addresses, plus nested-procedure linkage</td>
+                </tr>
+                <tr>
+                  <td><strong><code>.rsm</code></strong></td>
+                  <td>Sidecar file, from <em>Include remote debug symbols</em></td>
+                  <td>Local variables and type information. <strong>Optional</strong> — the debugger works without it, with reduced fidelity.</td>
+                </tr>
+                <tr>
+                  <td><strong><code>.dcp</code></strong></td>
+                  <td>Sidecar file, produced by a package build</td>
+                  <td>The same format as <code>.rsm</code>, supplying a BPL&rsquo;s debug information</td>
+                </tr>
+                <tr>
+                  <td><strong>JCL</strong></td>
+                  <td>A <code>JCLDEBUG</code> PE section, or a sidecar <code>.jdbg</code></td>
+                  <td>Line information. On by default; a fallback line source.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            An external <code>.tds</code> (<code>dcc64 -VT</code>) is also read, carrying the same
+            kind of content as the embedded TD32 section.
+          </p>
+        </section>
+
+        <section id="layering">
+          <h2>Contribution, not precedence</h2>
+          <p>
+            It is tempting to describe this as an ordered list — try TD32, fall back to MAP, fall back
+            to JCL. That is not what happens, and describing it that way would mislead. Different
+            formats answer <em>different questions</em>, and a build can be missing one capability
+            entirely while another is fully served.
+          </p>
+          <pre class="mermaid">
+flowchart LR
+  TD32["TD32<br/><i>.debug PE section</i>"]
+  MAP["MAP<br/><i>.map sidecar</i>"]
+  JCL["JCL<br/><i>JCLDEBUG / .jdbg</i>"]
+  RSM["RSM<br/><i>.rsm sidecar</i>"]
+  DCP["DCP<br/><i>.dcp, for BPLs</i>"]
+
+  subgraph LINES["Source lines &amp; breakpoints"]
+    L["any ONE of these is enough"]
+  end
+  subgraph VARS["Local variables &amp; types"]
+    V["RSM or DCP<br/>(optional — absence degrades, does not break)"]
+  end
+  subgraph NEST["Nested-procedure linkage"]
+    N["MAP"]
+  end
+
+  TD32 --> L
+  MAP --> L
+  JCL --> L
+  RSM --> V
+  DCP --> V
+  MAP --> N
+          </pre>
+          <p>
+            Read it as three independent capabilities, each fed by whatever is available. Lose every
+            line source and the debugger cannot set a breakpoint at all. Lose only the
+            <code>.rsm</code> and it still stops exactly where you asked — you just cannot see the
+            locals when it does.
+          </p>
+        </section>
+
+        <section id="modules">
+          <h2>Per module, not per session</h2>
+          <p>
+            All of this applies to each loaded image independently. A host EXE with complete debug
+            information and a BPL built without any is entirely normal, and the debugger reports it
+            per module rather than as a single session-wide state: <code>loaded</code>,
+            <code>noSymbols</code>, or <code>indexing</code> while an index is still filling.
+          </p>
+          <p>
+            The formats that <em>registered</em> for a module are reported too, which distinguishes
+            two situations that look identical from the outside: a binary that carries no debug
+            information at all, and one whose sidecar simply has not been found. See
+            <a href="../mcp/tool-reference.html#modules"><code>get_loaded_modules</code></a> and
+            <a href="../vscode-tutorial/09-multi-bpl-and-modules.html">Multi-BPL and modules</a>.
+          </p>
+          <div class="doc-note">
+            Not every format can enumerate source files. <code>.rsm</code>, <code>.dcp</code> and
+            <code>.jdbg</code> map addresses but hold no file index, so for a module carrying only
+            those, the file list is <em>unknown</em> rather than empty — and a breakpoint there may
+            still bind.
+          </div>
+        </section>
+
+        <section id="basename">
+          <h2>The one thing none of them fix</h2>
+          <p>
+            TD32&rsquo;s names table stores source files by <strong>basename only</strong>, with no
+            directory. Two <code>Oracle.pas</code> files in different folders are therefore
+            indistinguishable to any consumer of that table, and a frame can resolve to the wrong one
+            at the &ldquo;same&rdquo; line.
+          </p>
+          <p>
+            There is no downstream fix: the information was not emitted. It is recorded in
+            <a href="../vscode-tutorial/11-known-limitations.html">Known limitations</a> as a property
+            of the format rather than a defect of the debugger, because that distinction determines
+            whether it is worth reporting as a bug.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="dap-vs-mcp-frontends.html">&larr; DAP and MCP frontends</a>
+          <a class="doc-next" href="breakpoints-and-exceptions-internals.html">Breakpoints and exceptions internals &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: '#0d1117',
+        primaryColor: '#161b22',
+        primaryTextColor: '#e6edf3',
+        lineColor: '#2f81f7'
+      }
+    });
+  </script>
+
+</body>
+</html>

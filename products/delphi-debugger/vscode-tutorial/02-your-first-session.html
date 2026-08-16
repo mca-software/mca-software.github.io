@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2. Your first session &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="The Run and Debug view, starting a session, stepping with F10, F11 and Shift+F11, and stopAtEntry.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html" aria-current="page">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">2. Your first session</span>
+        </nav>
+
+        <h1>2. Your first session</h1>
+
+        <p>
+          With the project compiled per
+          <a href="01-preparing-your-project.html">chapter 1</a> and a <code>launch.json</code> in
+          place, a session is five steps.
+        </p>
+
+        <section id="starting">
+          <h2>Starting a session</h2>
+          <ol>
+            <li>
+              Compile your project with the debug settings, so the <code>.map</code> and
+              <code>.rsm</code> land next to the <code>.exe</code>.
+            </li>
+            <li>
+              Open the project folder in VS Code — from the Delphi IDE via <em>Open in Visual Studio
+              Code</em>, or by opening the folder and writing <code>launch.json</code> yourself.
+            </li>
+            <li>
+              Set a breakpoint in the editor gutter, exactly as you would for any other language.
+            </li>
+            <li>
+              Open <strong>Run and Debug</strong> (<code>Ctrl+Shift+D</code>) and pick your
+              configuration from the dropdown.
+            </li>
+            <li>
+              Press <code>F5</code>.
+            </li>
+          </ol>
+          <p>
+            The debuggee is started with <code>CreateProcess</code> and a hidden console. If you set
+            <code>"stopAtEntry": true</code>, the session breaks at the process entry point before any
+            of your code runs — useful when you need a breakpoint in place before initialisation
+            code executes, and the normal starting point when an
+            <a href="../mcp/index.html">AI agent</a> drives the session.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-02-run-and-debug.png">
+            <p>Screenshot: the Run and Debug side panel — configuration dropdown, green Start Debugging arrow, and the debug toolbar (continue, step over, step into, step out, restart, stop) annotated.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-02-run-and-debug.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="stepping">
+          <h2>Stepping</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Key</th><th>Command</th><th>What it actually does</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>F5</code></td><td>Continue</td><td>Resumes until the next breakpoint, exception or exit</td></tr>
+                <tr><td><code>F10</code></td><td>Step over</td><td>Runs the current line, including any calls it makes, and stops on the next one</td></tr>
+                <tr><td><code>F11</code></td><td>Step into</td><td>Enters the call and walks until the next line that has source information</td></tr>
+                <tr><td><code>Shift+F11</code></td><td>Step out</td><td>Runs to the caller&rsquo;s resume address, found by unwinding the stack with <code>StackWalk64</code></td></tr>
+                <tr><td>—</td><td>Pause</td><td>Interrupts a running debuggee via <code>DebugBreakProcess</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            The whole process stops as a unit at a breakpoint or an exception, and every thread is
+            reported at that stop. Stepping is the exception to that rule: a step command targets one
+            OS thread and explicitly freezes the others for its duration — see
+            <a href="06-threads-and-call-stack.html">chapter 6</a> and
+            <a href="../architecture/threading-model.html">the threading model</a>.
+          </p>
+        </section>
+
+        <section id="instruction-stepping">
+          <h2>When there is no line table</h2>
+          <p>
+            Step over, into and out all accept an <em>instruction</em> granularity, which steps
+            exactly one machine instruction and needs no line information at all. That is what gets
+            you through a package built without debug info, or through code the symbols do not
+            cover. Stepping over at instruction granularity runs past a <code>call</code> (or a
+            <code>rep</code>-prefixed instruction) rather than into it.
+          </p>
+          <p>
+            Instruction-granularity step out needs a <em>provable</em> return address —
+            <code>.pdata</code> on x64, <code>[EBP+4]</code> on x86 — and refuses with a stated reason
+            when it cannot prove one, rather than guessing and landing you somewhere arbitrary. This
+            is a recurring theme: where the debugger cannot prove an answer it says so.
+            <a href="07-registers-memory-disassembly.html">Chapter 7</a> covers the disassembly view
+            you will be looking at when this matters.
+          </p>
+        </section>
+
+        <section id="ending">
+          <h2>Ending a session</h2>
+          <p>
+            Stopping a launched session terminates the debuggee along with it. An
+            <em>attached</em> session is a different matter, and getting it wrong leaves a mess in the
+            target process — <a href="10-attach-to-a-running-process.html">chapter 10</a> explains
+            why you always detach rather than kill.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="01-preparing-your-project.html">&larr; 1. Preparing your project</a>
+          <a class="doc-next" href="03-breakpoints.html">3. Breakpoints &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

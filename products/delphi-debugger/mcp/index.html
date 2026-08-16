@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP and AI agents &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="What the MCP server is, and why an AI coding agent debugging a real process beats an agent inferring behaviour from source.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html">VS Code Tutorial</a>
+    <a href="../mcp/index.html" aria-current="page">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>In this section</span>
+        <a href="index.html" aria-current="page">Overview</a>
+        <a href="installing-and-registering.html">Installing and registering</a>
+        <a href="tool-reference.html">Tool reference</a>
+        <a href="example-prompts.html">Example prompts</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">MCP &amp; AI Agents</span>
+        </nav>
+
+        <h1>MCP and AI agents</h1>
+
+        <p>
+          An AI coding agent reading your source can tell you what the code <em>should</em> do. It
+          cannot tell you what the program <em>did</em>. The MCP server closes that gap: the same
+          debug engine the VS Code extension drives, exposed to an agent as around forty tools, so it
+          can launch your program, stop it, and read the real state.
+        </p>
+
+        <section id="why">
+          <h2>Why an agent wants this</h2>
+          <p>
+            Ask an agent why a value is wrong and, without a debugger, it reasons backwards from the
+            source — plausibly, confidently, and sometimes incorrectly, because the answer depended on
+            runtime state it could not see. Give it a debugger and the same question becomes a
+            breakpoint, a stop, and a look at the actual variable.
+          </p>
+          <p>
+            This matters most exactly where reading the source is hardest: a value corrupted by
+            something several call frames away, an exception raised inside a runtime package, a
+            failure that only reproduces on the third iteration of a loop. Those are the cases where
+            an agent guessing is worse than useless, and where stopping the program and looking takes
+            one round trip.
+          </p>
+        </section>
+
+        <section id="how">
+          <h2>How it fits together</h2>
+          <p>
+            <code>DelphiDebuggerMcp.exe</code> is a separate program from the debug adapter, but not
+            a separate debugger. Both are thin frontends over the same
+            <code>TDebugSession</code> facade and the same Windows Debug API engine — everything
+            below that line is shared, so an agent and the editor are looking at the same debugger.
+          </p>
+          <pre class="mermaid">
+flowchart LR
+  A["AI agent<br/>(Claude Code, VS Code, …)"] -- "MCP tool call" --> M["DelphiDebuggerMcp.exe"]
+  M --> S["TDebugSession<br/>(the same engine VS Code drives)"]
+  S -- "Windows Debug API" --> P[("Your Delphi program")]
+  P -- "stop event" --> S
+  S --> M
+  M -- "structured result" --> A
+          </pre>
+          <p>
+            Results come back as structured data, not as screen output an agent has to parse.
+            <a href="../architecture/dap-vs-mcp-frontends.html">DAP and MCP frontends</a> covers the
+            shared machinery in detail.
+          </p>
+        </section>
+
+        <section id="loop">
+          <h2>The shape of a session</h2>
+          <p>The typical cycle, which is worth knowing because it explains the tool names:</p>
+          <ol>
+            <li>
+              <code>launch_debuggee</code> or <code>launch_from_config</code> — the latter reads the
+              same <code>launch.json</code> the VS Code debugger uses, so the agent starts with the
+              project&rsquo;s real symbol and source paths instead of a hand-built approximation. Both
+              stop at entry.
+            </li>
+            <li><code>set_breakpoint</code>, while parked at entry.</li>
+            <li><code>continue_and_wait</code> — runs, and returns when the program next stops.</li>
+            <li>
+              <code>get_compact_debug_snapshot</code>, or the individual
+              <code>get_call_stack</code> / <code>get_locals</code> /
+              <code>evaluate_expression</code> calls.
+            </li>
+            <li>Step, continue, or look somewhere else — then repeat.</li>
+            <li><code>terminate_debuggee</code>, or <code>detach_debugger</code> if you attached.</li>
+          </ol>
+          <div class="doc-note">
+            Set breakpoints <strong>before</strong> the first <code>continue_and_wait</code>, while
+            the session is parked at entry. Once running, the session is event-driven — there is no
+            mid-flight &ldquo;pause and set&rdquo; convenience, though
+            <code>pause_execution</code> exists if you genuinely need to interrupt.
+          </div>
+          <p>
+            <code>get_compact_debug_snapshot</code> deserves its own mention: state, stop reason,
+            current location, top frames, top-frame locals and exception information in a single
+            call. After a stop that is usually everything the agent wanted, at a fraction of the
+            tokens three separate round trips would cost.
+          </p>
+        </section>
+
+        <section id="vs-vscode">
+          <h2>Where it differs from the VS Code experience</h2>
+          <p>
+            The engine is shared, but the two frontends do not expose identical surfaces. What is
+            available in VS Code and <strong>not</strong> over MCP:
+          </p>
+          <ul>
+            <li>Set Next Statement has no MCP tool.</li>
+            <li>
+              There is no <code>setVariable</code> equivalent. Only <code>write_memory</code> and
+              <code>set_register</code> mutate the debuggee&rsquo;s state.
+            </li>
+            <li>
+              A hardware watchpoint on a <strong>bare local variable</strong> is refused over MCP,
+              with a reason — watch the containing global or object field, or pass an address you
+              already have. In VS Code, watching a local is supported and withdrawn automatically when
+              the frame dies.
+            </li>
+            <li>
+              <code>expand_variable</code> covers class fields, records and dynamic arrays;
+              getter-backed properties and Variant arrays are not expanded through that path.
+            </li>
+          </ul>
+          <p>
+            One design difference rather than a gap: there is deliberately no
+            <code>get_scopes</code> or <code>get_arguments</code>. Locals come back directly, with
+            opaque handles for anything expandable, because arguments are not reliably separable from
+            locals in the underlying debug information — so a scope-reference indirection would have
+            promised a distinction the data cannot support.
+          </p>
+          <p>
+            Module and package loading over MCP is currently eager: every module carrying debug-info
+            sidecars is loaded once breakpoints exist, rather than lazily as each package maps.
+          </p>
+        </section>
+
+        <section id="next">
+          <h2>Next</h2>
+          <ul>
+            <li>
+              <a href="installing-and-registering.html">Installing and registering</a> — getting the
+              server in front of your agent, and taking it out again.
+            </li>
+            <li>
+              <a href="tool-reference.html">Tool reference</a> — every tool, by group, with what each
+              one refuses to do.
+            </li>
+            <li>
+              <a href="example-prompts.html">Example prompts</a> — eleven things you can actually type,
+              and the tools each one triggers.
+            </li>
+          </ul>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-next" href="installing-and-registering.html">Installing and registering &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: '#0d1117',
+        primaryColor: '#161b22',
+        primaryTextColor: '#e6edf3',
+        lineColor: '#2f81f7'
+      }
+    });
+  </script>
+
+</body>
+</html>

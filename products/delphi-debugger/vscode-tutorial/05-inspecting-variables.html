@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5. Inspecting variables &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="Locals, globals and parameters, generic collections, closures, writing values back and the safe getter safelist.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html" aria-current="page">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">5. Inspecting variables</span>
+        </nav>
+
+        <h1>5. Inspecting variables</h1>
+
+        <p>
+          Local variables come out of the Delphi <code>.rsm</code> format, which is where most of the
+          work in this project went. This chapter is what that buys you — and one hazard that is
+          worth knowing about before you meet it.
+        </p>
+
+        <section id="scopes">
+          <h2>What is in scope</h2>
+          <ul>
+            <li>Locals of the current procedure, and its parameters.</li>
+            <li>
+              Parent-procedure locals, seen from inside a nested procedure, at any depth of the
+              lexical scope chain.
+            </li>
+            <li>Locals declared in the program&rsquo;s main <code>begin..end</code> block.</li>
+            <li>Globals, and unit-scoped variables.</li>
+          </ul>
+          <div class="doc-note">
+            <code>threadvar</code> variables are <strong>not</strong> resolved, on either bitness. A
+            threadvar has no fixed address in the image, and the debugger reports that honestly rather
+            than showing you a plausible wrong value. See
+            <a href="11-known-limitations.html">Known limitations</a>.
+          </div>
+        </section>
+
+        <section id="formatting">
+          <h2>How values are shown</h2>
+          <p>
+            Formatting is type-aware: integers, floats, <code>TDateTime</code>, chars, ANSI and
+            Unicode strings, Variants, C-string pointers, and type aliases all render as what they
+            are rather than as raw storage. A dynamic array previews its contents inline —
+            <code>[10, 20, 30]</code>, capped for long ones — and an empty or <code>nil</code> array
+            shows as <code>[]</code>.
+          </p>
+        </section>
+
+        <section id="expanding">
+          <h2>Expanding objects, records and arrays</h2>
+          <ul>
+            <li>
+              <strong>Class instances</strong> expand to all their fields, across every visibility
+              level and every ancestor class, read through the VMT&rsquo;s extended RTTI.
+            </li>
+            <li><strong>Records</strong> expand through their <code>TypeInfo</code>.</li>
+            <li>
+              <strong>Dynamic arrays</strong> expand element by element, up to 512 of them.
+            </li>
+            <li>
+              <strong>Generic collections</strong> — <code>TList&lt;T&gt;</code>,
+              <code>TDictionary&lt;K,V&gt;</code>, and nested generics — inspect and enumerate
+              correctly rather than showing you their internal storage.
+            </li>
+          </ul>
+          <p>Expansion nests, so you can walk an object graph as far as it goes.</p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-05-object-graph.png">
+            <p>Screenshot: the Variables panel with an expanded object graph including a generic collection (<code>TList&lt;T&gt;</code> or <code>TDictionary&lt;K,V&gt;</code>) and a closure&rsquo;s captured fields.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-05-object-graph.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="closures">
+          <h2>Anonymous methods and closures</h2>
+          <p>
+            Expanding a captured closure shows its captured fields the way any other object expands.
+            Stopping <em>inside</em> an anonymous method shows both the captured variables and the
+            method&rsquo;s own parameters.
+          </p>
+          <p>
+            Those parameters appear positionally, as <code>arg1</code> to <code>argN</code>. That is
+            not a shortcut — the debug information for an anonymous method carries no names for them,
+            so there is nothing better to show.
+          </p>
+        </section>
+
+        <section id="writing">
+          <h2>Writing values back</h2>
+          <p>
+            Values can be edited in place in the Variables panel. What is supported:
+          </p>
+          <ul>
+            <li>Primitives, floats, dates and chars, written at the correct storage width.</li>
+            <li>Enums, by name or by ordinal.</li>
+            <li>Sets, by bitmask.</li>
+            <li>
+              Strings, assigned in-process so the reference count stays correct and nothing leaks.
+            </li>
+            <li>
+              <code>var</code> parameters, which write through to the caller&rsquo;s actual storage
+              rather than to the local copy.
+            </li>
+          </ul>
+          <div class="doc-note">
+            Editing in the <strong>Watch</strong> panel does not work — only the Variables panel does.
+            The underlying DAP <code>setExpression</code> request is not implemented. See
+            <a href="11-known-limitations.html">Known limitations</a>.
+          </div>
+        </section>
+
+        <section id="getters">
+          <h2>Properties backed by getters</h2>
+          <p>
+            A property whose value comes from a getter cannot be shown without <em>calling</em> that
+            getter — which means running your code, with whatever side effects it has, just because a
+            panel was expanded. The debugger does not do that by default.
+          </p>
+          <p>
+            Instead there is a safelist, driven by two context-menu commands: <em>Always Evaluate
+            This Property (Delphi)</em> and <em>Never Auto-Evaluate This Property (Delphi)</em>. A time
+            budget also bounds how long a burst of automatic getter calls may hold up the panel, so a
+            slow property cannot freeze the Variables view.
+          </p>
+          <div class="doc-note">
+            <strong>Hover has no such guard.</strong> Hovering an identifier that happens to be a
+            function or a getter executes it, in the debuggee, with no confirmation and no safelist
+            check. On code with side-effecting getters, hovering over the wrong word can change your
+            program&rsquo;s state. This is worth knowing before it surprises you — see
+            <a href="08-expression-evaluation.html">chapter 8</a> for what else evaluation can run.
+          </div>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="04-exception-handling.html">&larr; 4. Exception handling</a>
+          <a class="doc-next" href="06-threads-and-call-stack.html">6. Threads and the call stack &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

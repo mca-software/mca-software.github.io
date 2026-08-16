@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting started &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="Download, install and verify the Delphi debugger for Visual Studio Code, and the companion tooling worth installing alongside it.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html" aria-current="page">Getting Started</a>
+    <a href="../vscode-tutorial/index.html">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>On this page</span>
+        <a href="#download">Download</a>
+        <a href="#install">Install</a>
+        <a href="#first-run">First run</a>
+        <a href="#companions">Companion tooling</a>
+        <a href="#updates">Staying up to date</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Getting Started</span>
+        </nav>
+
+        <h1>Getting started</h1>
+
+        <p>
+          If you only want to <em>use</em> the debugger, do not build anything. The release ships the
+          debug adapter, the MCP server and the VS Code extension already compiled, and the installer
+          puts all three where they belong. No Delphi toolchain is needed on the machine you install
+          on — only on the machine that compiles the program you want to debug.
+        </p>
+
+        <section id="download">
+          <h2>Download</h2>
+          <p>
+            Grab <code>delphi-win64-debugger-setup-*.zip</code> from the
+            <a href="https://github.com/csm101/delphi-visual-studio-code-debugger/releases" target="_blank" rel="noopener">latest release</a>
+            and extract it anywhere. The zip contains <code>Setup.exe</code> and the prebuilt binaries
+            it installs.
+          </p>
+        </section>
+
+        <section id="install">
+          <h2>Install</h2>
+          <p>
+            Run <code>Setup.exe</code>. It detects the installed Visual Studio Code family editors,
+            installs the extension and the adapter, and updates an existing installation in place.
+            At the end it offers to register the MCP server as well.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/getting-started-setup.png">
+            <p>Screenshot: the <code>Setup.exe</code> installer window mid-run.</p>
+            <figcaption>(screenshot to be added — <code>getting-started-setup.png</code>)</figcaption>
+          </figure>
+
+          <div class="doc-note">
+            Windows will warn that the executables are unsigned, and SmartScreen will interrupt the
+            first run of <code>Setup.exe</code>. Code signing certificates cost more per year than
+            this project will ever make, which is nothing. The source of everything in the zip is
+            <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">on GitHub</a>
+            if you would rather build it yourself.
+          </div>
+
+          <p>
+            Say yes to the MCP registration offer if you want an AI coding agent to be able to drive
+            the debugger — that is what
+            <a href="../mcp/index.html">MCP &amp; AI agents</a> is about. It can also be done later,
+            and undone; see
+            <a href="../mcp/installing-and-registering.html">Installing and registering the MCP server</a>.
+          </p>
+
+          <h3>The extension is not on the Marketplace</h3>
+          <p>
+            The extension is <code>delphi-win64-debug</code>, publisher <code>local</code>, and it is
+            installed by the setup rather than pulled from the Visual Studio Marketplace. That is
+            deliberate: the same installer reaches Cursor, Windsurf, VSCodium and Trae through their
+            own extension paths, not only Microsoft's editor.
+          </p>
+
+          <h3>Installing from a source checkout</h3>
+          <p>
+            Only relevant if you are building the debugger yourself. Delphi 10.3 Rio or later is
+            required to compile it.
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Method</th><th>When to use it</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>install\Install.exe</code><br>(built by <code>build_installer.bat</code>)</td>
+                  <td>The interactive installer, built from your own checkout. Same behaviour as the released <code>Setup.exe</code>: detects the editor installs, updates in place.</td>
+                </tr>
+                <tr>
+                  <td><code>install-dev.bat</code></td>
+                  <td>Development mode — points the extension straight at your build output, so a rebuild is picked up without reinstalling.</td>
+                </tr>
+                <tr>
+                  <td>Manual copy</td>
+                  <td>Copy <code>package.json</code> and the built executable into <code>%USERPROFILE%\.vscode\extensions\local.delphi-win64-debug\</code>. The fallback when the installer cannot find your editor.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="first-run">
+          <h2>First run</h2>
+          <p>
+            Restart Visual Studio Code after installing, then check three things.
+          </p>
+          <ol>
+            <li>
+              The extension shows up in the Extensions view as installed and enabled.
+            </li>
+            <li>
+              A debug configuration of type <code>delphi-win64</code> is offered — the label in the
+              picker is <strong>Delphi (Win32/Win64)</strong>. The type id is <code>delphi-win64</code>
+              regardless of the target bitness; it was never renamed when Win32 support shipped, so
+              existing configurations keep working.
+            </li>
+            <li>
+              Gutter breakpoints can be set in your <code>.pas</code> files. The debugger claims the
+              <code>objectpascal</code> and <code>pascal</code> language ids, and breakpoints also work
+              in files VS Code has typed as <code>delphi</code>.
+            </li>
+          </ol>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/getting-started-extensions.png">
+            <p>Screenshot: the VS Code Extensions view showing the Delphi debugger and DelphiLSP installed and enabled.</p>
+            <figcaption>(screenshot to be added — <code>getting-started-extensions.png</code>)</figcaption>
+          </figure>
+
+          <div class="doc-note">
+            Installing the debugger is the easy half. The program you want to debug has to be
+            <em>compiled</em> with full debug information, or almost nothing on this site will work
+            — no source lines means no breakpoints and no stepping. The required compiler and linker
+            settings are the first thing in
+            <a href="../vscode-tutorial/01-preparing-your-project.html">Preparing your project</a>.
+          </div>
+
+          <p>
+            From here, <a href="../vscode-tutorial/index.html">the VS Code tutorial</a> takes it from
+            project settings to a running session and onwards.
+          </p>
+        </section>
+
+        <section id="companions">
+          <h2>Companion tooling</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Tool</th><th>Why</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a><br>(Delphi IDE plugin)</td>
+                  <td>Adds an <em>Open in Visual Studio Code</em> command to the Delphi IDE, and generates the workspace file, <code>launch.json</code> and <code>tasks.json</code> from the current Delphi project — output paths, source search paths, the package list. A real project carries a couple of hundred search paths and nobody wants to write that by hand. Not required, but it is what makes the debugger practical.</td>
+                </tr>
+                <tr>
+                  <td>DelphiLSP<br><code>embarcaderotechnologies.delphilsp</code></td>
+                  <td>Delphi language support in VS Code — syntax, autocomplete. A separate Embarcadero extension; this one only debugs.</td>
+                </tr>
+                <tr>
+                  <td>Hex Editor<br><code>ms-vscode.hexeditor</code></td>
+                  <td>No longer needed. The extension ships its own memory view; the stock pane is only relevant if you turn <code>delphi-win64.stockMemoryView</code> back on. See <a href="../vscode-tutorial/07-registers-memory-disassembly.html">Registers, memory and disassembly</a>.</td>
+                </tr>
+                <tr>
+                  <td>Delphi 10.3 Rio or later</td>
+                  <td>Needed to build the debugger from source, and to compile the program you want to debug.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="updates">
+          <h2>Staying up to date</h2>
+          <p>
+            The extension checks GitHub releases once a day and notifies you with a download link when
+            a newer version exists. It fails silently when the machine is offline. Turn it off with
+            <code>delphi-win64.checkForUpdates</code> — the full settings list is in the
+            <a href="../vscode-tutorial/12-settings-and-commands-reference.html">settings and commands reference</a>.
+          </p>
+          <p>
+            Updating is the same operation as installing: run the new <code>Setup.exe</code>, it
+            replaces the previous version in place.
+          </p>
+        </section>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

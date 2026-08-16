@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3. Breakpoints &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="Every breakpoint type: source line, conditional, hit count, logpoints, address breakpoints, hardware data breakpoints and Set Next Statement.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html" aria-current="page">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">3. Breakpoints</span>
+        </nav>
+
+        <h1>3. Breakpoints</h1>
+
+        <p>
+          Six kinds, plus one command that is not a breakpoint but belongs here.
+        </p>
+
+        <section id="source-line">
+          <h2>Source-line breakpoints</h2>
+          <p>
+            Click the editor gutter, as in any other language. One behaviour worth knowing: a
+            breakpoint placed on a routine&rsquo;s <code>begin</code> line is silently relocated to the
+            first real statement. Stopping on <code>begin</code> itself would show you the caller&rsquo;s
+            leftovers, because the parameters have not been spilled to the frame yet — the relocation
+            is what makes the Variables panel show the right thing when you arrive.
+          </p>
+        </section>
+
+        <section id="conditional">
+          <h2>Conditional breakpoints</h2>
+          <p>
+            Right-click the gutter and choose <em>Edit Breakpoint</em>. The condition is a Pascal
+            expression evaluated in the debuggee at every hit: non-zero or true stops, zero or false
+            continues. If the expression <em>fails to evaluate</em> it is treated as false and
+            execution continues silently — worth remembering when a conditional breakpoint never
+            fires and the condition references something not in scope at that line. The full
+            expression grammar is in
+            <a href="08-expression-evaluation.html">chapter 8</a>.
+          </p>
+        </section>
+
+        <section id="hit-count">
+          <h2>Hit-count breakpoints</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Hit count</th><th>Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>N</code></td><td>Stop on hit number N exactly</td></tr>
+                <tr><td><code>&gt;N</code></td><td>Stop on every hit after the Nth</td></tr>
+                <tr><td><code>&gt;=N</code></td><td>Stop from the Nth hit onwards</td></tr>
+                <tr><td><code>%N</code></td><td>Stop on every Nth hit</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="logpoints">
+          <h2>Logpoints</h2>
+          <p>
+            A logpoint never stops the program: it writes a message and continues. Expressions in
+            braces are evaluated live at each hit, so <code>Order {Order.Id} total {Order.Total}</code>
+            prints real values. Use <code>{{</code> and <code>}}</code> for a literal brace. This is
+            how you instrument a loop that a real breakpoint would make unusable.
+          </p>
+          <p>
+            Logpoint output is kept separate from the debuggee&rsquo;s own output — see
+            <a href="08-expression-evaluation.html#output">chapter 8</a>.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-03-breakpoints-view.png">
+            <p>Screenshot: the BREAKPOINTS view with a conditional breakpoint, a hit-count breakpoint and a logpoint visible, and the edit-breakpoint popover open on one of them.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-03-breakpoints-view.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="address">
+          <h2>Address breakpoints</h2>
+          <p>
+            Set from the Disassembly View gutter, for when you want to stop at an instruction rather
+            than a line — typically in code with no source at all.
+          </p>
+          <p>
+            They are stored as a <strong>(module, RVA)</strong> pair rather than a bare address. That
+            is what makes them survive a relaunch under ASLR, and makes them rebind automatically when
+            the owning package is unloaded and loaded again at a different base. An address inside a
+            module that is not currently loaded is refused outright, with a reason, rather than
+            planted speculatively somewhere that happens to be mapped. Setting one at an address that
+            already has an address breakpoint replaces the previous entry.
+          </p>
+          <p>
+            Conditions, hit counts and log messages all work on address breakpoints exactly as they
+            do on source ones.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-03-address-breakpoint.png">
+            <p>Screenshot: the Disassembly View with the gutter showing an address breakpoint set on an instruction.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-03-address-breakpoint.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="data">
+          <h2>Data breakpoints (hardware watchpoints)</h2>
+          <p>
+            Right-click a value in the Variables or Watch panel and choose <em>Break on Value
+            Change</em> or <em>Break on Value Access</em>. Execution stops when the memory is written,
+            and the stop tells you what happened:
+          </p>
+          <pre><code>FCustomer.FBalance: 1500 -&gt; 0 (thread 3)</code></pre>
+          <p>
+            Old value, new value, and which thread wrote it — the three things you actually wanted to
+            know about a field that is being corrupted.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-03-data-breakpoint-menu.png">
+            <p>Screenshot: the Variables panel right-click context menu showing &ldquo;Break on Value Change&rdquo; and &ldquo;Break on Value Access&rdquo;.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-03-data-breakpoint-menu.png</code>)</figcaption>
+          </figure>
+
+          <h3>What you can watch</h3>
+          <ul>
+            <li>A literal address.</li>
+            <li>A global or unit-scoped variable, by name.</li>
+            <li>
+              An arbitrary expression — <code>Arr[High(Arr)]</code>, <code>@Rec.Buf[0]</code>.
+            </li>
+            <li>
+              <strong>A local.</strong> The watchpoint is pinned to that specific frame invocation and
+              is withdrawn automatically the moment the frame&rsquo;s stack lifetime ends, with a console
+              message telling you so. Without that, the watchpoint would silently keep firing on
+              whatever reused that stack slot next.
+            </li>
+          </ul>
+
+          <h3>The four slots</h3>
+          <div class="doc-note">
+            These are the CPU&rsquo;s hardware debug registers, DR0 to DR3. There are
+            <strong>four, shared by the whole process</strong>, and no software fallback. A fifth
+            request is refused by name — the refusal tells you which watchpoints currently hold the
+            slots so you know what to release.
+          </div>
+          <p>Other constraints that follow from the hardware and from deliberate design:</p>
+          <ul>
+            <li>
+              Access modes are <code>write</code> and <code>readWrite</code>. There is no
+              watch-reads-only mode on x86 or x64, so <code>readWrite</code> also fires on plain
+              writes; a <code>read</code>-only request is refused rather than quietly upgraded.
+            </li>
+            <li>The session must be stopped to arm or remove a watchpoint.</li>
+            <li>
+              Watching a field of an object or record you have already expanded in the tree is
+              refused; watch the expression instead.
+            </li>
+            <li>
+              A remove request issued while the program is running does not free the hardware slot
+              until the next stop.
+            </li>
+            <li>
+              Re-entering the same routine at the same stack depth legitimately produces the same
+              frame identity, so a watchpoint on a local follows the new invocation.
+            </li>
+          </ul>
+        </section>
+
+        <section id="set-next-statement">
+          <h2>Set Next Statement</h2>
+          <p>
+            Not a breakpoint, but the other half of controlling where execution goes. Right-click a
+            line while stopped and choose <em>Set Next Statement</em>, or drag the yellow instruction
+            pointer arrow. Execution resumes from there — you can re-run a block you just stepped
+            through, or skip one, without restarting the session.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-03-set-next-statement.png">
+            <p>Screenshot: the right-click context menu on a stopped line showing &ldquo;Set Next Statement&rdquo;.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-03-set-next-statement.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="not-supported">
+          <h2>What is not here</h2>
+          <p>
+            DAP function breakpoints — breaking by routine name rather than by location — are not
+            supported. See <a href="11-known-limitations.html">Known limitations</a>.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="02-your-first-session.html">&larr; 2. Your first session</a>
+          <a class="doc-next" href="04-exception-handling.html">4. Exception handling &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP tool reference &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="The full MCP tool surface by group: session and process, breakpoints, data breakpoints, registers, execution control and inspection.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html">VS Code Tutorial</a>
+    <a href="../mcp/index.html" aria-current="page">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>In this section</span>
+        <a href="index.html">Overview</a>
+        <a href="installing-and-registering.html">Installing and registering</a>
+        <a href="tool-reference.html" aria-current="page">Tool reference</a>
+        <a href="example-prompts.html">Example prompts</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">MCP &amp; AI Agents</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">MCP tool reference</span>
+        </nav>
+
+        <h1>MCP tool reference</h1>
+
+        <p>
+          Forty-four tools, grouped by what you would be doing when you reach for them. Most take no
+          arguments beyond the obvious ones; where a tool <em>refuses</em> something, that refusal is
+          noted, because it is usually the interesting part.
+        </p>
+        <div class="doc-note">
+          Nearly everything below requires the session to be <strong>stopped</strong>.
+          <code>get_loaded_modules</code>, <code>get_source_files</code>,
+          <code>get_debug_session_status</code> and the two output tools also work while the
+          debuggee is running.
+        </div>
+
+        <section id="session">
+          <h2>Session and process</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>list_debuggable_processes</code></td>
+                  <td>Running processes with pid, executable name and path, command line, parent pid, start time and architecture. Optional name filter.</td>
+                </tr>
+                <tr>
+                  <td><code>launch_debuggee</code></td>
+                  <td>Start a process under the debugger. Takes <code>program</code> plus optional <code>args</code>, <code>mapFile</code>, <code>rsmFile</code>, <code>sourceRoot</code>, <code>sourceSearchPaths</code>, <code>stopAtEntry</code> and the exception filters.</td>
+                </tr>
+                <tr>
+                  <td><code>launch_from_config</code></td>
+                  <td>Launch from an existing VS Code <code>launch.json</code> — the same file the DAP debugger uses, JSONC and <code>${workspaceFolder}</code> / <code>${env:}</code> included — so nothing has to be restated. Stops at entry.</td>
+                </tr>
+                <tr>
+                  <td><code>attach_to_process</code></td>
+                  <td>Attach by <code>processId</code> or <code>processName</code>. An ambiguous name fails and <em>lists the candidates</em> rather than picking one. A target of a different architecture is rejected. Detaching leaves the process running by default.</td>
+                </tr>
+                <tr>
+                  <td><code>attach_from_config</code></td>
+                  <td>The same, from a <code>launch.json</code> <code>attach</code> configuration.</td>
+                </tr>
+                <tr>
+                  <td><code>get_debug_session_status</code></td>
+                  <td>Session state — none, launching, attaching, running, stopped, exited, detached, terminated — plus the stop reason and location when stopped.</td>
+                </tr>
+                <tr>
+                  <td><code>detach_debugger</code></td>
+                  <td>Detach, leaving the process <strong>running</strong>.</td>
+                </tr>
+                <tr>
+                  <td><code>terminate_debuggee</code></td>
+                  <td>Kill the debuggee.</td>
+                </tr>
+                <tr>
+                  <td><code>stop_debugging</code></td>
+                  <td>End the session: detaches an attached one, terminates a launched one, unless <code>killOnDetach</code> says otherwise.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="breakpoints">
+          <h2>Breakpoints</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>set_breakpoint</code></td>
+                  <td>One source-line breakpoint, with optional <code>condition</code>, <code>hitCondition</code> (<code>"5"</code>, <code>"&gt;5"</code>, <code>"&gt;=5"</code>, <code>"%5"</code>) and <code>logMessage</code>. Reports whether the line resolved to real code.</td>
+                </tr>
+                <tr>
+                  <td><code>set_breakpoints</code></td>
+                  <td>Several at once. <strong>Per file, this replaces that file&rsquo;s previous set</strong>; files not mentioned are untouched.</td>
+                </tr>
+                <tr>
+                  <td><code>list_breakpoints</code></td>
+                  <td>Everything currently set, source and address, with verified state.</td>
+                </tr>
+                <tr>
+                  <td><code>remove_all_breakpoints</code></td>
+                  <td>Clears both kinds.</td>
+                </tr>
+                <tr>
+                  <td><code>set_breakpoint_at_address</code></td>
+                  <td>Break at an absolute address instead of a line — what makes <code>disassemble</code> actionable in a frame with no symbols. Stored as (module, offset), never as the bare address, so it survives a relaunch or an ASLR-rebased package. An address in a module that is not loaded is refused with a reason.</td>
+                </tr>
+                <tr>
+                  <td><code>remove_breakpoint_at_address</code></td>
+                  <td>Removes one address breakpoint by id.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="data-breakpoints">
+          <h2>Data breakpoints (hardware watchpoints)</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>set_data_breakpoint</code></td>
+                  <td>Stop when memory is written, or read-or-written. Takes an <code>expression</code>, a <code>size</code> of 1, 2, 4 or 8 bytes, and an <code>access</code> of <code>write</code> or <code>readWrite</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>list_data_breakpoints</code></td>
+                  <td>Every watchpoint with its resolved address, owning module and RVA, size, access, whether it armed, the hardware slot it holds (0–3, or −1 when refused), and a message carrying the refusal reason or the read-or-write caveat.</td>
+                </tr>
+                <tr>
+                  <td><code>remove_data_breakpoint</code></td>
+                  <td>Removes one by id and frees its slot. Requires the session to be stopped.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>The expression is resolved by one rule, worth learning because it is what makes this tool sharp:</p>
+          <ul>
+            <li>A bare name is watched at its own storage.</li>
+            <li><code>@X</code> is already an address.</li>
+            <li>
+              Anything else is watched <em>where it lives</em> — so <code>Arr[High(Arr)]</code>
+              watches the last element, and <code>PByte(@Arr[0]) - 1</code> watches the byte just
+              before the buffer, which is how you find who writes past an array.
+            </li>
+          </ul>
+          <p>What it refuses, and why:</p>
+          <ul>
+            <li>
+              <strong>A fifth watchpoint.</strong> There are four CPU debug registers, shared by the
+              whole process. The refusal names what already holds the slots.
+            </li>
+            <li>
+              <strong><code>access: "read"</code>.</strong> x86 and x64 have no read-only watchpoint.
+              <code>readWrite</code> is the closest thing and it <em>also</em> fires on writes; the
+              response says so rather than pretending otherwise.
+            </li>
+            <li>
+              <strong>A bare local variable</strong>, with a reason — its address is only valid for
+              the lifetime of its frame. Watch the containing global or object field, or pass a
+              literal address. This is the one place the MCP surface is narrower than VS Code, where
+              locals can be watched and are withdrawn automatically when the frame dies.
+            </li>
+            <li>
+              <strong>A misaligned or odd-width request.</strong> The address must already be aligned
+              to the size. It is refused, never quietly rounded.
+            </li>
+          </ul>
+          <p>
+            When one fires, the stop reason is <code>dataBreakpoint</code> and
+            <code>dataBreakpointDescription</code> names the watched expression, the old and new
+            values, and the thread that wrote it — frequently the entire answer to &ldquo;who did
+            this?&rdquo;.
+          </p>
+        </section>
+
+        <section id="execution">
+          <h2>Execution control</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>continue_and_wait</code></td>
+                  <td>Resume and wait for the next stop or exit, returning a compact snapshot of the new state. <code>timeoutMs</code> defaults to 30000, after which it returns a still-running result.</td>
+                </tr>
+                <tr>
+                  <td><code>step_over</code></td>
+                  <td>One source line, then wait. Optional <code>threadId</code> steps another thread — only that one advances, the rest stay frozen, and run control afterwards targets it.</td>
+                </tr>
+                <tr>
+                  <td><code>step_into</code></td>
+                  <td>Into a call on the current line. Same <code>threadId</code> option.</td>
+                </tr>
+                <tr>
+                  <td><code>step_out</code></td>
+                  <td>Run until the current function returns.</td>
+                </tr>
+                <tr>
+                  <td><code>pause_execution</code></td>
+                  <td>Interrupt a running debuggee.</td>
+                </tr>
+                <tr>
+                  <td><code>wait_until_stopped</code></td>
+                  <td>Wait without issuing a command, for a target left running.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            All three step tools accept <code>granularity: "instruction"</code>, which steps exactly
+            one machine instruction and needs no line table — the way through a package built without
+            debug info, where a source-level step has no terminating condition. A refused instruction
+            step returns an error with the reason and <strong>nothing moves</strong>, not even
+            partially: there is no fallback decoder in this project, so an unavailable disassembler or
+            undecodable bytes are reported rather than worked around.
+          </p>
+          <p>
+            <code>step_out</code> at instruction granularity requires a <em>proven</em> return address
+            — <code>.pdata</code> on x64, <code>[EBP+4]</code> on x86 — and refuses rather than run
+            somewhere plausible.
+          </p>
+        </section>
+
+        <section id="exceptions">
+          <h2>Exceptions</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>set_exception_filters</code></td>
+                  <td>Change which exceptions break, on the live session: any of <code>delphi</code>, <code>av</code>, <code>all</code>, <code>unhandled</code>. <code>[]</code> means never break on first-chance. <code>delphiExceptionClasses</code> narrows the <code>delphi</code> filter to named classes.</td>
+                </tr>
+                <tr>
+                  <td><code>get_exception_details</code></td>
+                  <td>When stopped on an exception: its class, message, description and stack.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            The rule engine itself is configured in <code>launch.json</code>, not through a tool —
+            see <a href="../vscode-tutorial/04-exception-handling.html">Exception handling</a>. An
+            agent reaches it via <code>launch_from_config</code>.
+          </p>
+        </section>
+
+        <section id="location">
+          <h2>Location, stack and threads</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>get_compact_debug_snapshot</code></td>
+                  <td>Session state, stop reason, current thread and location, top frames, top-frame locals and exception info — in one call. The round-trip saver.</td>
+                </tr>
+                <tr>
+                  <td><code>get_current_source_location</code></td>
+                  <td>Function, source file and line at the stop.</td>
+                </tr>
+                <tr>
+                  <td><code>get_call_stack</code></td>
+                  <td>Innermost frame first, with function, file and line. Optional <code>threadId</code> walks another thread.</td>
+                </tr>
+                <tr>
+                  <td><code>get_threads</code></td>
+                  <td>Threads at the current stop: id, name, whether stopped, and which one is current. After a pause, current is the main application thread, not the transient thread the OS injected to break in.</td>
+                </tr>
+                <tr>
+                  <td><code>get_raw_stack_scan</code></td>
+                  <td>Last resort, and <strong>not a call stack</strong> — see below.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-note">
+            <code>get_raw_stack_scan</code> brute-forces the stack for words that could be return
+            addresses. Use it only when <code>get_call_stack</code> stops short, which on 32-bit
+            targets happens at the first routine built without a frame pointer. Each hit is marked:
+            <code>proven=true</code> means the instruction ending there was decoded and is a call,
+            <code>proven=false</code> means there was no line table to decode from. <strong>Neither
+            means the routine is still on the chain</strong> — a call that already returned leaves its
+            return address behind and no sweep can tell the difference. These are places the program
+            has been, never callers, and they must never be merged into a call stack.
+          </div>
+        </section>
+
+        <section id="variables">
+          <h2>Variables and expressions</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>get_locals</code></td>
+                  <td>A frame&rsquo;s locals with formatted values and types. Anything expandable carries a handle.</td>
+                </tr>
+                <tr>
+                  <td><code>get_variable</code></td>
+                  <td>One named variable. Prefers a frame local — so a class, record or array result carries an expansion handle — and otherwise evaluates the name, including fields, globals and dotted paths.</td>
+                </tr>
+                <tr>
+                  <td><code>expand_variable</code></td>
+                  <td>The child fields of an expandable value, by handle. Nested results carry their own handles, so an object graph is walked step by step. <strong>Handles are valid until the next stop.</strong></td>
+                </tr>
+                <tr>
+                  <td><code>evaluate_expression</code></td>
+                  <td>A Pascal expression in the context of a frame: locals, fields, globals, arithmetic, casts, method calls.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-note">
+            All four default to the top frame, and after a <code>pause_execution</code> that is
+            usually inside a system DLL where nothing resolves. Read the stack first and pass the
+            <code>frameIndex</code> of a frame in your own code. Each also takes a
+            <code>threadId</code>.
+          </div>
+          <p>
+            Expression evaluation executes method and getter calls in the debuggee, with their side
+            effects — see
+            <a href="../vscode-tutorial/08-expression-evaluation.html">Expression evaluation</a>.
+          </p>
+        </section>
+
+        <section id="modules">
+          <h2>Modules and sources</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>get_loaded_modules</code></td>
+                  <td>Every image mapped in the debuggee with load base, size, symbol state and the debug-info formats that actually loaded. <code>symbols</code> is <code>loaded</code>, <code>noSymbols</code> or <code>indexing</code>; <code>formats</code> lists what registered — <code>td32</code>, <code>map</code>, <code>rsm</code>, <code>dcp</code>, <code>jdbg</code>, <code>tds</code> — not what was looked for. Also how you tell whether an unbound breakpoint is waiting for a package that has not loaded yet.</td>
+                </tr>
+                <tr>
+                  <td><code>get_source_files</code></td>
+                  <td>The source files the loaded debug info can name, grouped by module. <strong>This is the file spelling <code>set_breakpoint</code> expects</strong> — use it rather than guessing from a unit name. A <code>listedBy</code> of null means the module&rsquo;s loaded formats cannot enumerate files (<code>.rsm</code>, <code>.dcp</code> and <code>.jdbg</code> map addresses but hold no file index), which means <em>unknown</em>, not <em>no source files</em>; a breakpoint there may still bind.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="registers">
+          <h2>Registers</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>get_registers</code></td>
+                  <td>General-purpose registers and flags of the stopped thread, named for the <em>target&rsquo;s</em> bitness. Values are hex strings, never bare numbers — a 64-bit register does not survive an IEEE double intact.</td>
+                </tr>
+                <tr>
+                  <td><code>set_register</code></td>
+                  <td>Write one by name; either spelling works on either bitness, and on x64 an E-name writes the low 32 bits and zero-extends as the hardware does. Returns the value <em>re-read from the thread</em>, so the response proves the write instead of echoing the request. Naming a register the target does not have — <code>R8</code>–<code>R15</code> on 32-bit — is an error, not a silent no-op.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="memory">
+          <h2>Memory and disassembly</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>read_memory</code></td>
+                  <td>1 to 4096 bytes, returned as hex plus little-endian integer interpretations, for structures the evaluator does not surface.</td>
+                </tr>
+                <tr>
+                  <td><code>write_memory</code></td>
+                  <td>Write contiguous hex bytes at an address. Mutates the live process.</td>
+                </tr>
+                <tr>
+                  <td><code>disassemble</code></td>
+                  <td>Zydis, x86 and x64, from an address or a frame&rsquo;s instruction pointer. Each instruction reports its address, raw bytes, Intel-syntax text and — where a symbol provider knows one — the nearest function plus offset and the source file and line.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Three things about <code>disassemble</code> that matter to an agent:</p>
+          <ul>
+            <li>
+              Use it instead of reading bytes with <code>read_memory</code> and decoding them
+              yourself. Hand-decoding x86 produces a confident wrong answer; this tool exists to
+              prevent that.
+            </li>
+            <li>
+              Bytes Zydis cannot decode come back as <code>db XX</code> with
+              <code>decoded:false</code> — never a guessed mnemonic.
+            </li>
+            <li>
+              <code>before</code> asks for preceding instructions. x86 cannot be decoded backwards, so
+              this is answered only when a <em>proven</em> earlier boundary exists and decoding
+              forward from it lands exactly on the requested address. Otherwise <code>before</code>
+              comes back <code>refused:true</code> with a reason — while the forward instructions are
+              still returned. A refused <code>before</code> is not a failed call, and the result never
+              mixes proven and unproven instructions in one list.
+            </li>
+          </ul>
+          <div class="doc-note">
+            If the Zydis DLL is missing or the wrong version, <code>disassemble</code> returns
+            <code>available:false</code> with a reason and no instructions. That is the ordinary
+            answer on a machine without it, not a failure.
+          </div>
+        </section>
+
+        <section id="output">
+          <h2>Output</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>get_debuggee_output</code></td>
+                  <td>The program&rsquo;s own stdout since the previous call. Incremental.</td>
+                </tr>
+                <tr>
+                  <td><code>get_debugger_output</code></td>
+                  <td>Debugger-generated output since the previous call — notably logpoint messages. Incremental.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="limits">
+          <h2>What is not here</h2>
+          <p>
+            The engine is shared with the VS Code debugger, but the tool surface is not a complete
+            mirror of it. Absent by design or not yet built:
+          </p>
+          <ul>
+            <li>No Set Next Statement.</li>
+            <li>
+              No <code>setVariable</code> equivalent — <code>write_memory</code> and
+              <code>set_register</code> are the only ways to mutate state.
+            </li>
+            <li>
+              <code>expand_variable</code> does not expand getter-backed properties or Variant
+              arrays.
+            </li>
+            <li>
+              Module loading is currently eager: every module carrying debug-info sidecars loads once
+              breakpoints exist, rather than lazily as each package maps.
+            </li>
+            <li>
+              No <code>get_scopes</code> or <code>get_arguments</code>. This one is deliberate —
+              locals are returned directly with opaque handles, because arguments are not reliably
+              separable from locals in the underlying debug information, and a scope indirection would
+              have promised a distinction the data cannot support.
+            </li>
+          </ul>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="installing-and-registering.html">&larr; Installing and registering</a>
+          <a class="doc-next" href="example-prompts.html">Example prompts &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

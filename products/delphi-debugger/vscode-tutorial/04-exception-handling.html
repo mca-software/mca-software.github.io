@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4. Exception handling &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="Exception filters, the per exception rule engine, the shared machine wide rules file and the $exception pseudo variable.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html" aria-current="page">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">4. Exception handling</span>
+        </nav>
+
+        <h1>4. Exception handling</h1>
+
+        <p>
+          Delphi codebases raise exceptions as control flow. A debugger that stops on every one of
+          them is unusable on a real project, and a debugger that stops on none of them is useless.
+          This chapter is about landing in between.
+        </p>
+
+        <section id="filters">
+          <h2>The four filters</h2>
+          <p>
+            The BREAKPOINTS view lists four exception filters. They are the coarse control, and for
+            many projects they are enough.
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Filter</th><th>Stops on</th><th>Default</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>delphi</code></td><td>First-chance Delphi language raises</td><td>on</td></tr>
+                <tr><td><code>av</code></td><td>First-chance access violations</td><td>on</td></tr>
+                <tr><td><code>all</code></td><td>Every first-chance exception, including native ones</td><td>off</td></tr>
+                <tr><td><code>unhandled</code></td><td>Second-chance — the ones that actually crash the program</td><td>on</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            A first-chance break passes the exception through correctly when you continue, so the
+            debuggee&rsquo;s own <code>try/except</code> still runs. You are looking at the raise, not
+            preventing the handler.
+          </p>
+          <p>
+            The <code>delphi</code> filter can be narrowed to specific classes with
+            <code>delphiExceptionClasses</code> — a comma- or semicolon-separated allowlist such as
+            <code>EAccessViolation,EConvertError</code>. Empty means every Delphi raise. Filters can
+            also be set at launch through <code>exceptionFilters</code>, and by an agent over
+            <a href="../mcp/tool-reference.html">MCP</a>.
+          </p>
+        </section>
+
+        <section id="on-a-stop">
+          <h2>What you see on a stop</h2>
+          <p>
+            The debugger reads the exception object&rsquo;s class name and its
+            <code>Exception.FMessage</code>. For a native access violation with no Delphi object
+            behind it, it synthesises a description instead — &ldquo;Access violation at
+            <code>$RIP</code> reading address <code>$fault</code>&rdquo;.
+          </p>
+          <p>
+            The live exception object itself appears in Locals as a synthetic
+            <code>$exception</code> row, shown as <code>Class: Message</code> and expandable like any
+            other object. It works in Watch and hover too, so you can evaluate
+            <code>$exception.Message</code> or drill into a custom exception class&rsquo;s own fields.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-exception-stop.png">
+            <p>Screenshot: a stop on a raised exception with the <code>$exception</code> row expanded in the Variables panel.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-04-exception-stop.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="rules">
+          <h2>The rule engine</h2>
+          <p>
+            Filters are on/off per category. Rules are what you need when a specific
+            <code>EFileNotFound</code> in one unit is noise but the same class elsewhere is the bug
+            you are chasing.
+          </p>
+          <p>
+            <code>exceptionRules</code> in <code>launch.json</code> is an ordered list. Each rule is
+            a flat object: any number of optional criteria, plus a required <code>action</code>.
+          </p>
+          <pre><code>"exceptionRules": [
+  { "class": "EAbort", "action": "ignore" },
+  { "messageRegex": "ORA-\\d+", "action": "logStack" },
+  { "class": "EAccessViolation", "unit": "OracleData",
+    "lineFrom": 2700, "lineTo": 2800, "action": "break" }
+]</code></pre>
+          <p>
+            Criteria present in a rule are <strong>AND-ed</strong>; criteria you omit are wildcards.
+            Evaluation is <strong>first match wins</strong>, top to bottom.
+          </p>
+
+          <h3>Criteria</h3>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Key</th><th>Type</th><th>Matches</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>class</code></td><td>string or array</td>
+                  <td>The runtime (leaf) class, exactly, case-insensitively. An array matches any of the listed names.</td>
+                </tr>
+                <tr>
+                  <td><code>classIs</code></td><td>string or array</td>
+                  <td>The runtime class <em>or any ancestor</em> — Delphi <code>is</code> semantics. Use this to catch a whole family.</td>
+                </tr>
+                <tr>
+                  <td><code>code</code></td><td>string, integer, or array</td>
+                  <td>The Win32 exception code, hex (<code>"0xC0000005"</code>) or decimal. The only criterion that can match a native, non-Delphi exception.</td>
+                </tr>
+                <tr>
+                  <td><code>message</code></td><td>string</td>
+                  <td>Case-insensitive substring of the exception message.</td>
+                </tr>
+                <tr>
+                  <td><code>messageRegex</code></td><td>string</td>
+                  <td>Regular expression against the message, case-insensitive.</td>
+                </tr>
+                <tr>
+                  <td><code>unit</code></td><td>string</td>
+                  <td>The unit the exception was raised in, by basename (the <code>.pas</code> is optional). The special value <code>"*unknown*"</code> matches raises with no resolvable source location.</td>
+                </tr>
+                <tr>
+                  <td><code>line</code></td><td>integer</td>
+                  <td>A single source line — shorthand for setting <code>lineFrom</code> and <code>lineTo</code> to the same value.</td>
+                </tr>
+                <tr>
+                  <td><code>lineFrom</code> / <code>lineTo</code></td><td>integer</td>
+                  <td>Inclusive bounds of a source-line range.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Actions</h3>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Action</th><th>Effect</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>ignore</code></td><td>Resume silently</td></tr>
+                <tr><td><code>log</code></td><td>Write <code>class: message</code> to the console, then resume</td></tr>
+                <tr><td><code>logStack</code></td><td>The same, plus the call stack</td></tr>
+                <tr><td><code>break</code></td><td>Stop in the debugger</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-note">
+            <code>action</code> is mandatory, and a rule whose <code>action</code> is missing or
+            misspelled is <strong>dropped without a message</strong> in the Debug Console — the note
+            goes to the adapter&rsquo;s log file, which is off by default. If a rule appears to have no
+            effect at all, check its <code>action</code> spelling first.
+          </div>
+
+          <h3>Where the criteria come from</h3>
+          <p>
+            <code>unit</code>, <code>line</code> and the line range refer to the <strong>raise
+            site</strong> — the first stack frame with known source — not to the address the OS
+            reported the exception at. Using them makes the adapter walk the stack on every
+            exception, which is a real cost with the <code>all</code> filter switched on.
+          </p>
+          <p>
+            Two consequences worth knowing before you write rules against them.
+            <code>unit: "*unknown*"</code> means there is no raise site, so any <code>line</code>
+            criteria on that same rule can never be evaluated. And because <code>line</code> seeds
+            both bounds before <code>lineFrom</code> / <code>lineTo</code> are applied,
+            <code>{ "line": 100, "lineTo": 200 }</code> means the range 100 to 200, not line 100.
+          </p>
+          <p>
+            <code>class</code> also matches the synthesised names the debugger uses for exceptions
+            with no Delphi object — <code>EAccessViolation</code> for an access violation, and
+            <code>Exception 0x…</code> forms for other native codes.
+          </p>
+          <p>
+            One exception can never be matched by a rule:
+            <code>TThread.NameThreadForDebugging</code> raises code <code>0x406D1388</code> purely to
+            announce a thread name, and the debugger consumes it before any filter or rule runs. It
+            never surfaces as a stop; the name shows up in the
+            <a href="06-threads-and-call-stack.html">Threads view</a> instead.
+          </p>
+        </section>
+
+        <section id="shared-rules">
+          <h2>Rules shared across projects</h2>
+          <p>
+            Some noise is not project-specific — you want <code>EAbort</code> ignored everywhere,
+            forever. A machine-wide rules file does that:
+          </p>
+          <pre><code>%USERPROFILE%\.DelphiWinDebugger\exceptionRules.json</code></pre>
+          <p>
+            It holds either a bare array of rules, or an object with an <code>exceptionRules</code>
+            key — the same rule shape as in <code>launch.json</code>. Turn it off per project with
+            <code>"useGlobalExceptionRules": false</code>, or point somewhere else with
+            <code>globalExceptionRulesPath</code>.
+          </p>
+          <div class="doc-note">
+            This file is read as <strong>strict JSON</strong>, not JSONC. A <code>//</code> comment or
+            a trailing comma makes the whole file fail to parse, and the failure is silent: you get
+            zero shared rules and no error in the Debug Console. Comments in
+            <code>launch.json</code> are fine — VS Code strips those before the adapter ever sees
+            them — but not here.
+          </div>
+          <p>
+            The project&rsquo;s own rules are evaluated before the shared ones, and both before the
+            filters: a matching rule overrides what the filters would have done, and if nothing
+            matches the filters decide.
+          </p>
+          <div class="doc-note">
+            Project and shared rules are evaluated as <em>one</em> ordered list with the project&rsquo;s
+            rules in front. So a catch-all rule at the end of a project&rsquo;s
+            <code>exceptionRules</code> — one with no criteria at all — makes every shared rule
+            unreachable. If your machine-wide rules stopped working in one project, look there.
+          </div>
+          <p>
+            The shared file is re-read when it changes: edit it while stopped, continue, and the new
+            rules apply without restarting the session. Project rules in <code>launch.json</code> are
+            <em>not</em> hot-reloaded — those need a restart.
+          </p>
+        </section>
+
+        <section id="editing-rules">
+          <h2>Editing rules without writing JSON</h2>
+          <p>
+            The extension contributes two commands for this. <em>Edit Exception Rules…</em>, from the
+            title bar of the Breakpoints or Call Stack view, opens an editor for both the project and
+            the shared rule lists. <em>Create a Rule for This Exception…</em> is available only while
+            stopped on an exception, and pre-fills a rule from the exception in front of you — the
+            fastest way to silence something you have just been interrupted by for the third time.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-rules-editor.png">
+            <p>Screenshot: the &ldquo;Edit Exception Rules…&rdquo; editor UI.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-04-rules-editor.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="stepping-through">
+          <h2>Stepping out of an exception</h2>
+          <p>
+            Step over, into and out all work while stopped on an exception, and run to the nearest
+            enclosing handler. The debugger finds that handler by deriving it from the binary itself
+            and setting a one-shot breakpoint there — it does not guess.
+          </p>
+          <p>
+            Where the handler address cannot be <em>proven</em> — which is the case for every
+            <code>try/finally</code>, and for every bare <code>except</code> on a 32-bit target — the
+            step is refused with a stated reason instead. That is deliberate. A guessed handler
+            address would resume the program somewhere arbitrary, and you would have no way to tell.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="03-breakpoints.html">&larr; 3. Breakpoints</a>
+          <a class="doc-next" href="05-inspecting-variables.html">5. Inspecting variables &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

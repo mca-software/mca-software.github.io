@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DAP and MCP frontends &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="Two frontends over one engine: what TDapServer and TMcpServer each add, and what they share below TDebugSession.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html" aria-current="page">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>In this section</span>
+        <a href="index.html">Overview</a>
+        <a href="engine-overview.html">Engine overview</a>
+        <a href="dap-vs-mcp-frontends.html" aria-current="page">DAP and MCP frontends</a>
+        <a href="symbol-formats.html">Symbol formats</a>
+        <a href="breakpoints-and-exceptions-internals.html">Breakpoints and exceptions</a>
+        <a href="threading-model.html">Threading model</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">Architecture</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">DAP and MCP frontends</span>
+        </nav>
+
+        <h1>DAP and MCP frontends</h1>
+
+        <p>
+          <code>TDapServer</code> and <code>TMcpServer</code> are protocol adapters, not debuggers.
+          Everything that actually debugs lives below them, in
+          <a href="engine-overview.html"><code>TDebugSession</code> and the engine</a>.
+        </p>
+
+        <section id="what-each-adds">
+          <h2>What each one adds</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th></th><th>DAP frontend</th><th>MCP frontend</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Client</td>
+                  <td>VS Code and any other DAP client</td>
+                  <td>Any MCP client — Claude Code, VS Code, others</td>
+                </tr>
+                <tr>
+                  <td>Shape of the API</td>
+                  <td>The Debug Adapter Protocol&rsquo;s requests and events, as specified</td>
+                  <td>Around forty semantic tools, each answering a question rather than fetching a resource</td>
+                </tr>
+                <tr>
+                  <td>Who drives</td>
+                  <td>The editor, in response to a person clicking</td>
+                  <td>A model, in response to a person asking</td>
+                </tr>
+                <tr>
+                  <td>Optimised for</td>
+                  <td>Interactive latency — many small requests, a UI that re-asks constantly</td>
+                  <td>Round trips and tokens — hence <code>get_compact_debug_snapshot</code>, which answers in one call what DAP would take three or four to assemble</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            That last row is the real design difference. DAP assumes a client that can afford to ask
+            twenty cheap questions because a human is waiting a few milliseconds; an agent pays for
+            every round trip in latency <em>and</em> context. So the MCP surface is coarser on
+            purpose, and its tool descriptions carry the caveats a model needs in order not to
+            misread an answer.
+          </p>
+        </section>
+
+        <section id="sequence">
+          <h2>One cycle, both frontends</h2>
+          <p>
+            Setting a breakpoint and hitting it, from either client. Everything below
+            <code>TDebugSession</code> is identical — the frontend only translates at the top and the
+            bottom.
+          </p>
+          <pre class="mermaid">
+sequenceDiagram
+  participant C as "Client<br/>(VS Code or agent)"
+  participant F as "Frontend<br/>(TDapServer / TMcpServer)"
+  participant S as TDebugSession
+  participant E as "Debug event loop"
+  participant D as Debuggee
+
+  C->>F: set breakpoint (file, line)
+  F->>S: resolve line to address
+  S->>D: write INT3 at address
+  S-->>F: verified / not verified
+  F-->>C: breakpoint state
+
+  C->>F: continue
+  F->>S: resume
+  S->>E: ContinueDebugEvent
+  E->>D: run
+  D-->>E: EXCEPTION_BREAKPOINT
+  E->>S: stop event
+  S->>S: identify thread, walk frames, read locals
+  S-->>F: stopped (reason, thread, location)
+  F-->>C: stopped event / snapshot
+          </pre>
+          <div class="doc-note">
+            Every step below <code>TDebugSession</code> is shared. A DAP client and an MCP client
+            issuing the equivalent request take the same path through the engine, hit the same symbol
+            providers and get the same answer — the difference is only in how it is spelled on the
+            way out.
+          </div>
+        </section>
+
+        <section id="asymmetries">
+          <h2>Where the surfaces are not symmetric</h2>
+          <p>
+            One engine does not mean two identical APIs. What the DAP frontend exposes and the MCP one
+            does not:
+          </p>
+          <ul>
+            <li>Set Next Statement.</li>
+            <li>
+              <code>setVariable</code> — writing a variable by name. Over MCP only
+              <code>write_memory</code> and <code>set_register</code> mutate state.
+            </li>
+            <li>
+              Hardware watchpoints on a bare local. DAP pins one to the frame invocation and withdraws
+              it when the frame dies; the MCP tool refuses a local with a reason instead.
+            </li>
+            <li>
+              Lazy per-module symbol loading. Over MCP, modules carrying debug-info sidecars currently
+              load eagerly once breakpoints exist.
+            </li>
+          </ul>
+          <p>
+            And two things the DAP frontend deliberately does <em>not</em> implement, which are worth
+            recording as decisions rather than gaps: the <code>modules</code> request (the same
+            information is already on every stack frame, so it would be a second source of truth), and
+            <code>setExpression</code> (Watch-panel inline editing).
+          </p>
+          <p>
+            The complete list is in
+            <a href="../mcp/tool-reference.html#limits">the MCP tool reference</a> and
+            <a href="../vscode-tutorial/11-known-limitations.html">Known limitations</a>.
+          </p>
+        </section>
+
+        <section id="why-two">
+          <h2>Why two frontends rather than one</h2>
+          <p>
+            An MCP server that shelled out to a DAP adapter would have been less code. It would also
+            have inherited DAP&rsquo;s shape — scope references, variable reference indirection, an event
+            stream designed for a UI — and handed a model an API built for a different kind of
+            consumer.
+          </p>
+          <p>
+            The concrete example is scopes. DAP models variables as scopes you dereference in a second
+            request. The MCP surface returns locals directly, with opaque handles for whatever is
+            expandable, and has no <code>get_scopes</code> at all — because in Delphi debug
+            information arguments are not reliably separable from locals, so a scope split would have
+            promised a distinction the data cannot support. Going through DAP would have forced that
+            fiction.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="engine-overview.html">&larr; Engine overview</a>
+          <a class="doc-next" href="symbol-formats.html">Symbol formats &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: '#0d1117',
+        primaryColor: '#161b22',
+        primaryTextColor: '#e6edf3',
+        lineColor: '#2f81f7'
+      }
+    });
+  </script>
+
+</body>
+</html>

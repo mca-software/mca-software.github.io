@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Installing and registering &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="Registering the MCP server with Claude Code and VS Code, via the installer, register-mcp.ps1 or a hand written configuration.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html">VS Code Tutorial</a>
+    <a href="../mcp/index.html" aria-current="page">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>In this section</span>
+        <a href="index.html">Overview</a>
+        <a href="installing-and-registering.html" aria-current="page">Installing and registering</a>
+        <a href="tool-reference.html">Tool reference</a>
+        <a href="example-prompts.html">Example prompts</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">MCP &amp; AI Agents</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Installing and registering the MCP server</span>
+        </nav>
+
+        <h1>Installing and registering the MCP server</h1>
+
+        <p>
+          The MCP server is <code>DelphiDebuggerMcp.exe</code>. Registering it means telling your
+          agent where that executable is; the agent starts it and talks to it over stdio.
+          Registration is per user, not per project.
+        </p>
+
+        <section id="installer">
+          <h2>During installation</h2>
+          <p>
+            The simplest path: <code>Setup.exe</code> offers to register the MCP server at the end of
+            an install. Say yes and there is nothing else to do —
+            <a href="../getting-started/index.html">Getting started</a> covers the install itself.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/mcp-registration.png">
+            <p>Screenshot: the terminal output of <code>register-mcp.ps1</code> completing successfully, or the <code>Setup.exe</code> prompt offering to register the MCP server.</p>
+            <figcaption>(screenshot to be added — <code>mcp-registration.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="script">
+          <h2>Registering it yourself</h2>
+          <p>
+            From a source checkout, or to register a copy the installer did not, run the same script
+            the installer uses. Build the server first if you are working from source:
+          </p>
+          <pre><code>cmd /c build_mcp.bat
+
+powershell -ExecutionPolicy Bypass -File register-mcp.ps1 ^
+  MCPDebugger\Win64\Debug\DelphiDebuggerMcp.exe</code></pre>
+          <p>
+            The script takes the path to <code>DelphiDebuggerMcp.exe</code> as its argument, resolves
+            it to an absolute path, and registers it under the name
+            <code>delphi-win64-debugger</code>. It is idempotent — re-running it is safe and simply
+            refreshes the registration.
+          </p>
+          <p>To remove it:</p>
+          <pre><code>powershell -ExecutionPolicy Bypass -File register-mcp.ps1 -Unregister</code></pre>
+          <p>
+            Restart Claude Code, or reload VS Code, for either change to take effect.
+          </p>
+        </section>
+
+        <section id="what-it-does">
+          <h2>What the script actually registers</h2>
+          <p>Two targets, handled differently because they configure MCP differently.</p>
+
+          <h3>Claude Code</h3>
+          <p>
+            Registered through the <code>claude</code> CLI at <strong>user scope</strong>, which is
+            the equivalent of running:
+          </p>
+          <pre><code>claude mcp add delphi-win64-debugger -s user -- "C:\path\to\DelphiDebuggerMcp.exe"</code></pre>
+          <p>
+            If the <code>claude</code> CLI is not on <code>PATH</code>, the script skips this step and
+            prints that command for you to run yourself rather than failing the whole registration.
+          </p>
+
+          <h3>VS Code and VS Code Insiders</h3>
+          <p>
+            No CLI needed — the script merges an entry into the user
+            <code>mcp.json</code>, in the format VS Code 1.102 and later expects:
+          </p>
+          <pre><code>%APPDATA%\Code\User\mcp.json
+%APPDATA%\Code - Insiders\User\mcp.json</code></pre>
+          <pre><code>{
+  "servers": {
+    "delphi-win64-debugger": {
+      "type": "stdio",
+      "command": "C:\\path\\to\\DelphiDebuggerMcp.exe",
+      "args": []
+    }
+  }
+}</code></pre>
+          <p>
+            It merges rather than overwrites: other servers already in the file are left alone. An
+            editor that is not installed is skipped, and if neither is found the script says so.
+          </p>
+          <div class="doc-note">
+            Any other MCP client is configured the same way — point it at
+            <code>DelphiDebuggerMcp.exe</code> as a stdio server with no arguments. The server itself
+            has no client-specific behaviour; only the configuration file format differs.
+          </div>
+        </section>
+
+        <section id="verify">
+          <h2>Checking it worked</h2>
+          <p>
+            Restart the agent and ask it to list running processes — that maps to
+            <code>list_debuggable_processes</code>, needs no debug session, and either answers or
+            makes it obvious the server is not connected. From there,
+            <a href="example-prompts.html">Example prompts</a> has eleven things worth trying, and
+            <a href="tool-reference.html">Tool reference</a> lists everything the server exposes.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="index.html">&larr; MCP and AI agents</a>
+          <a class="doc-next" href="tool-reference.html">MCP tool reference &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

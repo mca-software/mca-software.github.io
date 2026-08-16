@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Threading model &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="Per thread stepping with explicit freezing of every other thread, and StackWalk64 based unwinding.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html" aria-current="page">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>In this section</span>
+        <a href="index.html">Overview</a>
+        <a href="engine-overview.html">Engine overview</a>
+        <a href="dap-vs-mcp-frontends.html">DAP and MCP frontends</a>
+        <a href="symbol-formats.html">Symbol formats</a>
+        <a href="breakpoints-and-exceptions-internals.html">Breakpoints and exceptions</a>
+        <a href="threading-model.html" aria-current="page">Threading model</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">Architecture</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Threading model</span>
+        </nav>
+
+        <h1>Threading model</h1>
+
+        <p>
+          Two things here are easy to conflate and are not the same mechanism: the process stops as a
+          unit, and a <em>step</em> targets a single thread. This page is about how both are true at
+          once.
+        </p>
+
+        <section id="event-loop">
+          <h2>There is no debugger thread</h2>
+          <p>
+            The obvious design would be a dedicated thread pumping
+            <code>WaitForDebugEvent</code> while requests arrive on another and are marshalled across.
+            That is not what this is.
+          </p>
+          <p>
+            <code>WaitForDebugEvent</code> and <code>ContinueDebugEvent</code> are thread-affine —
+            the thread that waits is the thread that must continue. So the engine does not own a
+            thread at all: it is pumped cooperatively by a single host loop, and launching, attaching
+            and pumping all have to happen on that same thread.
+          </p>
+          <p>
+            Both frontends therefore have exactly two threads:
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Thread</th><th>Job</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Main loop</td>
+                  <td>Drains the request queue, handles each request, then pumps one debug event. Everything that touches the debuggee happens here.</td>
+                </tr>
+                <tr>
+                  <td>Stdin reader</td>
+                  <td>Reads and frames incoming protocol messages and pushes them onto a thread-safe queue. Nothing else.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Between the loop and the engine sits a command queue — <code>continue</code>,
+            <code>step</code>, <code>pause</code> — drained at the top of each event cycle. Its job is
+            not to cross threads but to place the action at a well-defined point: the moment before
+            the next event is fetched, while the pending debug event is still held.
+          </p>
+          <p>
+            A consequence worth stating, because it looks like an omission: DbgHelp — which
+            <code>StackWalk64</code> lives in — is documented as single-threaded and is used here
+            <strong>without a lock</strong>. That is safe precisely because every call into it is on
+            the one pump thread. Add a second thread and the absence of that lock becomes a bug.
+          </p>
+          <div class="doc-note">
+            The one deliberate exception is cancelling a synthetic call. Evaluating an expression that
+            calls a method runs real code in the debuggee, on the stopped thread, under a nested event
+            pump. Cancelling it has to reach that pump from outside, so the stdin thread sets an
+            atomic flag the nested pump polls. It is the only cross-thread signal in the design.
+          </div>
+        </section>
+
+        <section id="stopping">
+          <h2>What stops together</h2>
+          <p>
+            At a breakpoint, an exception or a pause, the whole process stops. There is no
+            freeze-one-thread-and-let-the-others-run mode: a single
+            <code>ContinueDebugEvent</code> resumes the process, and every stop is reported to the
+            client with all threads stopped.
+          </p>
+          <p>
+            Any thread&rsquo;s call stack, locals and watches remain readable at that stop, whichever
+            thread triggered it — see
+            <a href="../vscode-tutorial/06-threads-and-call-stack.html">chapter 6</a>.
+          </p>
+          <p>
+            Pause is <code>DebugBreakProcess</code>, not a suspend. Windows implements it by injecting
+            a thread into the target, which would otherwise become the thread the stop is reported
+            against — leaving you looking at a stack that is pure debugger plumbing. The engine picks
+            a real thread to report instead, so a pause lands somewhere meaningful.
+          </p>
+        </section>
+
+        <section id="per-thread-stepping">
+          <h2>Stepping one thread</h2>
+          <p>
+            A step names a thread. Every <em>other</em> thread is explicitly suspended for the
+            duration, because the Win32 debug API resumes all threads on
+            <code>ContinueDebugEvent</code> — an explicit suspend is what survives that continue and
+            keeps the others parked until the step lands.
+          </p>
+          <p>Four details make this safe rather than merely plausible:</p>
+          <ul>
+            <li>
+              <strong>Freezes never stack.</strong> A new step thaws first, so it always starts from a
+              known baseline rather than incrementing suspend counts that are never unwound.
+            </li>
+            <li>
+              <strong>Only successful suspends are recorded</strong>, so a failed suspend can never
+              produce an unmatched resume later.
+            </li>
+            <li>
+              <strong>A thread created mid-step is frozen too.</strong> Otherwise it would run free
+              alongside the one thread that is supposed to be moving.
+            </li>
+            <li>
+              <strong>If the stepped thread exits mid-step, everything thaws.</strong> Its
+              single-step can never land, and leaving the others frozen would deadlock a process with
+              nothing runnable in it. The exiting thread is also dropped from the freeze set before
+              its handle closes, so nothing tries to resume a dead handle.
+            </li>
+          </ul>
+          <p>
+            Thawing happens at exactly one place — the point every stop funnels through, whether it
+            was a breakpoint, a step landing, an exception, a pause or the entry stop. There is no
+            second code path that has to remember.
+          </p>
+          <div class="doc-note">
+            <strong>The inherent limit</strong>, the same one VS Code has: if the stepped thread blocks
+            on a lock held by a frozen thread, the step cannot complete. Freezing is what makes
+            single-thread stepping meaningful and it is also what makes this possible; the two cannot
+            be separated.
+          </div>
+        </section>
+
+        <section id="no-freeze">
+          <h2>The step that deliberately does not freeze</h2>
+          <p>
+            Stepping while stopped on a first-chance exception is the exception to all of the above,
+            and the reason is worth reading if you are tempted to make it consistent.
+          </p>
+          <p>
+            Every other step this engine performs covers a handful of instructions. That one runs the
+            operating system&rsquo;s exception dispatch and Delphi&rsquo;s unwind — code which takes the
+            memory manager&rsquo;s locks. Freeze a thread that happens to hold one of those and the step
+            does not merely fail: the whole process deadlocks.
+          </p>
+          <p>
+            So that step scopes itself by checking where it landed instead of by freezing anything.
+            Same goal, different mechanism, because the obvious mechanism is actively unsafe there.
+          </p>
+        </section>
+
+        <section id="two-phase">
+          <h2>Deciding on one thread, executing on another</h2>
+          <p>
+            Instruction-level steps and exception steps can <em>refuse</em> — no provable return
+            address, undecodable bytes, an unprovable handler. That refusal has to come back
+            synchronously to whoever asked, but the execution has to happen on the pump thread,
+            because that is the only thread allowed to call <code>ContinueDebugEvent</code>.
+          </p>
+          <p>
+            So these steps are split: the decision is made where the request arrives, reading state
+            only, and what crosses to the pump thread is a plan to execute. A refused step therefore
+            answers immediately and nothing in the debuggee moves — not even partially.
+          </p>
+        </section>
+
+        <section id="call-stacks">
+          <h2>Walking a thread&rsquo;s stack</h2>
+          <p>
+            Each stack walk resolves the thread&rsquo;s handle and seeds itself from a fresh
+            <code>GetThreadContext</code>, on a private copy of the context — the walker mutates its
+            context as it goes, so borrowing the caller&rsquo;s would corrupt it.
+          </p>
+          <p>
+            On 32-bit targets <code>StackWalk64</code> is the <em>fallback</em> rather than the
+            primary walker: the EBP chain drives the walk instead. That is also why 32-bit stacks end
+            early at the first routine built without a frame pointer, and why the
+            <a href="../vscode-tutorial/06-threads-and-call-stack.html#raw-stack-scan">raw stack
+            scan</a> exists as an opt-in for that case.
+          </p>
+        </section>
+
+        <section id="names">
+          <h2>Thread names</h2>
+          <p>Two sources, in order.</p>
+          <p>
+            <code>TThread.NameThreadForDebugging</code> announces a name by raising exception code
+            <code>0x406D1388</code> with the string in the exception record. The engine consumes it
+            before the filter and rule machinery runs and resumes the thread. It can never surface as
+            a stop — not with the <code>all</code> first-chance filter on, and no user rule can turn
+            it into one, because it never reaches the rules at all.
+          </p>
+          <p>
+            The name is stored per thread id and looked up per request rather than cached when the
+            thread is created, because the announcement typically arrives long after creation. It is
+            dropped when the thread exits, since Windows recycles thread ids and a stale name would
+            end up on the wrong thread.
+          </p>
+          <p>
+            When no name was announced, the engine falls back to the modern
+            <code>GetThreadDescription</code> API, resolved dynamically so the adapter still loads on
+            Windows versions that lack it. Failing both, a thread is reported by id.
+          </p>
+        </section>
+
+        <section id="watchpoints">
+          <h2>Hardware watchpoints across threads</h2>
+          <p>
+            DR0–DR3 are <em>per-thread</em> registers, but which slot watches which address is a
+            single process-wide fact — you asked to watch an address, not to watch it on one thread.
+            The engine reconciles those by replicating: a watchpoint is armed on every live thread,
+            armed again on each newly created thread, armed on attach, and cleared on detach.
+          </p>
+          <p>
+            A thread that could not be armed is logged rather than passed over silently. The
+            user-facing behaviour is in
+            <a href="../vscode-tutorial/03-breakpoints.html#data">chapter 3</a>; the four-slot budget
+            is in <a href="breakpoints-and-exceptions-internals.html#hardware">breakpoints and
+            exceptions internals</a>.
+          </p>
+        </section>
+
+        <section id="rearm">
+          <h2>Two threads on one breakpoint</h2>
+          <p>
+            Resuming from a breakpoint means restoring the original byte, single-stepping over it, and
+            putting the <code>INT3</code> back. In a multithreaded process a second thread can reach
+            that same address while the first is mid-re-arm.
+          </p>
+          <p>
+            The re-arm single-step is therefore bound to the thread that is performing it. Another
+            thread arriving at the same address is a genuine hit and is reported as one, rather than
+            being swallowed as if it were the re-arm step — which is the failure mode that makes a
+            breakpoint in hot multithreaded code appear to miss.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="breakpoints-and-exceptions-internals.html">&larr; Breakpoints and exceptions internals</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: '#0d1117',
+        primaryColor: '#161b22',
+        primaryTextColor: '#e6edf3',
+        lineColor: '#2f81f7'
+      }
+    });
+  </script>
+
+</body>
+</html>

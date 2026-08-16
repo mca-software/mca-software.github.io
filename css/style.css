@@ -651,6 +651,60 @@ footer {
 
 .footer-copy { font-size: 13px; color: var(--text-muted); }
 
+/* ── Multi-page manual (Delphi Debugger docs) ── */
+.doc-sectionnav {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 0.75rem max(24px, calc((100% - var(--max-w)) / 2));
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.doc-sectionnav a { color: var(--text); opacity: 0.7; text-decoration: none; }
+.doc-sectionnav a:hover { color: var(--text); opacity: 1; }
+.doc-sectionnav a[aria-current="page"] { color: var(--accent); opacity: 1; font-weight: 600; }
+
+.doc-toc a[aria-current="page"] { color: var(--accent); font-weight: 600; }
+
+.doc-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.doc-breadcrumb a { color: var(--text-muted); }
+.doc-breadcrumb a:hover { color: var(--accent); }
+
+.doc-body h1 {
+  font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.doc-prevnext {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 56px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.doc-prevnext .doc-next { margin-left: auto; text-align: right; }
+
+.doc-body pre.mermaid { text-align: center; overflow-x: auto; }
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .feature { grid-template-columns: 1fr; direction: ltr; gap: 32px; }

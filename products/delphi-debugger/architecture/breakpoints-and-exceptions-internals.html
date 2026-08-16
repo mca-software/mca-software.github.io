@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Breakpoints and exceptions internals &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="INT3 patching, the DR0 to DR3 hardware watchpoint slots, and the exception rule engine with its verified precedence order.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html" aria-current="page">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>In this section</span>
+        <a href="index.html">Overview</a>
+        <a href="engine-overview.html">Engine overview</a>
+        <a href="dap-vs-mcp-frontends.html">DAP and MCP frontends</a>
+        <a href="symbol-formats.html">Symbol formats</a>
+        <a href="breakpoints-and-exceptions-internals.html" aria-current="page">Breakpoints and exceptions</a>
+        <a href="threading-model.html">Threading model</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">Architecture</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Breakpoints and exceptions internals</span>
+        </nav>
+
+        <h1>Breakpoints and exceptions internals</h1>
+
+        <p>
+          Two mechanisms with almost nothing in common except that both surface as &ldquo;the program
+          stopped&rdquo;: software breakpoints, which are patched bytes, and hardware watchpoints,
+          which are four CPU registers. Then the layer that decides whether a given exception should
+          stop you at all.
+        </p>
+
+        <section id="int3">
+          <h2>Software breakpoints: INT3</h2>
+          <p>
+            A source breakpoint is one byte. The debugger resolves the line to an address, saves the
+            original byte there, and writes <code>0xCC</code> — the <code>INT3</code> instruction.
+            When execution reaches it the CPU raises <code>EXCEPTION_BREAKPOINT</code>, the debug
+            event loop receives it, the original byte is restored, the instruction pointer is backed
+            up over the patch, and the stop is reported.
+          </p>
+          <p>
+            Two consequences follow directly from &ldquo;the debugger modified your code&rdquo;:
+          </p>
+          <ul>
+            <li>
+              <strong>Only the debugger that planted a patch can remove it.</strong> A clean detach
+              restores every byte. An adapter that is killed outright cannot, which is why a
+              force-killed <em>attached</em> session leaves <code>INT3</code> bytes in a live process
+              and produces a much later, entirely mystifying
+              <code>External exception 80000003</code>. See
+              <a href="../vscode-tutorial/10-attach-to-a-running-process.html#detaching">chapter 10</a>.
+            </li>
+            <li>
+              <strong>An address is not a stable identity.</strong> Address breakpoints are therefore
+              stored as <strong>(module, RVA)</strong> and re-resolved whenever the owning module
+              maps, which is what makes them survive ASLR and a package being unloaded and reloaded at
+              a different base. An address in a module that is not currently loaded is refused, rather
+              than planted at a location that may belong to something else once a module maps there.
+            </li>
+          </ul>
+          <p>
+            A breakpoint requested on a routine&rsquo;s <code>begin</code> line is relocated to the first
+            real statement, because at <code>begin</code> the parameters have not yet been spilled to
+            the frame and the Variables panel would show the caller&rsquo;s leftovers.
+          </p>
+          <p>
+            Conditions, hit counts and logpoints are all evaluated <em>after</em> the trap: the
+            breakpoint fires every time, and the engine decides whether to report it or resume
+            silently. A condition that fails to evaluate resumes — which is why a conditional
+            breakpoint referencing something out of scope never appears to fire.
+          </p>
+        </section>
+
+        <section id="hardware">
+          <h2>Hardware watchpoints: DR0–DR3</h2>
+          <p>
+            Data breakpoints are not patched code. They are the x86 debug registers, and the hardware
+            defines what is possible:
+          </p>
+          <ul>
+            <li>
+              <strong>Four slots, per process.</strong> Not per thread and not per frame — DR0 to DR3
+              are all there is, and there is no software emulation fallback. The fifth request is
+              refused by name, reporting what holds the slots.
+            </li>
+            <li>
+              <strong>Widths are 1, 2, 4 or 8 bytes, and the address must already be aligned</strong>
+              to the width. A misaligned request is refused rather than rounded to something that
+              would watch the wrong bytes.
+            </li>
+            <li>
+              <strong>There is no read-only watch.</strong> The hardware offers write and
+              read-or-write; <code>readWrite</code> therefore also fires on writes, and a
+              <code>read</code>-only request is refused instead of being silently upgraded into
+              something that answers a different question.
+            </li>
+            <li>
+              <strong>Arming touches live thread contexts</strong>, so the session must be stopped to
+              add or remove one. A removal requested while running does not free the slot until the
+              next stop.
+            </li>
+          </ul>
+          <p>
+            Watching a local is the interesting case. A local&rsquo;s address is a stack offset that is
+            only meaningful while its frame lives; afterwards the same address is whatever the next
+            call put there. The DAP frontend supports it by pinning the watchpoint to the specific
+            frame invocation and withdrawing it — with a console message and a breakpoint-removed
+            event — the moment that frame&rsquo;s lifetime ends. The MCP frontend refuses a bare local
+            outright instead. Both are the same judgement: never let a watchpoint silently continue on
+            reused stack.
+          </p>
+        </section>
+
+        <section id="exception-flow">
+          <h2>How an exception is decided</h2>
+          <p>
+            Every first-chance exception arrives at the debug event loop, and something has to decide
+            whether it becomes a stop, a log line, or nothing at all. The order is fixed:
+          </p>
+          <ol>
+            <li>
+              <strong>Thread-name announcements are consumed first.</strong>
+              <code>TThread.NameThreadForDebugging</code> raises exception code
+              <code>0x406D1388</code> purely to carry a string. It is intercepted before any filter or
+              rule runs, the name is captured, and it never surfaces as a stop — which also means no
+              exception rule can ever match it.
+            </li>
+            <li>
+              <strong>The rule list is evaluated, first match wins.</strong> Project rules and shared
+              machine-wide rules are concatenated into a <em>single</em> ordered list, project rules
+              first. A matching rule&rsquo;s action — <code>ignore</code>, <code>log</code>,
+              <code>logStack</code> or <code>break</code> — is the decision.
+            </li>
+            <li>
+              <strong>If no rule matches, the filters decide</strong> — <code>delphi</code>,
+              <code>av</code>, <code>all</code>, <code>unhandled</code>. Filters are the fallback, not
+              a parallel mechanism.
+            </li>
+          </ol>
+          <div class="doc-note">
+            Because project and shared rules are <em>one</em> list rather than two tiers, a rule with
+            no criteria at the end of a project&rsquo;s <code>exceptionRules</code> matches everything and
+            makes every shared rule unreachable. This is the single most common way a machine-wide
+            rules file appears to stop working in one project.
+          </div>
+          <p>
+            The criteria themselves are flat fields on the rule object, AND-ed when present and
+            treated as wildcards when absent, with <code>action</code> required. The full table is in
+            <a href="../vscode-tutorial/12-settings-and-commands-reference.html#exception-rules">the
+            reference</a>; the behaviour is in
+            <a href="../vscode-tutorial/04-exception-handling.html">chapter 4</a>.
+          </p>
+          <p>
+            <code>unit</code> and the line criteria refer to the <strong>raise site</strong> — the
+            first frame with known source — not the address the OS reported. Using them therefore
+            makes the engine walk the stack on every exception, which is a measurable cost with the
+            <code>all</code> filter enabled. Rules that use only <code>class</code>,
+            <code>classIs</code>, <code>code</code> or the message criteria do not pay it.
+          </p>
+        </section>
+
+        <section id="passthrough">
+          <h2>First-chance passthrough</h2>
+          <p>
+            Breaking on a first-chance exception must not prevent the program&rsquo;s own
+            <code>try/except</code> from running when you continue. The engine reports the stop and
+            then passes the exception through to the debuggee&rsquo;s handler chain, so a first-chance
+            break is an observation rather than an interception.
+          </p>
+          <p>
+            Stepping out of an exception is the harder half. The engine derives the enclosing
+            handler&rsquo;s address from the binary and sets a one-shot breakpoint there. Where that
+            address cannot be <em>proven</em> — every <code>try/finally</code>, and every bare
+            <code>except</code> on a 32-bit target — the step is refused with a reason instead of
+            resuming somewhere plausible, on the same principle as everything else here: a wrong
+            resume point is undetectable downstream.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="symbol-formats.html">&larr; Symbol formats</a>
+          <a class="doc-next" href="threading-model.html">Threading model &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: '#0d1117',
+        primaryColor: '#161b22',
+        primaryTextColor: '#e6edf3',
+        lineColor: '#2f81f7'
+      }
+    });
+  </script>
+
+</body>
+</html>

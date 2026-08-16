@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>8. Expression evaluation &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="The Pascal expression grammar available in Watch, hover and the Debug Console, plus the debugger output streams.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html" aria-current="page">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">8. Expression evaluation</span>
+        </nav>
+
+        <h1>8. Expression evaluation</h1>
+
+        <p>
+          Watch, hover and the Debug Console share one Pascal expression evaluator. It is a real
+          evaluator, not a variable lookup with arithmetic bolted on.
+        </p>
+
+        <section id="grammar">
+          <h2>The grammar</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Category</th><th>Supported</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Identifiers</td>
+                  <td>Qualified identifiers, field and property access, array and open-array indexing</td>
+                </tr>
+                <tr>
+                  <td>Arithmetic</td>
+                  <td><code>+ - * /</code>, <code>div</code>, <code>mod</code>, <code>shl</code>, <code>shr</code>, unary <code>-</code>. Mixed integer and float operands promote to <code>Double</code>.</td>
+                </tr>
+                <tr>
+                  <td>Logic</td>
+                  <td><code>and</code>, <code>or</code>, <code>xor</code>, <code>not</code> — logical for Boolean operands, bitwise for integer ones, as in Delphi</td>
+                </tr>
+                <tr>
+                  <td>Comparison</td>
+                  <td>The full set, on every type that supports it</td>
+                </tr>
+                <tr>
+                  <td>Literals</td>
+                  <td><code>True</code>, <code>False</code>, <code>nil</code>, numbers, strings, and bare enum literals — <code>Mode = wmPaused</code> needs no qualifier</td>
+                </tr>
+                <tr>
+                  <td>Strings</td>
+                  <td>Concatenation with <code>+</code>. This allocates a real string in the debuggee.</td>
+                </tr>
+                <tr>
+                  <td>Sets</td>
+                  <td>Set algebra with <code>+</code>, <code>-</code> and <code>*</code></td>
+                </tr>
+                <tr>
+                  <td>Types</td>
+                  <td>Type casts with the correct semantics per case, and <code>is</code> / <code>as</code>, driven by RTTI</td>
+                </tr>
+                <tr>
+                  <td>Intrinsics</td>
+                  <td><code>Length</code>, <code>SizeOf</code>, <code>Ord</code>, <code>Low</code>, <code>High</code></td>
+                </tr>
+                <tr>
+                  <td>Addresses</td>
+                  <td>Unary <code>@</code> — useful for feeding an address to a <a href="03-breakpoints.html#data">data breakpoint</a> or the memory view</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="calls">
+          <h2>Calling methods and getters</h2>
+          <p>
+            Method calls and property getters in an expression <strong>execute in the debuggee</strong>.
+            The stopped thread is hijacked to run them, and any state they change persists — a later
+            evaluation sees the result of an earlier one. That is what makes it possible to ask a
+            live object a question rather than reconstructing the answer from its fields.
+          </p>
+          <p>
+            It also means an expression can have side effects. Evaluating something that increments a
+            counter increments the counter, for real.
+          </p>
+          <p>
+            If the call raises, or triggers an access violation, it is aborted cleanly: the thread
+            context is restored and the evaluation returns a failure string. A broken expression does
+            not take the session with it.
+          </p>
+          <div class="doc-note">
+            Hovering also evaluates, with <strong>no</strong> confirmation and no safelist — see
+            <a href="05-inspecting-variables.html#getters">chapter 5</a>. On a codebase with
+            side-effecting getters, this is the one place the debugger will run your code without
+            being asked to.
+          </div>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-08-debug-console.png">
+            <p>Screenshot: the Debug Console with a method-call expression evaluated — for example a property getter call — and its result printed.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-08-debug-console.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="output">
+          <h2>Where the output goes</h2>
+          <p>
+            Three streams, deliberately kept apart, because mixing them is how you end up unable to
+            tell what your program printed from what the debugger printed.
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Stream</th><th>Default destination</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>The debuggee&rsquo;s own output</td>
+                  <td>Debug Console</td>
+                </tr>
+                <tr>
+                  <td>Debugger-generated output — notably <a href="03-breakpoints.html#logpoints">logpoint</a> text</td>
+                  <td>Debug Console, as a separate channel from the above</td>
+                </tr>
+                <tr>
+                  <td>The debugger&rsquo;s own diagnostics</td>
+                  <td>A separate &ldquo;Delphi Debugger&rdquo; channel in the Output panel, not the Debug Console. Change with <code>diagnosticsLocation</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="troubleshooting">
+          <h2>When something is wrong with the adapter</h2>
+          <p>
+            Set <code>"diagnosticLog": true</code> in the launch configuration, or the
+            <code>DAP_LOG=1</code> environment variable, and the adapter writes a verbose log to:
+          </p>
+          <pre><code>%TEMP%\dap_adapter.log</code></pre>
+          <p>
+            It is genuinely verbose and off by default for that reason, but it is the file to attach
+            to a bug report, and the place where quietly-dropped things — a
+            <a href="04-exception-handling.html#rules">malformed exception rule</a>, for instance —
+            actually get reported.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="07-registers-memory-disassembly.html">&larr; 7. Registers, memory and disassembly</a>
+          <a class="doc-next" href="09-multi-bpl-and-modules.html">9. Multi-BPL applications and modules &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

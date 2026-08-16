@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>6. Threads and the call stack &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="Per thread inspection, thread names, the StackWalk64 based call stack and the opt in raw stack scan.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html" aria-current="page">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">6. Threads and the call stack</span>
+        </nav>
+
+        <h1>6. Threads and the call stack</h1>
+
+        <p>
+          When the program stops, it stops as a whole — every thread, reported together. Which thread
+          triggered the stop does not limit what you can look at.
+        </p>
+
+        <section id="threads">
+          <h2>The Threads view</h2>
+          <p>
+            Every live thread is listed. Threads that announced a name through
+            <code>TThread.NameThreadForDebugging</code> show it: the debugger intercepts that
+            announcement as it happens and decodes the name, so a stack full of worker threads is
+            readable instead of a list of numbers.
+          </p>
+          <p>
+            Select any thread and you get <em>that</em> thread&rsquo;s call stack, its frames&rsquo; locals,
+            and its watches — regardless of which thread hit the breakpoint. For a deadlock or a race
+            this is the whole job: stop once, then read every thread&rsquo;s position.
+          </p>
+        </section>
+
+        <section id="call-stack">
+          <h2>The call stack</h2>
+          <p>
+            Frames are produced by a <code>StackWalk64</code>-based unwind, each with a function name
+            and a source line.
+          </p>
+          <p>
+            One detail that matters more than it sounds: caller frames are symbolicated at the return
+            address <em>minus one</em>. A return address points at the instruction <em>after</em> the
+            call, which on a line boundary belongs to the next statement — symbolicating it directly
+            would report the wrong line for every caller in the stack. Backing up one byte lands
+            inside the call, so the line you see is the call site.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-06-call-stack-raw.png">
+            <p>Screenshot: the Call Stack panel with at least one <code>[raw]</code> or <code>[raw?]</code>-marked frame alongside normal frames, plus the thread selector dropdown.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-06-call-stack-raw.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="raw-stack-scan">
+          <h2>Raw stack scan</h2>
+          <p>
+            Sometimes the unwinder has nothing to work with — no unwind data for the code in
+            question. This is mainly a 32-bit problem, where there is no <code>.pdata</code> to
+            consult. The call stack then ends early, and what you want to know is where the program
+            has been.
+          </p>
+          <p>
+            The raw stack scan is an opt-in fallback for exactly that: a brute-force sweep of the
+            thread&rsquo;s stack for words that look like return addresses, resolved against every loaded
+            module. Turn it on with the <code>rawStackScan</code> launch flag, or toggle it from the
+            Call Stack view&rsquo;s title bar during a session.
+          </p>
+          <p>
+            Results are marked so they can never be mistaken for a real unwind: <code>[raw]</code>
+            where the address is provably a call, <code>[raw?]</code> where there is no line table to
+            confirm it. Read them for what they are —
+          </p>
+          <div class="doc-note">
+            Raw stack scan results are <strong>places the program has been, never callers</strong>. A
+            stale return address from a completed call sits on the stack exactly like a live one. The
+            scan is a lead, not a stack trace.
+          </div>
+        </section>
+
+        <section id="per-thread-stepping">
+          <h2>Stepping and the other threads</h2>
+          <p>
+            A step command targets one OS thread. Every other thread is explicitly suspended for the
+            duration of the step, including threads created while the step is in progress, so the
+            program cannot run away underneath you between one line and the next. If the stepped
+            thread exits mid-step, everything is thawed rather than left frozen.
+          </p>
+          <p>
+            The one case this cannot solve: if the thread you are stepping blocks on a lock held by a
+            thread you just froze, the step cannot complete. That is inherent to freezing, and VS
+            Code has the same limitation generally. <a href="../architecture/threading-model.html">The
+            threading model</a> covers the mechanism.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="05-inspecting-variables.html">&larr; 5. Inspecting variables</a>
+          <a class="doc-next" href="07-registers-memory-disassembly.html">7. Registers, memory and disassembly &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

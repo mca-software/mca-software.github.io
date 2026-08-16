@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>10. Attach to a running process &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="Attach configurations, the process picker, SeDebugPrivilege and why an attached session must always be detached, never killed.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html" aria-current="page">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">10. Attach to a running process</span>
+        </nav>
+
+        <h1>10. Attach to a running process</h1>
+
+        <p>
+          For a program that is already running: a service, something started by another process, or
+          a session you do not want to restart because reproducing the state took twenty minutes.
+        </p>
+
+        <section id="config">
+          <h2>The attach configuration</h2>
+          <p>
+            Set <code>"request": "attach"</code> and identify the process by id or by name:
+          </p>
+          <pre><code>{
+  "name": "Attach to MyApp",
+  "type": "delphi-win64",
+  "request": "attach",
+  "processName": "MyApp.exe",
+  "program": "${workspaceFolder}/Win64/Debug/MyApp.exe",
+  "sourceRoot": "${workspaceFolder}"
+}</code></pre>
+          <p>
+            <code>program</code> is still worth giving: it is where the debugger reads symbols from.
+            The attach configuration shares <code>sourceRoot</code>,
+            <code>sourceSearchPaths</code>, <code>modules</code>, <code>exceptionRules</code>,
+            <code>progressLocation</code> and <code>diagnosticLog</code> with launch, and adds
+            <code>processId</code>, <code>processName</code> and <code>killOnDetach</code>. The full
+            table is in the
+            <a href="12-settings-and-commands-reference.html">settings and commands reference</a>.
+          </p>
+        </section>
+
+        <section id="picker">
+          <h2>Picking the process interactively</h2>
+          <p>
+            Use the pick-process command as the value of <code>processId</code> to choose at the
+            moment the session starts:
+          </p>
+          <pre><code>"processId": "${command:delphi-win64.pickProcess}"</code></pre>
+          <p>
+            When several instances of the same executable are running, the picker lists each one with
+            its full command line — which is usually the only thing that tells two instances of the
+            same service apart.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-10-process-picker.png">
+            <p>Screenshot: the &ldquo;Pick a Process to Attach To&rdquo; quick-pick list, showing multiple instances of one executable disambiguated by their command lines.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-10-process-picker.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="privileges">
+          <h2>Privileges</h2>
+          <p>
+            Attaching requires <code>SeDebugPrivilege</code>. The adapter tries to enable it itself
+            through <code>AdjustTokenPrivileges</code> where the token allows, but in practice that
+            means either running the editor as Administrator, or attaching to a process you already
+            own.
+          </p>
+        </section>
+
+        <section id="detaching">
+          <h2>Detaching</h2>
+          <p>
+            <code>killOnDetach</code> defaults to <strong>false</strong> for attach: ending the
+            session leaves the process running, which is almost always what you want when you
+            attached to something you did not start.
+          </p>
+          <div class="doc-note">
+            <strong>Detach. Never force-kill the adapter or VS Code during an attached session.</strong>
+            <br><br>
+            Breakpoints are <code>INT3</code> bytes patched into the target&rsquo;s code, and only the
+            debugger that planted them can put the original bytes back. A clean detach does exactly
+            that. An adapter that is killed outright cannot — so the <code>INT3</code> bytes stay
+            behind in a process that no longer has a debugger attached, and the next time execution
+            reaches one the program takes a breakpoint exception with nobody to handle it. What the
+            user sees is a mystifying <code>External exception 80000003</code>
+            (<code>STATUS_BREAKPOINT</code>) surfacing from the application&rsquo;s own error handling,
+            long after the debugger is gone and with nothing to connect it back.
+            <br><br>
+            This applies to attached sessions only. A launched target dies together with the adapter,
+            so there is nothing left to corrupt.
+          </div>
+        </section>
+
+        <section id="agents">
+          <h2>From an agent</h2>
+          <p>
+            The same operations are available over MCP — <code>attach_to_process</code>,
+            <code>attach_from_config</code> and <code>detach_debugger</code> — with the same rule
+            about detaching rather than terminating. See
+            <a href="../mcp/example-prompts.html">Example prompts</a>.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="09-multi-bpl-and-modules.html">&larr; 9. Multi-BPL applications and modules</a>
+          <a class="doc-next" href="11-known-limitations.html">11. Known limitations &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

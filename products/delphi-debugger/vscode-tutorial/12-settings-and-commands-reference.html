@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>12. Settings and commands reference &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="Appendix: the full launch and attach configuration schema, contributed commands and extension settings.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html" aria-current="page">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">12. Settings and commands reference</span>
+        </nav>
+
+        <h1>12. Settings and commands reference</h1>
+
+        <p>
+          Everything configurable, in one place. The chapters explain what these do; this page is for
+          looking one up.
+        </p>
+
+        <section id="debug-type">
+          <h2>The debug type</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <tbody>
+                <tr><td>Type id</td><td><code>delphi-win64</code> — used for 32-bit targets too; it was never renamed when Win32 support shipped, so existing configurations keep working</td></tr>
+                <tr><td>Label</td><td>Delphi (Win32/Win64)</td></tr>
+                <tr><td>Languages</td><td><code>objectpascal</code>, <code>pascal</code>; breakpoints also work in files typed as <code>delphi</code></td></tr>
+                <tr><td>Extension</td><td><code>delphi-win64-debug</code>, publisher <code>local</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="launch-properties">
+          <h2>Launch configuration</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Property</th><th>Type</th><th>Default</th><th>Notes</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>program</code></td><td>string</td><td><em>required</em></td><td>Path to the <code>.exe</code> to debug</td></tr>
+                <tr><td><code>mapFile</code></td><td>string</td><td>same path as <code>program</code>, <code>.map</code></td><td>Delphi MAP file</td></tr>
+                <tr><td><code>rsmFile</code></td><td>string</td><td>same path, <code>.rsm</code></td><td>Needed for local variable inspection</td></tr>
+                <tr><td><code>sourceRoot</code></td><td>string</td><td><em>empty</em></td><td>Root directory for source lookup</td></tr>
+                <tr><td><code>sourceSearchPaths</code></td><td>string[]</td><td><em>empty</em></td><td>Extra source directories, each searched two levels deep</td></tr>
+                <tr><td><code>args</code></td><td>string[]</td><td><em>empty</em></td><td>Command-line arguments for the debuggee</td></tr>
+                <tr><td><code>stopAtEntry</code></td><td>boolean</td><td><code>false</code></td><td>Break at the process entry point before any user code runs</td></tr>
+                <tr><td><code>rawStackScan</code></td><td>boolean</td><td><code>false</code></td><td>Opt-in brute-force stack sweep fallback — <a href="06-threads-and-call-stack.html#raw-stack-scan">chapter 6</a></td></tr>
+                <tr><td><code>modules</code></td><td>object[]</td><td><em>empty</em></td><td><code>{ name (required), map, rsm, dcp }</code> — pre-binds debug info for runtime-loaded DLLs and BPLs</td></tr>
+                <tr><td><code>exceptionRules</code></td><td>object[]</td><td><em>empty</em></td><td>See <a href="#exception-rules">exception rules</a> below</td></tr>
+                <tr><td><code>useGlobalExceptionRules</code></td><td>boolean</td><td><code>true</code></td><td>Also load the shared machine-wide rules file</td></tr>
+                <tr><td><code>globalExceptionRulesPath</code></td><td>string</td><td><code>%USERPROFILE%\.DelphiWinDebugger\exceptionRules.json</code></td><td>Override the shared rules file location</td></tr>
+                <tr><td><code>progressLocation</code></td><td><code>"statusBar"</code> | <code>"notification"</code></td><td><code>"statusBar"</code></td><td>Where long operations report progress</td></tr>
+                <tr><td><code>diagnosticLog</code></td><td>boolean</td><td><code>false</code></td><td>Writes <code>%TEMP%\dap_adapter.log</code>. Very verbose. Also enabled by the <code>DAP_LOG=1</code> environment variable.</td></tr>
+                <tr><td><code>diagnosticsLocation</code></td><td><code>"outputChannel"</code> | <code>"debugConsole"</code></td><td><code>"outputChannel"</code></td><td>Where the debugger&rsquo;s own messages go</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="attach-properties">
+          <h2>Attach configuration</h2>
+          <p>
+            Adds the following. <code>program</code>, <code>sourceRoot</code>,
+            <code>sourceSearchPaths</code>, <code>modules</code>, <code>exceptionRules</code>,
+            <code>useGlobalExceptionRules</code>, <code>globalExceptionRulesPath</code>,
+            <code>progressLocation</code> and <code>diagnosticLog</code> work as they do for launch.
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Property</th><th>Type</th><th>Default</th><th>Notes</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>processId</code></td><td>number or string</td><td>—</td><td>PID to attach to. Use <code>"${command:delphi-win64.pickProcess}"</code> to pick interactively.</td></tr>
+                <tr><td><code>processName</code></td><td>string</td><td>—</td><td>Executable name, e.g. <code>"MyApp.exe"</code></td></tr>
+                <tr><td><code>killOnDetach</code></td><td>boolean</td><td><code>false</code></td><td>Detaching leaves the process running by default</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="exception-rules">
+          <h2>Exception rules</h2>
+          <p>
+            An ordered array; first match wins. Each rule is a flat object of optional criteria plus a
+            required <code>action</code>. Criteria present in a rule are AND-ed; omitted criteria are
+            wildcards. <a href="04-exception-handling.html">Chapter 4</a> explains the behaviour.
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Key</th><th>Type</th><th>Matches</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>class</code></td><td>string | string[]</td><td>Runtime (leaf) class, exact, case-insensitive</td></tr>
+                <tr><td><code>classIs</code></td><td>string | string[]</td><td>Runtime class or any ancestor</td></tr>
+                <tr><td><code>code</code></td><td>string | integer | array</td><td>Win32 exception code, hex or decimal. The only criterion that matches native exceptions.</td></tr>
+                <tr><td><code>message</code></td><td>string</td><td>Case-insensitive substring of the message</td></tr>
+                <tr><td><code>messageRegex</code></td><td>string</td><td>Case-insensitive regular expression against the message</td></tr>
+                <tr><td><code>unit</code></td><td>string</td><td>Raise-site unit by basename; <code>"*unknown*"</code> for no resolvable location</td></tr>
+                <tr><td><code>line</code></td><td>integer</td><td>Single raise-site line; seeds both range bounds</td></tr>
+                <tr><td><code>lineFrom</code> / <code>lineTo</code></td><td>integer</td><td>Inclusive raise-site line range</td></tr>
+                <tr><td><code>action</code></td><td>string</td><td><strong>Required.</strong> <code>ignore</code>, <code>log</code>, <code>logStack</code> or <code>break</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Exception <em>filters</em> — <code>delphi</code>, <code>av</code>, <code>all</code>,
+            <code>unhandled</code> — are set in the BREAKPOINTS view, or at launch through
+            <code>exceptionFilters</code>. The <code>delphi</code> filter narrows to specific classes
+            with <code>delphiExceptionClasses</code>, a comma- or semicolon-separated allowlist.
+            Defaults are <code>delphi</code>, <code>av</code> and <code>unhandled</code>.
+          </p>
+        </section>
+
+        <section id="commands">
+          <h2>Commands</h2>
+          <p>All under the <strong>Delphi Debugger</strong> category in the command palette.</p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Command</th><th>Where it lives</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Edit Exception Rules…</td><td>Breakpoints / Call Stack view title bar</td></tr>
+                <tr><td>Create a Rule for This Exception…</td><td>Available only while stopped on an exception</td></tr>
+                <tr><td>Toggle Raw Stack Scan</td><td>Call Stack view title bar</td></tr>
+                <tr><td>Pick a Process to Attach To</td><td>Used as <code>${command:delphi-win64.pickProcess}</code> in an attach configuration</td></tr>
+                <tr><td>View Memory (Delphi)</td><td>Variables / Watch context menu</td></tr>
+                <tr><td>Always Evaluate This Property (Delphi)</td><td>Variables context menu, on a getter-backed property</td></tr>
+                <tr><td>Never Auto-Evaluate This Property (Delphi)</td><td>Variables context menu</td></tr>
+                <tr><td>Refresh Modules</td><td>Delphi Modules view</td></tr>
+                <tr><td>Filter Modules…</td><td>Delphi Modules view</td></tr>
+                <tr><td>Clear Module Filter</td><td>Delphi Modules view</td></tr>
+                <tr><td>Copy Path</td><td>Delphi Modules view, per module</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="settings">
+          <h2>Extension settings</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Setting</th><th>Type</th><th>Default</th><th>What it does</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>delphi-win64.stockMemoryView</code></td><td>boolean</td><td><code>false</code></td>
+                  <td>Also show VS Code&rsquo;s built-in hex pane alongside the extension&rsquo;s own memory view</td>
+                </tr>
+                <tr>
+                  <td><code>delphi-win64.checkForUpdates</code></td><td>boolean</td><td><code>true</code></td>
+                  <td>Daily check of GitHub releases, with a download-link notification. Fails silently when offline.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="keys">
+          <h2>Keyboard</h2>
+          <p>Standard VS Code debug bindings; nothing is remapped.</p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <tbody>
+                <tr><td><code>F5</code></td><td>Start / Continue</td></tr>
+                <tr><td><code>F10</code></td><td>Step over</td></tr>
+                <tr><td><code>F11</code></td><td>Step into</td></tr>
+                <tr><td><code>Shift+F11</code></td><td>Step out</td></tr>
+                <tr><td><code>Ctrl+Shift+D</code></td><td>Open the Run and Debug view</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-prev" href="11-known-limitations.html">&larr; 11. Known limitations</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
