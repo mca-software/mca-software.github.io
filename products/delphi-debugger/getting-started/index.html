@@ -42,6 +42,7 @@
         <a href="#download">Download</a>
         <a href="#install">Install</a>
         <a href="#first-run">First run</a>
+        <a href="#project">Opening your project</a>
         <a href="#companions">Companion tooling</a>
         <a href="#updates">Staying up to date</a>
       </aside>
@@ -61,6 +62,18 @@
           puts all three where they belong. No Delphi toolchain is needed on the machine you install
           on — only on the machine that compiles the program you want to debug.
         </p>
+        <div class="doc-note">
+          <strong>There are two halves to this, and the second one matters as much as the first.</strong>
+          Installing the debugger gives VS Code the ability to debug Delphi. It does not tell it
+          <em>what</em> to debug — that comes from a <code>launch.json</code> carrying your output
+          paths, your source root, a few hundred unit search paths and, on a package project, the BPL
+          list.
+          <br><br>
+          You are not expected to write that. The
+          <a href="#project">Edit in VS Code</a> plugin generates it from the Delphi project you
+          already have open, and opens the whole thing in VS Code with one command. That is the
+          intended way in, and the rest of this manual assumes you took it.
+        </div>
 
         <section id="download">
           <h2>Download</h2>
@@ -186,9 +199,108 @@
           </div>
 
           <p>
-            From here, <a href="../vscode-tutorial/index.html">the VS Code tutorial</a> takes it from
-            project settings to a running session and onwards.
+            That is the debugger installed. Next comes getting your actual project in front of it,
+            which is <a href="#project">the other half</a>.
           </p>
+        </section>
+
+        <section id="project">
+          <h2>Opening your project: the Edit in VS Code plugin</h2>
+          <p>
+            A Delphi project carries its configuration in the IDE: output directories per platform
+            and per configuration, unit search paths accumulated over years, and for a package
+            project the list of BPLs. VS Code knows none of it, and transcribing it into
+            <code>launch.json</code> by hand is not an afternoon anyone should spend.
+          </p>
+          <p>
+            The <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a>
+            plugin reads it out of the project options you already have and writes the workspace for
+            you — including both the <strong>launch and attach</strong> configurations this debugger
+            uses. It is a separate project of the same author, and it is the piece that makes the
+            debugger practical rather than merely possible.
+          </p>
+
+          <h3>Installing it</h3>
+          <p>
+            It is a design-time package, so it is built and installed the way Delphi packages always
+            are — there is no installer:
+          </p>
+          <ol>
+            <li>
+              Get the source from the
+              <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">repository</a>.
+            </li>
+            <li>Open the package project in Delphi, build it, and install it.</li>
+            <li>
+              Turn on <em>Tools → Options → Editor → Language → Delphi → Code Insight</em>. DelphiLSP
+              in VS Code needs it; without it you get the debugger but no code intelligence.
+            </li>
+          </ol>
+          <div class="doc-note">
+            Worth doing while you are in there: turn off Delphi&rsquo;s prompt asking what to do when a
+            file it has open changes on disk. You are about to be editing the same files from two
+            editors, and that prompt fires on every switch back. Safe as long as you do not leave
+            unsaved edits in the Delphi editor — and if you always leave through the plugin&rsquo;s own
+            command, you will not, because it saves first.
+          </div>
+
+          <h3>Using it</h3>
+          <p>
+            With the project you want to work on open in Delphi:
+          </p>
+          <pre><code>Tools &rarr; Edit in Visual Studio Code</code></pre>
+          <p>That single command does the whole round trip:</p>
+          <ul>
+            <li>saves everything you have modified in the IDE;</li>
+            <li>
+              generates the workspace file, <code>launch.json</code> and <code>tasks.json</code> from
+              the active project or project group;
+            </li>
+            <li>
+              opens VS Code <strong>on the file you were editing, at the same line and column</strong>
+              — not just on the folder;
+            </li>
+            <li>reuses an editor window already open on that workspace instead of stacking another.</li>
+          </ul>
+          <p>
+            From there, <code>F5</code> starts a debug session against the configuration it just
+            wrote. That is the point at which
+            <a href="../vscode-tutorial/index.html">the tutorial</a> becomes useful.
+          </p>
+          <p>
+            Its own settings live under <em>Tools → Options → Third Party → Edit in VS Code</em>, and
+            it can drive Cursor, Windsurf, TRAE and VSCodium as well as VS Code itself — the menu
+            entry changes name to match.
+          </p>
+
+          <h3>What to put under version control</h3>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>File</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>vscode-workspace-defaults.json</code></td>
+                  <td><strong>Yes.</strong> It holds what the team shares — editor settings and recommended extensions. The plugin creates it with sensible defaults and never rewrites it, so edit it freely. See <a href="../vscode-tutorial/00-vscode-for-delphi-developers.html#settings">chapter 0</a> for what belongs in it and why.</td>
+                </tr>
+                <tr>
+                  <td>The generated <code>.code-workspace</code></td>
+                  <td><strong>No.</strong> It contains machine-specific paths and a per-developer debug configuration. It is regenerated on demand, so there is nothing to lose.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Paths inside the generated configuration are written relative to the workspace wherever
+            possible, so a configuration produced on your machine still works on a colleague&rsquo;s,
+            wherever they checked the project out.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/getting-started-open-in-vscode.png">
+            <p>Screenshot: the Delphi IDE&rsquo;s <em>Tools</em> menu with the <em>Edit in Visual Studio Code</em> command visible — the one command that turns a Delphi project into a debuggable VS Code workspace.</p>
+            <figcaption>(screenshot to be added — <code>getting-started-open-in-vscode.png</code>)</figcaption>
+          </figure>
         </section>
 
         <section id="companions">
@@ -200,8 +312,8 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a><br>(Delphi IDE plugin)</td>
-                  <td>Adds an <em>Open in Visual Studio Code</em> command to the Delphi IDE, and generates the workspace file, <code>launch.json</code> and <code>tasks.json</code> from the current Delphi project — output paths, source search paths, the package list. A real project carries a couple of hundred search paths and nobody wants to write that by hand. Not required, but it is what makes the debugger practical.</td>
+                  <td><a href="#project">Edit in VS Code</a><br>(Delphi IDE plugin)</td>
+                  <td><strong>Effectively required.</strong> It is how your project gets into VS Code with a working debug configuration — covered in full <a href="#project">above</a>. You can write <code>launch.json</code> by hand instead, and <a href="../vscode-tutorial/01-preparing-your-project.html">chapter 1</a> shows the minimum, but on a real project you will not enjoy it.</td>
                 </tr>
                 <tr>
                   <td>DelphiLSP<br><code>embarcaderotechnologies.delphilsp</code></td>
