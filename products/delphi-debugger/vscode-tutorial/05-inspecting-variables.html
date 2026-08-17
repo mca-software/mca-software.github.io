@@ -177,6 +177,11 @@
             budget also bounds how long a burst of automatic getter calls may hold up the panel, so a
             slow property cannot freeze the Variables view.
           </p>
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-05-safelist-menu.png">
+            <p>Screenshot: a getter-backed property row in the Variables view reading <code>(expand to evaluate)</code>, with the right-click menu open on it showing <em>Always Evaluate This Property (Delphi)</em> and <em>Never Auto-Evaluate This Property (Delphi)</em>. Both the placeholder text and the menu entries need to be visible in one shot.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-05-safelist-menu.png</code>)</figcaption>
+          </figure>
+
           <div class="doc-note">
             <strong>Hover has no such guard.</strong> Hovering an identifier that happens to be a
             function or a getter executes it, in the debuggee, with no confirmation and no safelist

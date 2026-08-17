@@ -95,6 +95,11 @@
             swallowing a second-chance exception almost always wedges the program, and a debugger
             that lets you do that by accident is not doing its job.
           </div>
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-exception-filters.png">
+            <p>Screenshot: the BREAKPOINTS view in the Run and Debug side bar, showing the four exception-filter checkboxes with their real labels and default ticks — and, if it can be shown, the pencil/edit affordance that sets the per-class condition on the Delphi filter.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-04-exception-filters.png</code>)</figcaption>
+          </figure>
+
           <p>
             A first-chance break passes the exception through correctly when you continue, so the
             debuggee&rsquo;s own <code>try/except</code> still runs. You are looking at the raise, not
@@ -291,6 +296,11 @@
             stopped on an exception, and pre-fills a rule from the exception in front of you — the
             fastest way to silence something you have just been interrupted by for the third time.
           </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-create-rule-button.png">
+            <p>Screenshot: the floating debug toolbar while stopped on an exception, with the extra <em>Create a Rule for This Exception…</em> button visible alongside the standard continue/step controls — it only appears in that situation, so the reader needs to see where it turns up.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-04-create-rule-button.png</code>)</figcaption>
+          </figure>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-rules-editor.png">
             <p>Screenshot: the &ldquo;Edit Exception Rules…&rdquo; editor UI.</p>
