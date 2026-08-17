@@ -81,8 +81,13 @@
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/getting-started-setup.png">
-            <p>Screenshot: the <code>Setup.exe</code> installer window mid-run.</p>
-            <figcaption>(screenshot to be added — <code>getting-started-setup.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/getting-started-setup.png"
+                 alt="The installer running in a console window: it reports portable mode with the bundled adapter, the VSIX package it built, and Visual Studio Code as the target editor; the extension is installed through the code CLI and a stale install folder is removed. The last line asks whether to also install and register the MCP debug server."
+                 width="826" height="457">
+            <figcaption>
+              <code>Setup.exe</code> mid-run: it has installed the extension into Visual Studio Code
+              and is asking whether to register the MCP debug server as well.
+            </figcaption>
           </figure>
 
           <div class="doc-note">
@@ -160,8 +165,16 @@
           </ol>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/getting-started-extensions.png">
-            <p>Screenshot: the VS Code Extensions view showing the Delphi debugger and DelphiLSP installed and enabled.</p>
-            <figcaption>(screenshot to be added — <code>getting-started-extensions.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/getting-started-extensions.png"
+                 alt="The Visual Studio Code Extensions view. Under Installed, Delphi Debugger (Win32 and Win64) from publisher local is highlighted, with DelphiLSP from Embarcadero Technologies directly below it. Further down, an MCP Servers - Installed section lists delphi-win64-debugger. The details pane on the right shows the extension's description, version 0.6.2 and identifier local.delphi-win64-debug."
+                 width="1262" height="783">
+            <figcaption>
+              Three things to look for after installing: the debugger itself under
+              <strong>Installed</strong> — publisher <code>local</code>, because it does not come from
+              the Marketplace — <strong>DelphiLSP</strong> beside it, and, if you accepted the
+              registration offer, <code>delphi-win64-debugger</code> under
+              <strong>MCP Servers</strong>. The details pane confirms the version you are running.
+            </figcaption>
           </figure>
 
           <div class="doc-note">

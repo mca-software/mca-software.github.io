@@ -705,6 +705,12 @@ footer {
 
 .doc-body pre.mermaid { text-align: center; overflow-x: auto; }
 
+/* A figure holding a real image is finished, so it drops the dashed placeholder
+   frame. Its caption is a sentence rather than a label, and reads better ranged
+   left than centred. */
+.doc-figure:has(img) { border-style: solid; padding: 12px; }
+.doc-figure:has(img) figcaption { text-align: left; margin-top: 12px; line-height: 1.65; }
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .feature { grid-template-columns: 1fr; direction: ltr; gap: 32px; }
