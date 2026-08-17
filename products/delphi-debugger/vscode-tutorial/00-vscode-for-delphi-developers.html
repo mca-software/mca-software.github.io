@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>0. VS Code for Delphi developers &mdash; Delphi Debugger for VS Code</title>
+  <meta name="description" content="A translation table from the Delphi IDE to Visual Studio Code: which key does what, where the debug windows went, and the settings a Delphi codebase needs.">
+  <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
+  <link rel="stylesheet" href="../../../css/fonts.css">
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <ul>
+        <li><a href="../../../index.html#projects">Projects</a></li>
+        <li><a href="../getting-started/index.html">Install</a></li>
+        <li><a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="../../../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <nav class="doc-sectionnav" aria-label="Delphi Debugger documentation">
+    <a href="../index.html">Overview</a>
+    <a href="../getting-started/index.html">Getting Started</a>
+    <a href="../vscode-tutorial/index.html" aria-current="page">VS Code Tutorial</a>
+    <a href="../mcp/index.html">MCP &amp; AI Agents</a>
+    <a href="../architecture/index.html">Architecture</a>
+  </nav>
+
+  <main>
+
+    <div class="doc-layout">
+
+      <aside class="doc-toc">
+        <span>Chapters</span>
+        <a href="00-vscode-for-delphi-developers.html" aria-current="page">0. VS Code for Delphi developers</a>
+        <a href="01-preparing-your-project.html">1. Preparing your project</a>
+        <a href="02-your-first-session.html">2. Your first session</a>
+        <a href="03-breakpoints.html">3. Breakpoints</a>
+        <a href="04-exception-handling.html">4. Exception handling</a>
+        <a href="05-inspecting-variables.html">5. Inspecting variables</a>
+        <a href="06-threads-and-call-stack.html">6. Threads and the call stack</a>
+        <a href="07-registers-memory-disassembly.html">7. Registers, memory, disassembly</a>
+        <a href="08-expression-evaluation.html">8. Expression evaluation</a>
+        <a href="09-multi-bpl-and-modules.html">9. Multi-BPL and modules</a>
+        <a href="10-attach-to-a-running-process.html">10. Attach to a running process</a>
+        <a href="11-known-limitations.html">11. Known limitations</a>
+        <a href="12-settings-and-commands-reference.html">12. Settings and commands</a>
+      </aside>
+
+      <div class="doc-body">
+        <nav class="doc-breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Delphi Debugger</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html">VS Code Tutorial</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">0. VS Code for Delphi developers</span>
+        </nav>
+
+        <h1>0. VS Code for Delphi developers</h1>
+
+        <p>
+          You have spent years in an IDE where you know where everything is without looking. This
+          page is about getting some of that back quickly, because almost nothing here is where you
+          expect it and two of the keys do the opposite of what your hands are about to do.
+        </p>
+        <p>
+          It assumes Visual Studio Code is installed and you can open a folder in it. It does not try
+          to teach the editor —
+          <a href="https://code.visualstudio.com/docs" target="_blank" rel="noopener">Microsoft&rsquo;s own documentation</a>
+          does that better than we would. What follows is only the translation.
+        </p>
+        <div class="doc-note">
+          Delphi shortcuts below are the <strong>Default</strong> keymapping in RAD Studio. If you
+          use the Classic scheme, or have customised yours, your keys will differ — the mapping to VS
+          Code still holds, only the left-hand column changes.
+        </div>
+
+        <section id="f5">
+          <h2>Read this one first: F5 and F9 are swapped</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Key</th><th>In Delphi</th><th>In VS Code</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>F5</code></td>
+                  <td>Toggle a breakpoint</td>
+                  <td><strong>Start / continue the program</strong></td>
+                </tr>
+                <tr>
+                  <td><code>F9</code></td>
+                  <td>Run the program</td>
+                  <td><strong>Toggle a breakpoint</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            They are exactly exchanged. Your first instinct — <code>F5</code> to mark a line — starts
+            the application instead, and <code>F9</code> to launch it silently drops a breakpoint on
+            whatever line the cursor was on. This costs everyone the same confused thirty seconds, so
+            now you have had them here instead.
+          </p>
+          <p>
+            You can swap them back if you want to; see
+            <a href="#keys">changing the keys</a> below. Read the rest of this page before deciding.
+          </p>
+        </section>
+
+        <section id="run-and-debug">
+          <h2>Where the debug windows went</h2>
+          <p>
+            Delphi scatters its debug windows across the desktop and you summon them with
+            <code>Ctrl+Alt</code>-something. VS Code puts nearly all of them in a single side bar
+            panel: the <strong>Run and Debug</strong> view, opened with
+            <code>Ctrl+Shift+D</code>. Inside it are collapsible sections, and those sections are
+            your old windows.
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Delphi window</th><th></th><th>Where it is now</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Local Variables</td><td><code>Ctrl+Alt+L</code></td><td><strong>VARIABLES</strong> section</td></tr>
+                <tr><td>Watches</td><td><code>Ctrl+Alt+W</code></td><td><strong>WATCH</strong> section</td></tr>
+                <tr><td>Call Stack</td><td><code>Ctrl+Alt+S</code></td><td><strong>CALL STACK</strong> section</td></tr>
+                <tr><td>Breakpoints</td><td><code>Ctrl+Alt+B</code></td><td><strong>BREAKPOINTS</strong> section — which is also where the exception filters live</td></tr>
+                <tr><td>Thread Status</td><td><code>Ctrl+Alt+T</code></td><td><strong>THREADS</strong> section</td></tr>
+                <tr><td>Modules</td><td><code>Ctrl+Alt+M</code></td><td><strong>Delphi Modules</strong> section — added by this extension, not part of VS Code</td></tr>
+                <tr><td>CPU / Disassembly</td><td><code>Ctrl+Alt+C</code> / <code>Ctrl+Alt+D</code></td><td>The <strong>Disassembly View</strong>, opened from the Call Stack&rsquo;s context menu</td></tr>
+                <tr><td>Event Log</td><td><code>Ctrl+Alt+V</code></td><td>Split in two: your program&rsquo;s output goes to the <strong>Debug Console</strong>, the debugger&rsquo;s own messages to an <strong>Output</strong> panel channel</td></tr>
+                <tr><td>Raw values in the stack</td><td><code>Ctrl+Alt+R</code></td><td>The <a href="06-threads-and-call-stack.html#raw-stack-scan">raw stack scan</a> — same idea, same caveats, switched on from the Call Stack title bar</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-00-run-and-debug.png">
+            <p>Screenshot: the Run and Debug side bar during a session, with every section expanded and labelled — VARIABLES, WATCH, CALL STACK, BREAKPOINTS, THREADS and Delphi Modules — so a reader can match each one to the Delphi window it replaces. This is the orientation picture for the whole manual.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-00-run-and-debug.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="keys-table">
+          <h2>The rest of the keys</h2>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>What you want</th><th>Delphi</th><th>VS Code</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Run with debugging</td><td><code>F9</code></td><td><code>F5</code></td></tr>
+                <tr><td>Run without debugging</td><td><code>Ctrl+Shift+F9</code></td><td><code>Ctrl+F5</code></td></tr>
+                <tr><td>Toggle breakpoint</td><td><code>F5</code></td><td><code>F9</code></td></tr>
+                <tr><td>Step over</td><td><code>F8</code></td><td><code>F10</code></td></tr>
+                <tr><td>Step into</td><td><code>F7</code> (Trace Into)</td><td><code>F11</code></td></tr>
+                <tr><td>Run until the routine returns</td><td><code>Shift+F8</code></td><td><code>Shift+F11</code></td></tr>
+                <tr><td>Stop the program</td><td><code>Ctrl+F2</code> (Program Reset)</td><td><code>Shift+F5</code></td></tr>
+                <tr><td>Restart</td><td>—</td><td><code>Ctrl+Shift+F5</code></td></tr>
+                <tr><td>Run to the cursor</td><td><code>F4</code></td><td><em>Run to Cursor</em>, from the editor&rsquo;s right-click menu while stopped</td></tr>
+                <tr><td>Move the execution point</td><td>drag the arrow</td><td><em>Jump to Cursor</em>, in that same menu — see <a href="03-breakpoints.html#set-next-statement">chapter 3</a></td></tr>
+                <tr><td>Evaluate / modify a value</td><td><code>Ctrl+F7</code></td><td>Type it in the <strong>Debug Console</strong>, or edit the value in place in VARIABLES</td></tr>
+                <tr><td>Inspect a value</td><td>hover, or Debug Inspector</td><td>Hover — and if you <em>select</em> an expression first, the selection is what gets evaluated, as in Delphi</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-note">
+            <strong>Two that do not exist here.</strong> There is no <em>Trace to next source line</em>
+            (<code>Shift+F7</code>): step into already walks to the next line that has source. And
+            there is no drag gesture for the execution point — VS Code does not implement one.
+          </div>
+        </section>
+
+        <section id="keys">
+          <h2>Changing the keys</h2>
+          <p>
+            None of this is fixed. <code>Ctrl+K</code> then <code>Ctrl+S</code> opens the Keyboard
+            Shortcuts editor: search for a command, click the pencil, press the combination you want.
+            Everything you change is written to a <code>keybindings.json</code> you can version and
+            share.
+          </p>
+          <p>
+            So you <em>can</em> put <code>F9</code> back on Run and <code>F5</code> back on Toggle
+            Breakpoint, and if you spend most of your day in Delphi that may well be the right call —
+            fighting your own muscle memory all day is a real cost.
+          </p>
+          <div class="doc-note">
+            The argument for leaving them alone: every VS Code tutorial, every answer you find
+            online, every colleague looking over your shoulder and every article about this debugger
+            assumes the defaults. Remap them and you are on your own whenever you look something up.
+            It is a genuine trade-off — just make it deliberately rather than discovering it later.
+          </div>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-00-keyboard-shortcuts.png">
+            <p>Screenshot: the Keyboard Shortcuts editor (<code>Ctrl+K Ctrl+S</code>) filtered on a debug command, with the edit affordance visible.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-00-keyboard-shortcuts.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="hiding">
+          <h2>Where things hide</h2>
+          <p>
+            Delphi puts its commands in menus. VS Code hides most of them, and knowing the four
+            hiding places is most of what makes it usable.
+          </p>
+          <ul>
+            <li>
+              <strong>View title bars.</strong> Small icons at the top-right of a section — but only
+              when the mouse is over that section. <em>Edit Exception Rules</em> and
+              <em>Toggle Raw Stack Scan</em> live there, and you will never see them by staring at a
+              stationary screen.
+            </li>
+            <li>
+              <strong>Inline row icons.</strong> Some commands appear as an icon on a row when you
+              hover it, not in its right-click menu. <em>View Memory (Delphi)</em> is one, so looking
+              for it under right-click fails.
+            </li>
+            <li>
+              <strong>The Command Palette</strong> — <code>Ctrl+Shift+P</code>, type a few letters of
+              what you want. Everything this extension contributes is prefixed
+              <code>Delphi Debugger:</code>, so typing that lists the lot. A handful are deliberately
+              excluded because they only make sense on a row you clicked.
+            </li>
+            <li>
+              <strong>The editor&rsquo;s right-click menu while stopped</strong>, which is where
+              <em>Run to Cursor</em> and <em>Jump to Cursor</em> are.
+            </li>
+          </ul>
+          <div class="doc-note">
+            A VS Code habit worth acquiring early: when a button is not where you expect,
+            it is usually <em>absent</em> rather than greyed out. VS Code hides commands that do not
+            apply instead of disabling them, so a missing button is telling you the state is wrong —
+            not stopped, wrong debug type, no session — rather than that you have looked in the wrong
+            place.
+          </div>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-00-view-title-bar.png">
+            <p>Screenshot: a view title bar with its icons revealed by hovering, alongside a row showing an inline icon — the two hiding places that cost the most time, in one picture.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-00-view-title-bar.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="no-project-options">
+          <h2>There is no project options dialog</h2>
+          <p>
+            Everything you would set in <em>Project → Options</em> — what to run, where the symbols
+            are, where the sources are — is a JSON file, <code>.vscode/launch.json</code>. There is
+            no dialog, and hand-writing it for a real Delphi project means transcribing a couple of
+            hundred search paths.
+          </p>
+          <p>
+            Do not do that. The
+            <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a>
+            IDE plugin generates the whole thing from the project you already have open in Delphi.
+            <a href="01-preparing-your-project.html">Chapter 1</a> covers what ends up in it.
+          </p>
+        </section>
+
+        <section id="settings">
+          <h2>Settings a Delphi codebase needs</h2>
+          <p>
+            VS Code&rsquo;s defaults assume a codebase that is not yours. Five settings make it behave
+            around Delphi sources, and the first one is not optional.
+          </p>
+
+          <h3>Encoding detection — the one that looks like corruption</h3>
+          <pre><code>"files.autoGuessEncoding": true</code></pre>
+          <p>
+            VS Code opens every file as UTF-8. Plenty of Delphi code predates that and is stored in a
+            local ANSI code page, so the moment you open a unit with accented characters in it you
+            get mojibake — and if you save, you write the damage to disk. Turning detection on fixes
+            it. This is the setting that makes people conclude VS Code &ldquo;does not work with
+            Delphi&rdquo; and give up in the first ten minutes.
+          </p>
+
+          <h3>Hide the build output</h3>
+          <pre><code>"files.exclude": {
+  "**/Win32/Debug": true,
+  "**/Win64/Debug": true,
+  "**/__history": true,
+  "**/__recovery": true,
+  "**/*.res": true
+}</code></pre>
+          <p>
+            Without this, the file tree and every search are full of build output and IDE backups.
+            <code>__history</code> is the worst of them: it holds old copies of your own units, so a
+            search for a routine name returns the current version and nine previous ones with no
+            indication of which is which.
+          </p>
+
+          <h3>Stop the editor guessing indentation</h3>
+          <pre><code>"editor.detectIndentation": false</code></pre>
+          <p>
+            By default VS Code infers tabs-versus-spaces per file from what it finds. On a codebase
+            with decades of mixed history that means the setting changes as you move between units,
+            and your edits inherit whatever the file happened to have.
+          </p>
+
+          <h3>Let folding work on big units</h3>
+          <pre><code>"editor.foldingMaximumRegions": 8000</code></pre>
+          <p>
+            Folding gives up past a fixed number of regions, and a large Delphi unit blows through
+            the default. It fails quietly — folding simply stops working, with no message.
+          </p>
+
+          <h3>Teach it that begin/end is a bracket pair</h3>
+          <p>
+            VS Code understands <code>{}</code> and <code>()</code>. It has no idea that
+            <code>begin</code> and <code>end</code> belong together, so bracket matching and folding
+            do nothing useful in Pascal until you tell it — the same for
+            <code>case</code>/<code>end</code>, <code>repeat</code>/<code>until</code>,
+            <code>try</code>/<code>end</code>.
+          </p>
+          <div class="doc-note">
+            <strong>You do not have to type any of this.</strong> The
+            <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a>
+            plugin writes them all into a <code>vscode-workspace-defaults.json</code> next to your
+            project, together with the recommendation to install DelphiLSP. Put that file under
+            version control and your colleagues get the same editor behaviour on checkout, which is
+            the point of it existing.
+          </div>
+
+          <h3>One more, from the File menu</h3>
+          <p>
+            Turn on <strong>Auto Save</strong>. You will be switching between Delphi and VS Code
+            constantly, and this way the file on disk is already current when you switch back. Note
+            the asymmetry: Delphi does <em>not</em> auto-save when you leave it, unless you left
+            through the plugin&rsquo;s own <em>Edit in Visual Studio Code</em> command.
+          </p>
+        </section>
+
+        <section id="next">
+          <h2>Next</h2>
+          <p>
+            That is the orientation. <a href="01-preparing-your-project.html">Chapter 1</a> is about
+            getting your project compiled so the debugger has something to read — which is the other
+            thing that stops people on day one, and has nothing to do with VS Code.
+          </p>
+        </section>
+
+        <nav class="doc-prevnext" aria-label="Chapter navigation">
+          <a class="doc-next" href="01-preparing-your-project.html">1. Preparing your project &rarr;</a>
+        </nav>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="../../../index.html" class="footer-logo">
+        <img src="../../../assets/logo-mca-software.png" alt="MCA Software">
+      </a>
+      <div class="footer-links">
+        <a href="../../../index.html#projects">Projects</a>
+        <a href="../../../index.html#contributions">Contributions</a>
+        <a href="https://github.com/csm101/delphi-visual-studio-code-debugger" target="_blank" rel="noopener">GitHub</a>
+        <a href="../../../contact.html">Contact</a>
+        <a href="../../../privacy.html">Privacy Policy</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 MCA Software S.a.s. di Sirna Carlo &amp; C.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
