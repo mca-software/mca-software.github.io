@@ -111,7 +111,7 @@
                 </tr>
                 <tr>
                   <td>Intrinsics</td>
-                  <td><code>Length</code>, <code>SizeOf</code>, <code>Ord</code>, <code>Low</code>, <code>High</code></td>
+                  <td><code>Length</code>, <code>SizeOf</code>, <code>Ord</code>, <code>Low</code>, <code>High</code>, <code>Assigned</code>, <code>Pred</code>, <code>Succ</code>, <code>Abs</code>, <code>Chr</code>, <code>Trunc</code>, <code>Round</code>, <code>Int</code>, <code>Frac</code>, <code>Copy</code>, <code>Pos</code>, <code>UpperCase</code>, <code>LowerCase</code></td>
                 </tr>
                 <tr>
                   <td>Addresses</td>
@@ -120,6 +120,38 @@
               </tbody>
             </table>
           </div>
+          <p>
+            <strong>Operator precedence is Delphi&rsquo;s</strong>, not C&rsquo;s: <code>and</code> binds
+            like a multiplication and <code>or</code> / <code>xor</code> like an addition, both
+            tighter than any comparison. So <code>Flags and MASK = 0</code> means what it means in
+            your source, and <code>a &gt; 1 and b &lt; 2</code> needs its parentheses here exactly as
+            it does in the compiler.
+          </p>
+          <p>
+            <strong>Strings compare by their characters</strong>, ordinally, across all the string
+            types and against <code>Char</code>. A <code>nil</code> string reads as empty, and
+            comparing a string against something that is not text is refused with a reason rather
+            than quietly compared as a number.
+          </p>
+
+          <h3>Intrinsics the debugger cannot provide</h3>
+          <p>
+            The eighteen listed above are the ones that exist. The rest of Delphi&rsquo;s built-ins
+            are compiler magic with no symbol in the binary to call, so the debugger cannot run them
+            — but it says so by name instead of reporting an unresolved symbol, which would read as
+            though your variable were wrong:
+          </p>
+          <pre><code>&lt;Format is a Delphi compiler intrinsic, not a function in the binary,
+ so the debugger cannot call it: it takes an open array of const, which
+ cannot be built from outside the process -- concatenate with + instead&gt;</code></pre>
+          <p>
+            Twenty-five are answered this way, each with the reason and, where one exists, the thing
+            to write instead — <code>Inc(X)</code> tells you to write <code>X + 1</code>,
+            <code>Include</code> points at <code>x in S</code>, <code>Addr</code> at <code>@X</code>.
+            Several are refused on principle rather than for want of a symbol: <code>New</code>,
+            <code>Dispose</code>, <code>SetLength</code> and <code>Halt</code> would allocate, free,
+            mutate or end the debuggee, and evaluating a watch expression must not do any of that.
+          </p>
         </section>
 
         <section id="calls">

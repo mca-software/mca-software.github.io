@@ -92,12 +92,22 @@
           <p>
             Right-click the gutter and choose <em>Edit Breakpoint</em>. The condition is a Pascal
             expression evaluated in the debuggee at every hit: non-zero or true stops, zero or false
-            continues. If the expression <em>fails to evaluate</em> it is treated as false and
-            execution continues silently — worth remembering when a conditional breakpoint never
-            fires and the condition references something not in scope at that line. The full
-            expression grammar is in
+            continues. The full expression grammar is in
             <a href="08-expression-evaluation.html">chapter 8</a>.
           </p>
+          <div class="doc-note">
+            <strong>If the condition cannot be evaluated at all, the breakpoint stops anyway</strong>
+            and tells you why — the reason appears on the stop itself and in the Debug Console, once
+            per breakpoint. This is what the Delphi IDE does, and it is the only safe answer: a
+            condition the debugger cannot read is a question you have not actually asked, and
+            silently not stopping would be indistinguishable from the condition being false. You
+            would conclude the code never runs.
+            <br><br>
+            So a breakpoint that suddenly stops every time with an error is the debugger reporting a
+            broken condition, not misbehaving. Read the message and fix the expression. Note that the
+            hit count is bypassed in this case: a <code>%100</code> would otherwise swallow the very
+            stop that is trying to tell you something is wrong.
+          </div>
         </section>
 
         <section id="hit-count">

@@ -114,10 +114,17 @@
         <section id="attach-properties">
           <h2>Attach configuration</h2>
           <p>
-            Adds the following. <code>program</code>, <code>sourceRoot</code>,
-            <code>sourceSearchPaths</code>, <code>modules</code>, <code>exceptionRules</code>,
-            <code>useGlobalExceptionRules</code>, <code>globalExceptionRulesPath</code>,
-            <code>progressLocation</code> and <code>diagnosticLog</code> work as they do for launch.
+            Adds the following. <code>program</code>, <code>mapFile</code>, <code>rsmFile</code>,
+            <code>sourceRoot</code>, <code>sourceSearchPaths</code>, <code>modules</code>,
+            <code>exceptionRules</code>, <code>useGlobalExceptionRules</code>,
+            <code>globalExceptionRulesPath</code>, <code>rawStackScan</code>,
+            <code>progressLocation</code>, <code>diagnosticLog</code> and
+            <code>diagnosticsLocation</code> all work as they do for launch.
+          </p>
+          <p>
+            <code>stopAtEntry</code> and <code>args</code> are the two that do <em>not</em> — and
+            they are absent from the attach schema rather than silently ignored, because both only
+            mean something for a process the debugger starts itself.
           </p>
           <div class="doc-scroll">
             <table class="doc-table">
@@ -170,7 +177,7 @@
         <section id="commands">
           <h2>Commands</h2>
           <p>
-            Eleven commands, all in the <strong>Delphi Debugger</strong> category — so in the Command
+            Twelve commands, all in the <strong>Delphi Debugger</strong> category — so in the Command
             Palette (<code>Ctrl+Shift+P</code>) they read
             <code>Delphi Debugger: Edit Exception Rules…</code> and so on. Four of them are
             deliberately <em>not</em> in the palette, because they only make sense on the thing you
@@ -191,6 +198,7 @@
                 <tr><td>View Memory (Delphi)</td><td><strong>Hover icon on a row</strong> in the Variables or Watch view — not in the right-click menu</td><td>yes</td></tr>
                 <tr><td>Always Evaluate This Property (Delphi)</td><td>Right-click a row in Variables <em>or</em> Watch</td><td><strong>no</strong></td></tr>
                 <tr><td>Never Auto-Evaluate This Property (Delphi)</td><td>Right-click a row in Variables <em>or</em> Watch</td><td><strong>no</strong></td></tr>
+                <tr><td>Forget Evaluation Decision (Delphi)</td><td>Right-click a row in Variables <em>or</em> Watch — undoes a previous allow or deny</td><td><strong>no</strong></td></tr>
                 <tr><td>Copy Path</td><td><strong>Hover icon</strong> on a module row in the Delphi Modules view</td><td><strong>no</strong></td></tr>
                 <tr><td>Pick a Process to Attach To</td><td>Only as <code>${command:delphi-win64.pickProcess}</code> in an attach configuration</td><td><strong>no</strong></td></tr>
               </tbody>

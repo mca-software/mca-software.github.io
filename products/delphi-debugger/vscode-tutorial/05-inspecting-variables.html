@@ -109,7 +109,9 @@
             </li>
             <li><strong>Records</strong> expand through their <code>TypeInfo</code>.</li>
             <li>
-              <strong>Dynamic arrays</strong> expand element by element, up to 512 of them.
+              <strong>Dynamic arrays</strong> expand element by element, up to 1024 of them — past
+              that the tree says how many were shown out of how many exist, rather than just
+              stopping.
             </li>
             <li>
               <strong>Generic collections</strong> — <code>TList&lt;T&gt;</code>,
@@ -171,11 +173,17 @@
             panel was expanded. The debugger does not do that by default.
           </p>
           <p>
-            Instead there is a safelist, driven by two commands you reach by right-clicking the row
-            — in the Variables view or the Watch view, either works: <em>Always Evaluate
-            This Property (Delphi)</em> and <em>Never Auto-Evaluate This Property (Delphi)</em>. A time
-            budget also bounds how long a burst of automatic getter calls may hold up the panel, so a
-            slow property cannot freeze the Variables view.
+            Instead there is a safelist, driven by three commands you reach by right-clicking the row
+            — in the Variables view or the Watch view, either works: <em>Always Evaluate This
+            Property (Delphi)</em>, <em>Never Auto-Evaluate This Property (Delphi)</em>, and
+            <em>Forget Evaluation Decision (Delphi)</em> to undo either of them. A time budget also
+            bounds how long a burst of automatic getter calls may hold up the panel, so a slow
+            property cannot freeze the Variables view.
+          </p>
+          <p>
+            The decision is remembered across sessions — it is written to a file under your user
+            profile, and the confirmation message names that file, so it can also be edited or reset
+            by hand.
           </p>
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-05-safelist-menu.png">
             <p>Screenshot: a getter-backed property row in the Variables view reading <code>(expand to evaluate)</code>, with the right-click menu open on it showing <em>Always Evaluate This Property (Delphi)</em> and <em>Never Auto-Evaluate This Property (Delphi)</em>. Both the placeholder text and the menu entries need to be visible in one shot.</p>
