@@ -115,10 +115,17 @@
             <li>Writes individual bytes, behind an explicit toggle rather than by accident.</li>
           </ul>
           <p>
-            The stock pane can be brought back alongside it with the
-            <code>delphi-win64.stockMemoryView</code> setting, which is the only reason to still have
-            the Hex Editor extension installed.
+            Open it from the <strong>hover icon on a row</strong> in the Variables or Watch view — an
+            inline icon at the right-hand end of the row, not an entry in the right-click menu.
           </p>
+          <div class="doc-note">
+            VS Code&rsquo;s own hex pane (<em>View Binary Data</em>) is <strong>switched off by
+            default</strong>, not merely supplemented: the extension tells the adapter to withhold
+            the memory capabilities that put it there, so that icon is absent entirely. Set
+            <code>delphi-win64.stockMemoryView</code> to <code>true</code> to get it back alongside
+            this one — which is also the only remaining reason to keep the Hex Editor extension
+            installed.
+          </div>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-07-memory-view.png">
             <p>Screenshot: the custom &ldquo;View Memory (Delphi)&rdquo; panel with a byte-extent marker and at least one flashed (changed-since-last-stop) byte visible.</p>

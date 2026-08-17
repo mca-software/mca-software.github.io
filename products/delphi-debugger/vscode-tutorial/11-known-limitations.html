@@ -122,14 +122,12 @@
               <strong>No &ldquo;step into a specific call target&rdquo; chooser</strong> when a line
               contains several calls.
             </li>
-            <li>
-              <strong>The DAP <code>modules</code> request is not implemented</strong>, deliberately:
-              the same information is already attached to every stack frame. Use the
-              <a href="09-multi-bpl-and-modules.html#modules-view">Delphi Modules view</a>, or
-              <code>get_loaded_modules</code> over
-              <a href="../mcp/tool-reference.html">MCP</a>.
-            </li>
           </ul>
+          <p>
+            That is the whole list. Every other DAP request the editor makes, the adapter answers —
+            including <code>modules</code>, which is what the
+            <a href="09-multi-bpl-and-modules.html#modules-view">Delphi Modules view</a> is built on.
+          </p>
         </section>
 
         <section id="refusals">

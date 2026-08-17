@@ -72,11 +72,19 @@
           <h2>Source-line breakpoints</h2>
           <p>
             Click the editor gutter, as in any other language. One behaviour worth knowing: a
-            breakpoint placed on a routine&rsquo;s <code>begin</code> line is silently relocated to the
-            first real statement. Stopping on <code>begin</code> itself would show you the caller&rsquo;s
-            leftovers, because the parameters have not been spilled to the frame yet — the relocation
-            is what makes the Variables panel show the right thing when you arrive.
+            breakpoint placed on a routine&rsquo;s <code>begin</code> line is planted at the first real
+            statement instead. Stopping on <code>begin</code> itself would show you the caller&rsquo;s
+            leftovers, because the parameters have not been spilled to the frame yet — moving it is
+            what makes the Variables panel show the right thing when you arrive.
           </p>
+          <div class="doc-note">
+            That is the <em>only</em> adjustment made. A breakpoint on a blank line, a comment or a
+            <code>var</code> block is not moved to the nearest executable line and no alternative is
+            suggested: the line simply comes back unverified — a hollow gutter marker — with the
+            reason <em>&ldquo;No debug info for this line&rdquo;</em>. If a breakpoint refuses to arm,
+            check that first, then check that the unit was compiled with debug information at all
+            (<a href="01-preparing-your-project.html">chapter 1</a>).
+          </div>
         </section>
 
         <section id="conditional">
@@ -219,14 +227,28 @@
         <section id="set-next-statement">
           <h2>Set Next Statement</h2>
           <p>
-            Not a breakpoint, but the other half of controlling where execution goes. Right-click a
-            line while stopped and choose <em>Set Next Statement</em>, or drag the yellow instruction
-            pointer arrow. Execution resumes from there — you can re-run a block you just stepped
-            through, or skip one, without restarting the session.
+            Not a breakpoint, but the other half of controlling where execution goes: it moves the
+            instruction pointer without restarting, so you can re-run a block you just stepped
+            through, or skip one entirely.
           </p>
+          <p>
+            While stopped, <strong>right-click the line you want to jump to</strong> and take the
+            command from the editor&rsquo;s context menu.
+          </p>
+          <div class="doc-note">
+            <strong>Coming from the Delphi IDE:</strong> there is no yellow arrow to drag. Dragging
+            the execution marker is a Delphi IDE gesture that Visual Studio Code does not implement,
+            so the context menu is the only route.
+            <br><br>
+            And unlike the Delphi IDE, <strong>the destination is not checked</strong>. The debugger
+            will move the instruction pointer to any line that carries debug information — including
+            one in a different routine — leaving the call stack untouched, and nothing warns you.
+            Jumping out of the current routine this way will corrupt the stack. Stay inside the
+            routine you are stopped in.
+          </div>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-03-set-next-statement.png">
-            <p>Screenshot: the right-click context menu on a stopped line showing &ldquo;Set Next Statement&rdquo;.</p>
+            <p>Screenshot: the editor&rsquo;s right-click context menu on a stopped line, showing the command that moves the instruction pointer.</p>
             <figcaption>(screenshot to be added — <code>tutorial-03-set-next-statement.png</code>)</figcaption>
           </figure>
         </section>

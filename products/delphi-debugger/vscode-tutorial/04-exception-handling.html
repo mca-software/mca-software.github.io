@@ -85,9 +85,15 @@
                 <tr><td><code>delphi</code></td><td>First-chance Delphi language raises</td><td>on</td></tr>
                 <tr><td><code>av</code></td><td>First-chance access violations</td><td>on</td></tr>
                 <tr><td><code>all</code></td><td>Every first-chance exception, including native ones</td><td>off</td></tr>
-                <tr><td><code>unhandled</code></td><td>Second-chance — the ones that actually crash the program</td><td>on</td></tr>
+                <tr><td><code>unhandled</code></td><td>Second-chance — the ones that actually crash the program</td><td><strong>always on</strong></td></tr>
               </tbody>
             </table>
+          </div>
+          <div class="doc-note">
+            <code>unhandled</code> is the one filter you cannot switch off. Unticking it in the
+            BREAKPOINTS view has no effect — the adapter keeps it armed regardless, because silently
+            swallowing a second-chance exception almost always wedges the program, and a debugger
+            that lets you do that by accident is not doing its job.
           </div>
           <p>
             A first-chance break passes the exception through correctly when you continue, so the

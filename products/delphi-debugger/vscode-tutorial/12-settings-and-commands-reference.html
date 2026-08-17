@@ -169,26 +169,38 @@
 
         <section id="commands">
           <h2>Commands</h2>
-          <p>All under the <strong>Delphi Debugger</strong> category in the command palette.</p>
+          <p>
+            Eleven commands, all in the <strong>Delphi Debugger</strong> category — so in the Command
+            Palette (<code>Ctrl+Shift+P</code>) they read
+            <code>Delphi Debugger: Edit Exception Rules…</code> and so on. Four of them are
+            deliberately <em>not</em> in the palette, because they only make sense on the thing you
+            clicked; those are marked below.
+          </p>
           <div class="doc-scroll">
             <table class="doc-table">
               <thead>
-                <tr><th>Command</th><th>Where it lives</th></tr>
+                <tr><th>Command</th><th>Where it lives</th><th>In palette</th></tr>
               </thead>
               <tbody>
-                <tr><td>Edit Exception Rules…</td><td>Breakpoints / Call Stack view title bar</td></tr>
-                <tr><td>Create a Rule for This Exception…</td><td>Available only while stopped on an exception</td></tr>
-                <tr><td>Toggle Raw Stack Scan</td><td>Call Stack view title bar</td></tr>
-                <tr><td>Pick a Process to Attach To</td><td>Used as <code>${command:delphi-win64.pickProcess}</code> in an attach configuration</td></tr>
-                <tr><td>View Memory (Delphi)</td><td>Variables / Watch context menu</td></tr>
-                <tr><td>Always Evaluate This Property (Delphi)</td><td>Variables context menu, on a getter-backed property</td></tr>
-                <tr><td>Never Auto-Evaluate This Property (Delphi)</td><td>Variables context menu</td></tr>
-                <tr><td>Refresh Modules</td><td>Delphi Modules view</td></tr>
-                <tr><td>Filter Modules…</td><td>Delphi Modules view</td></tr>
-                <tr><td>Clear Module Filter</td><td>Delphi Modules view</td></tr>
-                <tr><td>Copy Path</td><td>Delphi Modules view, per module</td></tr>
+                <tr><td>Edit Exception Rules…</td><td>Title bar of the Breakpoints and Call Stack views</td><td>yes</td></tr>
+                <tr><td>Create a Rule for This Exception…</td><td>The floating debug toolbar — only while stopped on an exception</td><td>yes, same condition</td></tr>
+                <tr><td>Toggle Raw Stack Scan</td><td>Call Stack view title bar</td><td>yes</td></tr>
+                <tr><td>Refresh Modules</td><td>Delphi Modules view title bar</td><td>yes</td></tr>
+                <tr><td>Filter Modules…</td><td>Delphi Modules view title bar</td><td>yes</td></tr>
+                <tr><td>Clear Module Filter</td><td>Delphi Modules view title bar, once a filter is set</td><td>yes</td></tr>
+                <tr><td>View Memory (Delphi)</td><td><strong>Hover icon on a row</strong> in the Variables or Watch view — not in the right-click menu</td><td>yes</td></tr>
+                <tr><td>Always Evaluate This Property (Delphi)</td><td>Right-click a row in Variables <em>or</em> Watch</td><td><strong>no</strong></td></tr>
+                <tr><td>Never Auto-Evaluate This Property (Delphi)</td><td>Right-click a row in Variables <em>or</em> Watch</td><td><strong>no</strong></td></tr>
+                <tr><td>Copy Path</td><td><strong>Hover icon</strong> on a module row in the Delphi Modules view</td><td><strong>no</strong></td></tr>
+                <tr><td>Pick a Process to Attach To</td><td>Only as <code>${command:delphi-win64.pickProcess}</code> in an attach configuration</td><td><strong>no</strong></td></tr>
               </tbody>
             </table>
+          </div>
+          <div class="doc-note">
+            Two of these are <strong>inline icons</strong>, not menu entries: they appear on the row
+            itself when the mouse is over it, at the right-hand end. Looking for
+            <em>View Memory (Delphi)</em> or <em>Copy Path</em> in a right-click menu will not find
+            them.
           </div>
         </section>
 
