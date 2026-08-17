@@ -39,6 +39,7 @@
 
       <aside class="doc-toc">
         <span>On this page</span>
+        <a href="#prerequisite">Important prerequisite</a>
         <a href="#download">Download</a>
         <a href="#install">Install</a>
         <a href="#first-run">First run</a>
@@ -62,18 +63,51 @@
           puts all three where they belong. No Delphi toolchain is needed on the machine you install
           on — only on the machine that compiles the program you want to debug.
         </p>
-        <div class="doc-note">
-          <strong>There are two halves to this, and the second one matters as much as the first.</strong>
-          Installing the debugger gives VS Code the ability to debug Delphi. It does not tell it
-          <em>what</em> to debug — that comes from a <code>launch.json</code> carrying your output
-          paths, your source root, a few hundred unit search paths and, on a package project, the BPL
-          list.
-          <br><br>
-          You are not expected to write that. The
-          <a href="#project">Edit in VS Code</a> plugin generates it from the Delphi project you
-          already have open, and opens the whole thing in VS Code with one command. That is the
-          intended way in, and the rest of this manual assumes you took it.
-        </div>
+        <section id="prerequisite">
+          <h2>Important prerequisite</h2>
+          <p>
+            <strong>Today, a Delphi project only becomes a properly configured VS Code workspace
+            through the
+            <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a>
+            Delphi IDE plugin.</strong> Treat it as required, not as a nice extra.
+          </p>
+          <p>
+            Nothing in VS Code can read a <code>.dproj</code>. Everything that makes your project
+            <em>your project</em> — the output directory for this platform and configuration, the
+            source root, the unit search paths accumulated over years, the BPL list on a package
+            project — lives in the Delphi IDE and has to be handed over. The plugin is what hands it
+            over.
+          </p>
+          <p>That configuration is not only for debugging. It carries two things at once:</p>
+          <ul>
+            <li>
+              <strong>Editing.</strong> This is what the plugin was originally built for, before this
+              debugger existed. Without the generated configuration, DelphiLSP has no search paths,
+              so code navigation, completion and Copilot are all working half-blind on a codebase
+              they cannot resolve.
+            </li>
+            <li>
+              <strong>Debugging.</strong> The <code>launch.json</code> and attach configurations this
+              debugger needs, derived from the same project options. On a real project that is a few
+              hundred entries.
+            </li>
+          </ul>
+          <div class="doc-note">
+            So the order is: install the debugger (below), install the plugin, then open your project
+            <em>from Delphi</em> — see <a href="#project">Opening your project</a>. Install the
+            debugger alone and it works, but with nothing to point it at. The rest of this manual
+            assumes you took that route.
+          </div>
+          <p>
+            <strong>On the roadmap:</strong> not requiring the Delphi IDE at all. There is a
+            third-party extension,
+            <a href="https://github.com/valentin-baron/delphi-devkit" target="_blank" rel="noopener">Delphi DevKit</a>,
+            that manages Delphi projects and compilers from inside VS Code — including generating the
+            DelphiLSP configuration — without RAD Studio needing to be open. Interoperating with it,
+            so this debugger can be configured from a workspace it set up, is planned. It is not
+            supported yet; for now the plugin is the way.
+          </p>
+        </section>
 
         <section id="download">
           <h2>Download</h2>
@@ -268,9 +302,10 @@
             <a href="../vscode-tutorial/index.html">the tutorial</a> becomes useful.
           </p>
           <p>
-            Its own settings live under <em>Tools → Options → Third Party → Edit in VS Code</em>, and
-            it can drive Cursor, Windsurf, TRAE and VSCodium as well as VS Code itself — the menu
-            entry changes name to match.
+            The menu entry also carries a keyboard shortcut, configurable per editor. Its settings
+            live under <em>Tools → Options → Third Party → Edit in VS Code</em>, and it can drive
+            Cursor, Windsurf, TRAE and VSCodium as well as VS Code itself — the menu entry changes
+            name to match.
           </p>
 
           <h3>What to put under version control</h3>
