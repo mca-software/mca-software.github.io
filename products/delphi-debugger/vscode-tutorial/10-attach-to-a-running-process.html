@@ -101,9 +101,37 @@
           </p>
           <pre><code>"processId": "${command:delphi-win64.pickProcess}"</code></pre>
           <p>
-            When several instances of the same executable are running, the picker lists each one with
-            its full command line — which is usually the only thing that tells two instances of the
-            same service apart.
+            You may not need to write that at all: a configuration that names a
+            <code>processName</code> but no usable <code>processId</code> brings up the picker by
+            itself, so an attach configuration you already have gains it without editing.
+          </p>
+          <p>Each row carries what you need to tell instances apart:</p>
+          <ul>
+            <li>
+              the executable name, its <strong>PID</strong>, architecture, start time and Windows
+              session;
+            </li>
+            <li>the <strong>full command line</strong>, and the main window&rsquo;s caption if it has one;</li>
+            <li>
+              a <strong>reason</strong>, for processes that cannot be debugged — those are listed and
+              marked rather than hidden, so you are not left wondering where your process went.
+            </li>
+          </ul>
+          <p>
+            Typing filters across all of it, not just the name, so a fragment of a command line
+            narrows the list. Processes whose name matches your workspace folder are floated to the
+            top and Windows&rsquo; own infrastructure is pushed down. And if a name filter matches
+            exactly one process, the picker does not appear at all — it just attaches.
+          </p>
+          <div class="doc-note">
+            Pressing <code>Escape</code> in the picker <strong>cancels the whole session start</strong>.
+            There is no fallback to some default process, deliberately: attaching a debugger to
+            whichever process happened to be first in an enumeration is not a sane default.
+          </div>
+          <p>
+            The list comes from the debug adapter itself, not from Windows&rsquo; task list — which is
+            also available on its own: running the adapter with
+            <code>--list-processes</code> prints the same information as JSON and exits.
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-10-process-picker.png">

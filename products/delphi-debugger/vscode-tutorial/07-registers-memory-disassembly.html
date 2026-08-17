@@ -119,6 +119,114 @@
             <li>Flashes the bytes that changed since the previous stop.</li>
             <li>Writes individual bytes, behind an explicit toggle rather than by accident.</li>
           </ul>
+
+          <h3>Opening it</h3>
+          <p>
+            Three ways in, and which one you get depends on what the row knows about itself:
+          </p>
+          <ul>
+            <li>
+              <strong>From a Variables or Watch row</strong> — the usual route, via the inline icon
+              described above. The row already carries an address.
+            </li>
+            <li>
+              <strong>From a Watch row with no address</strong> — the expression is evaluated first,
+              then the view opens on the result.
+            </li>
+            <li>
+              <strong>From nothing</strong> — run the command with no row selected and it asks for an
+              expression, suggesting the shapes it accepts: a variable, a field path, or
+              <code>@Rec</code> for an address.
+            </li>
+          </ul>
+          <div class="doc-note">
+            A value that exists only as a computation — an arithmetic result, a function return —
+            is refused, because it lives nowhere in memory to be dumped. The message says so
+            explicitly rather than opening an empty pane.
+          </div>
+          <p>
+            One pane per value per session: asking for the same variable again reveals the pane you
+            already have rather than stacking another. All of them close when the session ends.
+          </p>
+
+          <h3>Moving around</h3>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Control</th><th>What it does</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>▲ back</strong> / <strong>▼ forward</strong></td><td>Scroll by a page</td></tr>
+                <tr><td><strong>value start</strong></td><td>Jump back to the value&rsquo;s own address</td></tr>
+                <tr><td><strong>refresh</strong></td><td>Re-read now, and mark what changed since the last time you looked</td></tr>
+                <tr><td><strong>edit: off</strong> / <strong>edit: ON</strong></td><td>Arms byte editing — see below</td></tr>
+                <tr><td><strong>−</strong> / number / <strong>+</strong></td><td>Bytes per row. Match it to a 2D array&rsquo;s row width and the block reads as one.</td></tr>
+                <tr><td>Mouse wheel</td><td>One row; hold <code>Shift</code> for a page</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Scrolling <em>backwards past the start</em> is the point of the thing, not an accident:
+            a string&rsquo;s length header sits four bytes before its characters, a dynamic array&rsquo;s
+            eight before its elements.
+          </p>
+
+          <h3>Reading the colours</h3>
+          <p>
+            Four marks, and they mean different things — telling them apart is most of the value of
+            the view:
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Mark</th><th>Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Blue <strong>underline</strong></td>
+                  <td>This byte belongs to the value you opened the view on. Nothing is underlined when the extent could not be established — deliberately, so the view never claims a neighbouring variable&rsquo;s bytes are yours.</td>
+                </tr>
+                <tr>
+                  <td>Blue <strong>box</strong>, and the row&rsquo;s address in blue</td>
+                  <td>Offset zero — the variable&rsquo;s own address.</td>
+                </tr>
+                <tr>
+                  <td><strong>Orange flash</strong>, fading to orange text</td>
+                  <td>Changed since the last comparison point. The flash fades after a few seconds but the text <em>stays</em> orange until the next comparison, so a change you looked away from is still there when you look back.</td>
+                </tr>
+                <tr>
+                  <td>Grey <code>??</code></td>
+                  <td>Not readable at that address.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-note">
+            <strong>What counts as a comparison point</strong> — a stop, a write made in this pane,
+            or the <em>refresh</em> button. Scrolling, resizing the pane and changing the column
+            count are just looking: they never clear the marks and never produce a false
+            &ldquo;nothing changed&rdquo;. The header line also states the number of changed bytes, so
+            a flash you missed is still countable.
+          </div>
+          <p>
+            If the value moves — a string reallocated, an object freed and rebuilt — the pane
+            notices on the next refresh, retargets to the new address and says so in its header.
+          </p>
+
+          <h3>Writing a byte</h3>
+          <ol>
+            <li>Click <strong>edit: off</strong> so it reads <strong>edit: ON</strong>.</li>
+            <li>Click the byte and type over it — one or two hex digits, <code>0x</code> allowed.</li>
+            <li>
+              Press <code>Enter</code>, or simply click away: <strong>both commit</strong>. Press
+              <code>Escape</code> to abandon the edit and restore the byte.
+            </li>
+          </ol>
+          <p>
+            Anything that is not a byte is refused by name — <code>"zz" is not a byte (expected
+            00..FF)</code> — and a write the debuggee rejects reports that too. Unreadable
+            <code>??</code> cells never become editable in the first place.
+          </p>
           <p>
             Open it from the <strong>hover icon on a row</strong> in the Variables or Watch view — an
             inline icon at the right-hand end of the row, not an entry in the right-click menu.
@@ -174,10 +282,41 @@
           <h2>When the symbols run out</h2>
           <p>
             A stop at an address with no source — OS code, a module built without debug information,
-            an address the debug info does not cover — does not go silent. You get the address, the
-            module it belongs to, and the reason there is no source, alongside the disassembly around
-            the stop.
+            an address the debug info does not cover — does not go silent, and it does not leave you
+            staring at an empty editor either. <strong>A document opens</strong>, containing:
           </p>
+          <ul>
+            <li>the address, and the module it belongs to;</li>
+            <li>
+              <strong>why</strong> there is no source — the module has no debug information, the
+              symbols are still being indexed, the address is not covered by the symbols it does
+              have, or the module is not known at all — each with what to do about it;
+            </li>
+            <li>
+              the <strong>disassembly around the stop</strong>: a few proven instructions before the
+              current one and a good stretch after, each labelled with the nearest function and
+              offset, and with a source file and line wherever the line table has one — which is
+              often how you discover that the frame <em>below</em> you does have source.
+            </li>
+          </ul>
+          <p>
+            That last point is the reason this exists rather than a blank screen. A stop in the RTL
+            or in a package built without symbols is not a dead end; it tells you where you are and
+            what is nearby, and from there
+            <a href="02-your-first-session.html#instruction-stepping">instruction stepping</a> gets
+            you out.
+          </p>
+          <div class="doc-note">
+            If <em>no</em> frame on the whole stack has source, the debugger also announces it in the
+            Debug Console rather than letting a stop pass unnoticed. Set
+            <code>"noSourcePlaceholder": false</code> in the launch configuration to turn the whole
+            mechanism off.
+          </div>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-07-no-source.png">
+            <p>Screenshot: the document that opens on a stop with no source — the address and module header, the stated reason, and the annotated disassembly below it.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-07-no-source.png</code>)</figcaption>
+          </figure>
           <p>
             From there, instruction-granularity stepping (see
             <a href="02-your-first-session.html#instruction-stepping">chapter 2</a>) is what moves you

@@ -171,6 +171,21 @@
             context is restored and the evaluation returns a failure string. A broken expression does
             not take the session with it.
           </p>
+          <h3>Hovering, and what exactly gets evaluated</h3>
+          <p>
+            Resting the mouse over code while stopped shows the value, as you would expect. What is
+            worth knowing is <em>how much</em> of the line it takes. The identifier under the cursor
+            is grown outwards into a whole Pascal expression — through <code>.</code> for a field
+            path, through <code>[…]</code> for an index, through <code>^</code> for a dereference —
+            so hovering anywhere in <code>Customer.Orders[3].Total</code> evaluates the whole thing,
+            not the one word you happened to be over.
+          </p>
+          <p>
+            <strong>And if you select text first, the selection wins.</strong> Select any expression,
+            hover inside the selection, and that is what is evaluated. This is the Delphi IDE
+            behaviour, and it is here on purpose — but nothing in the interface advertises it, so it
+            is worth knowing it exists.
+          </p>
           <div class="doc-note">
             Hovering also evaluates, with <strong>no</strong> confirmation and no safelist — see
             <a href="05-inspecting-variables.html#getters">chapter 5</a>. On a codebase with

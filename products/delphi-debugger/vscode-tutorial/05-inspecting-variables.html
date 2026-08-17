@@ -121,6 +121,25 @@
           </ul>
           <p>Expansion nests, so you can walk an object graph as far as it goes.</p>
 
+          <h3>Properties, events and fields are separated</h3>
+          <p>
+            An object with published properties does not expand into one flat list. It splits into
+            three groups — <strong>properties</strong>, <strong>event handlers</strong> and
+            <strong>fields</strong> — because they answer different questions and only one of them is
+            writable.
+          </p>
+          <p>
+            <strong>Only the fields group can be edited.</strong> A property is whatever its getter
+            returns; writing to it would mean calling a setter, which is running your code, which the
+            debugger will not do behind your back. If you want to change what a property reports,
+            change the field behind it.
+          </p>
+          <p>
+            Indexed properties appear as leaves reading <code>(indexed property)</code> — there is no
+            index to supply from a tree view. Evaluate them by hand in Watch, where you can write the
+            index yourself.
+          </p>
+
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-05-object-graph.png">
             <p>Screenshot: the Variables panel with an expanded object graph including a generic collection (<code>TList&lt;T&gt;</code> or <code>TDictionary&lt;K,V&gt;</code>) and a closure&rsquo;s captured fields.</p>
             <figcaption>(screenshot to be added — <code>tutorial-05-object-graph.png</code>)</figcaption>
@@ -158,6 +177,32 @@
               rather than to the local copy.
             </li>
           </ul>
+          <p>
+            What matters in practice is how a value must be <em>spelled</em> when you type it in:
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>Type</th><th>Write it as</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Booleans</td><td><code>true</code> / <code>false</code>, or a number. All three widths handled.</td></tr>
+                <tr><td><code>TDateTime</code>, <code>TDate</code>, <code>TTime</code></td><td><code>2026-08-17 14:30:00.000</code> — date alone and time alone both accepted — or the raw float</td></tr>
+                <tr><td>Floats</td><td>A number. Either <code>.</code> or <code>,</code> works as the decimal separator.</td></tr>
+                <tr><td>Chars</td><td><code>'A'</code> — quotes included, one character — or the ordinal</td></tr>
+                <tr><td>Integers</td><td>Decimal, negative included</td></tr>
+                <tr><td>Enums</td><td>The <strong>member name</strong>, or its ordinal — which is range-checked against the type</td></tr>
+                <tr><td>Sets</td><td>The bitmask, as a number</td></tr>
+                <tr><td>Strings</td><td>Bare or quoted; one layer of quotes is stripped</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-note">
+            Two things are <strong>refused rather than guessed</strong>: a set wider than eight bytes,
+            and an enum whose storage width cannot be established from the debug information. Both
+            could be written at a plausible width, and a wrong width does not fail — it silently
+            corrupts the variable next to the one you meant to change. Better to be told no.
+          </div>
           <div class="doc-note">
             Editing in the <strong>Watch</strong> panel does not work — only the Variables panel does.
             The underlying DAP <code>setExpression</code> request is not implemented. See
@@ -184,6 +229,67 @@
             The decision is remembered across sessions — it is written to a file under your user
             profile, and the confirmation message names that file, so it can also be edited or reset
             by hand.
+          </p>
+          <p>
+            A property waiting for permission reads <code>(expand to evaluate)</code>. Two variants
+            of that text mean something different, and the distinction saves you from chasing the
+            wrong thing:
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>What the row says</th><th>What to do</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>(expand to evaluate)</code></td>
+                  <td>No decision has been made for this property. Expand it, or allow it permanently.</td>
+                </tr>
+                <tr>
+                  <td><code>(expand to evaluate -- automatic evaluation budget spent at this stop)</code></td>
+                  <td>Nothing is wrong with <em>this</em> property — the time allowance for automatic getter calls was used up by the rows above it. Expand it directly, or allow the slow one above so it stops eating the budget.</td>
+                </tr>
+                <tr>
+                  <td><code>(expand to evaluate -- the getter call was cut short)</code></td>
+                  <td>The call started and ran too long. This getter does real work; consider whether you want it evaluated automatically at all.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            The budget is per group of rows, so the ordering matters: one slow getter near the top
+            can push everything below it into the second state.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-05-property-groups.png">
+            <p>Screenshot: an object expanded in the Variables view showing the three group rows — <em>properties</em>, <em>event handlers</em> and <em>fields</em> — with a getter-backed property visibly deferred as <code>(expand to evaluate)</code>.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-05-property-groups.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="limits">
+          <h2>Where the tree stops</h2>
+          <p>
+            Everything here is bounded, because a debugger that tries to render a million-element
+            array freezes the panel it was meant to help you read. The bounds you can actually reach:
+          </p>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>What</th><th>Limit</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Children shown when expanding</td><td>1024, then a line saying how many exist</td></tr>
+                <tr><td>Dynamic-array preview on the collapsed row</td><td>First 50, then the total</td></tr>
+                <tr><td>String rendering</td><td>4096 characters, then the total length</td></tr>
+                <tr><td>Nested-procedure scope climb</td><td>32 levels of enclosing routines</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            None of these truncate silently: the count of what exists is always shown next to what
+            was rendered, so a partial view never reads as a complete one. To look past a cap, watch
+            the element directly — <code>Arr[50000]</code> — rather than scrolling for it.
           </p>
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-05-safelist-menu.png">
             <p>Screenshot: a getter-backed property row in the Variables view reading <code>(expand to evaluate)</code>, with the right-click menu open on it showing <em>Always Evaluate This Property (Delphi)</em> and <em>Never Auto-Evaluate This Property (Delphi)</em>. Both the placeholder text and the menu entries need to be visible in one shot.</p>

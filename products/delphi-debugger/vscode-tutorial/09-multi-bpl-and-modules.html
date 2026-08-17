@@ -113,10 +113,33 @@
           <h2>The Delphi Modules view</h2>
           <p>
             A tree view in the Run &amp; Debug sidebar listing what is currently loaded and the state
-            of each module&rsquo;s symbols. It contributes commands to refresh the list, filter it, clear
-            the filter, and copy a module&rsquo;s path — the last one being how you check that the BPL
-            being debugged is the one you think it is, rather than an older copy earlier on the search
-            path.
+            of each module&rsquo;s symbols.
+          </p>
+          <p>
+            <strong>The order is not alphabetical.</strong> The host executable comes first, then
+            every module <em>without</em> debug information, then the rest. The problem cases are put
+            where you will see them instead of somewhere down a list of ninety packages — because
+            &ldquo;my breakpoint will not bind&rdquo; almost always ends here.
+          </p>
+          <p>
+            Each row states its symbol status next to the name: <em>indexing</em> while a symbol file
+            is still being read, <em>no debug information</em>, or the list of formats that actually
+            loaded — <code>TD32 (embedded), .map</code> and so on. That naming is deliberate: TD32
+            lives inside the binary while the others are separate files, and &ldquo;<code>.map</code>
+            only&rdquo; is a materially different situation from &ldquo;TD32 and
+            <code>.rsm</code>&rdquo; — the first gives you lines but no types and no locals.
+          </p>
+          <p>Expand a module for its full path, load address, image size, and the same format list. That path is worth checking whenever behaviour does not match the source you are looking at: it tells you whether the BPL being debugged is the one you just built, or an older copy earlier on the search path.</p>
+          <p>
+            A module carrying no debug information says so in plain words —
+            <em>none found — breakpoints here cannot bind</em> — rather than leaving you to infer it
+            from an empty format list.
+          </p>
+          <p>
+            Filtering matches on <strong>name and path together</strong>, case-insensitively, and
+            <strong>several words are ANDed</strong>: <code>bpl win64</code> shows modules whose name
+            or path contains both. The line above the list always says how many of the loaded modules
+            are being shown, so a filter can never quietly hide something you were looking for.
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-09-modules-view.png">
@@ -154,8 +177,25 @@
         <section id="sources">
           <h2>Finding the sources</h2>
           <p>
-            <code>sourceRoot</code> plus <code>sourceSearchPaths</code>, each searched two levels
-            deep, and <code>${env:BDS}/source</code> automatically for RTL and VCL units.
+            The debug information records a source file by name; finding it on disk is a search, and
+            knowing its order is what lets you predict which copy you will get:
+          </p>
+          <ol>
+            <li>an absolute path, if the debug information carries one and it exists;</li>
+            <li><code>sourceRoot</code>, first its top level, then one level down;</li>
+            <li>the executable&rsquo;s own directory, then its parent, then its grandparent;</li>
+            <li>each <code>sourceSearchPaths</code> entry, top level first, then two levels down;</li>
+            <li>
+              finally, a deep recursive sweep of <code>sourceRoot</code> — which skips
+              <code>.git</code>, <code>__history</code> and <code>__recovery</code>, so an old copy
+              in the IDE&rsquo;s backup folder cannot win.
+            </li>
+          </ol>
+          <p>
+            RTL and VCL units are found automatically through <code>${env:BDS}/source</code>, without
+            listing anything. Results are remembered for the session, including the failures — so a
+            file that was missing when first needed stays missing until you restart, even if you put
+            it there in the meantime.
           </p>
           <div class="doc-note">
             <strong>Same-basename source files cannot be told apart.</strong> If two directories both

@@ -210,11 +210,29 @@
         <section id="updates">
           <h2>Staying up to date</h2>
           <p>
-            The extension checks GitHub releases once a day and notifies you with a download link when
-            a newer version exists. It fails silently when the machine is offline. Turn it off with
-            <code>delphi-win64.checkForUpdates</code> — the full settings list is in the
+            The extension checks GitHub releases once a day. When a newer version exists you get a
+            notification offering two things: <strong>Download</strong>, which opens the release page,
+            and <strong>Skip this version</strong>, which silences that particular version for good —
+            useful when you have decided to stay where you are. It fails silently when the machine is
+            offline or behind a proxy: no error, no repeated prompting.
+          </p>
+          <p>
+            Turn it off entirely with <code>delphi-win64.checkForUpdates</code> — the full settings
+            list is in the
             <a href="../vscode-tutorial/12-settings-and-commands-reference.html">settings and commands reference</a>.
           </p>
+          <div class="doc-note">
+            <strong>The extension is dormant until you first use it.</strong> Like most VS Code
+            extensions it does not load when the editor starts: it wakes on the first Delphi debug
+            session, or when the Delphi Modules view is opened. So immediately after installing,
+            <em>Delphi Debugger</em> commands may not appear in the Command Palette and no update
+            check has run yet. Start a session once and everything is there.
+          </div>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/getting-started-update.png">
+            <p>Screenshot: the update notification, showing the version comparison and both buttons — <em>Download</em> and <em>Skip this version</em>.</p>
+            <figcaption>(screenshot to be added — <code>getting-started-update.png</code>)</figcaption>
+          </figure>
           <p>
             Updating is the same operation as installing: run the new <code>Setup.exe</code>, it
             replaces the previous version in place.

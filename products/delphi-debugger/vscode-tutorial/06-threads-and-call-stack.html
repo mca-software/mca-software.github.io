@@ -133,6 +133,18 @@
             stale return address from a completed call sits on the stack exactly like a live one. The
             scan is a lead, not a stack trace.
           </div>
+          <p>
+            The presentation reinforces that. Swept entries are <strong>greyed out</strong> and always
+            <strong>appended below</strong> the real frames, never mixed in among them. And selecting
+            one shows <em>no</em> locals — not the locals of some neighbouring frame, which would be
+            worse than nothing. There is no frame there to read; the address is just a number that
+            was found on the stack.
+          </p>
+          <p>
+            Turning the scan on or off confirms itself in the status bar, and the confirmation
+            repeats the warning rather than just saying &ldquo;on&rdquo;. That is deliberate: the
+            feature is only dangerous if you forget what the extra entries mean.
+          </p>
         </section>
 
         <section id="per-thread-stepping">

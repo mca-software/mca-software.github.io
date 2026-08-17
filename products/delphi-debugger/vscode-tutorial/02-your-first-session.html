@@ -150,6 +150,33 @@
           </p>
         </section>
 
+        <section id="progress">
+          <h2>What it tells you while it works</h2>
+          <p>
+            Loading symbols for a large project takes real time, and a debugger that goes quiet
+            during it is indistinguishable from one that has hung. So the adapter reports what it is
+            doing in the <strong>status bar</strong>, at the bottom of the window: a spinner with the
+            current operation — <em>running…</em>, <em>step over…</em>, <em>building call
+            stack…</em>, <em>loading symbols: SomePackage.bpl</em>. When several things are in
+            flight it shows the newest and a count of the rest; hovering lists them all.
+          </p>
+          <p>
+            At startup the message is more specific: how many modules have loaded and how many of
+            them brought symbols, ending with a summary once the first stop is reached. That count is
+            worth a glance — a module that arrived without symbols is a breakpoint that will not
+            bind, and this is the first place it shows.
+          </p>
+          <div class="doc-note">
+            Operations shorter than about a fifth of a second never appear, so ordinary stepping
+            stays silent. If the spinner is up, something genuinely is taking time.
+          </div>
+          <p>
+            To have these appear as notification toasts instead of in the status bar, set
+            <code>"progressLocation": "notification"</code> in the launch configuration. The two are
+            mutually exclusive — you get one or the other, never both.
+          </p>
+        </section>
+
         <section id="ending">
           <h2>Ending a session</h2>
           <p>

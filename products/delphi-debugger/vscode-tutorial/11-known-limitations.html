@@ -165,6 +165,29 @@
           </ul>
         </section>
 
+        <section id="bounds">
+          <h2>Bounds, not bugs</h2>
+          <p>
+            Everything that renders a value is capped, because an uncapped debugger freezes on the
+            first pathological data structure it meets. What matters is that none of these truncate
+            silently — the total is always shown beside what was rendered:
+          </p>
+          <ul>
+            <li>1024 children per expansion, 50 elements in a collapsed array preview.</li>
+            <li>4096 characters per string.</li>
+            <li>32 levels of enclosing routines when climbing nested-procedure scopes.</li>
+            <li>
+              A symbol index gets a fixed slice of time per request; if it is not ready the answer
+              comes back incomplete and fills in on the next one, rather than blocking the editor.
+            </li>
+          </ul>
+          <p>
+            To see past a cap, ask for the thing directly — a watch on
+            <code>Arr[50000]</code> rather than scrolling a tree to it. Full details are in
+            <a href="05-inspecting-variables.html#limits">chapter 5</a>.
+          </p>
+        </section>
+
         <section id="hazards">
           <h2>Things that are easy to trip over</h2>
           <ul>
@@ -184,6 +207,17 @@
               <strong>The shared exception-rules file is strict JSON.</strong> A comment or a trailing
               comma silently yields zero rules. See
               <a href="04-exception-handling.html#shared-rules">chapter 4</a>.
+            </li>
+            <li>
+              <strong>Saving in the exception-rules editor leaves the file unsaved.</strong> It writes
+              the rules and opens the file beside the editor; saving that file is still yours to do.
+              See <a href="04-exception-handling.html#editing-rules">chapter 4</a>.
+            </li>
+            <li>
+              <strong>A breakpoint condition that cannot be evaluated stops every time</strong> and
+              reports why — including bypassing the hit count. That is intended: it is the debugger
+              telling you the condition is broken, not the breakpoint misbehaving. See
+              <a href="03-breakpoints.html#conditional">chapter 3</a>.
             </li>
             <li>
               <strong>The shipped executables are unsigned</strong>, so SmartScreen warns on first

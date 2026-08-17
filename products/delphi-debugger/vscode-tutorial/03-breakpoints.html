@@ -189,12 +189,28 @@
             <figcaption>(screenshot to be added — <code>tutorial-03-data-breakpoint-menu.png</code>)</figcaption>
           </figure>
 
+          <p>
+            There is a second way in that is easy to miss: the Breakpoints panel has an
+            <strong>Add Data Breakpoint at Address</strong> entry, which is the only place you can
+            <em>type</em> a target instead of picking it off a row. Useful when the address came from
+            somewhere else — a crash report, the disassembly, a previous session.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-03-data-bp-at-address.png">
+            <p>Screenshot: the BREAKPOINTS panel&rsquo;s <em>Add Data Breakpoint at Address</em> entry, and the input it opens for typing an address and a byte width.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-03-data-bp-at-address.png</code>)</figcaption>
+          </figure>
+
           <h3>What you can watch</h3>
           <ul>
             <li>A literal address.</li>
             <li>A global or unit-scoped variable, by name.</li>
             <li>
-              An arbitrary expression — <code>Arr[High(Arr)]</code>, <code>@Rec.Buf[0]</code>.
+              An arbitrary expression, watched <em>where it lives</em> — which is more useful than it
+              sounds. <code>Arr[High(Arr)]</code> watches the last element.
+              <code>PByte(@Arr[0]) - 1</code> watches the byte immediately <em>before</em> the buffer,
+              which is how you catch whoever is writing past the end of an array — the classic bug
+              that corrupts something unrelated and leaves no trace at the scene.
             </li>
             <li>
               <strong>A local.</strong> The watchpoint is pinned to that specific frame invocation and
@@ -270,6 +286,27 @@
             <p>Screenshot: the editor&rsquo;s right-click context menu on a stopped line, with <strong>Run to Cursor</strong> and <strong>Jump to Cursor</strong> both visible and adjacent — the whole point is that the reader can see the two together and tell them apart.</p>
             <figcaption>(screenshot to be added — <code>tutorial-03-set-next-statement.png</code>)</figcaption>
           </figure>
+        </section>
+
+        <section id="lifecycle">
+          <h2>Hollow, solid, and back again</h2>
+          <p>
+            A breakpoint marker has two states worth reading. <strong>Solid</strong> means the line
+            resolved to an address and the breakpoint is armed. <strong>Hollow</strong> means it did
+            not — hover it and the reason is there.
+          </p>
+          <p>
+            The state is not fixed at the moment you set it. A breakpoint in a unit belonging to a
+            runtime package that has not loaded yet starts hollow, and <strong>fills in by itself the
+            moment the package maps</strong> and its symbols are read. You do not have to set it
+            again, and you do not have to wait before setting it — see
+            <a href="09-multi-bpl-and-modules.html">chapter 9</a>.
+          </p>
+          <p>
+            It goes the other way too: unload the package and the marker goes hollow again, because a
+            breakpoint in code that is no longer mapped is not armed. Watching the marker is the
+            quickest way to tell whether the module you care about is actually loaded.
+          </p>
         </section>
 
         <section id="not-supported">
