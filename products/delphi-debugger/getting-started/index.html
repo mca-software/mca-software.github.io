@@ -256,20 +256,45 @@
 
           <h3>Installing it</h3>
           <p>
-            It is a design-time package, so it is built and installed the way Delphi packages always
-            are — there is no installer:
+            It is a design-time package: it installs <em>into the Delphi IDE</em>, the way components
+            do — there is no setup program. If you have never installed a package before, the whole
+            procedure is this:
           </p>
           <ol>
             <li>
-              Get the source from the
-              <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">repository</a>.
+              Clone the repository into a folder of its own, and keep it — the IDE loads the package
+              from where you built it, so this is not a temp directory:
+              <pre><code>git clone https://github.com/csm101/EditInVsCodeDelphiPlugin.git</code></pre>
+              No git? The repository&rsquo;s <em>Code → Download ZIP</em> button gets you the same
+              files.
             </li>
-            <li>Open the package project in Delphi, build it, and install it.</li>
+            <li>
+              In Delphi, open <code>EditInVSCode.dpk</code> from that folder
+              (<em>File → Open Project</em>).
+            </li>
+            <li>
+              In the Project Manager pane, <strong>right-click the package → Install</strong>. Delphi
+              compiles it and loads it into the IDE; a confirmation names the plugin it just
+              registered. From now on it loads with the IDE — this is a one-time step.
+            </li>
             <li>
               Turn on <em>Tools → Options → Editor → Language → Delphi → Code Insight</em>. DelphiLSP
               in VS Code needs it; without it you get the debugger but no code intelligence.
             </li>
+            <li>
+              Pick your hotkey under <em>Tools → Options → Third Party → Edit in VS Code</em> — the
+              key that will flip you from Delphi to VS Code on the file you are editing.
+            </li>
+            <li>
+              Verify: open any <code>.pas</code> in Delphi and run
+              <em>Tools → Edit in Visual Studio Code</em>. VS Code must open on that same file. If it
+              does, everything below is already working.
+            </li>
           </ol>
+          <div class="doc-note">
+            Upgrading later is the same dance in miniature: <code>git pull</code> in that folder,
+            reopen the package, right-click → Install again.
+          </div>
           <div class="doc-note">
             Worth doing while you are in there: turn off Delphi&rsquo;s prompt asking what to do when a
             file it has open changes on disk. You are about to be editing the same files from two
