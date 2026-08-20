@@ -109,10 +109,25 @@
             hit count is bypassed in this case: a <code>%100</code> would otherwise swallow the very
             stop that is trying to tell you something is wrong.
           </div>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-03-edit-breakpoint.png">
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-03-edit-breakpoint.png"
+                 alt="The breakpoint editor widget in the editor, opened over a source breakpoint. A dropdown on the left reads Wait for Breakpoint, with Expression, Hit Count, Log Message and Wait for Breakpoint as its options; a second field on the right reads Debugme.dpr: 89, and an OK button confirms."
+                 width="776" height="240">
+            <figcaption>One editor, four modes. <em>Edit Breakpoint</em> opens this widget over any
+            source breakpoint; the left dropdown switches between <strong>Expression</strong> (the
+            condition above), <strong>Hit Count</strong>, <strong>Log Message</strong> (the next
+            section), and <strong>Wait for Breakpoint</strong> &mdash; the one <a href="#triggered">triggered
+            breakpoints</a> use, where the right-hand field is which breakpoint arms this one instead
+            of an expression.</figcaption>
+          </figure>
         </section>
 
         <section id="hit-count">
           <h2>Hit-count breakpoints</h2>
+          <p>
+            Same editor as above, <em>Hit Count</em> selected in the dropdown.
+          </p>
           <div class="doc-scroll">
             <table class="doc-table">
               <thead>
@@ -168,8 +183,13 @@
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-03-triggered-breakpoint.png">
-            <p>Screenshot: the gutter context menu&rsquo;s <em>Add Triggered Breakpoint&hellip;</em> entry, and the picker it opens for choosing which breakpoint is the trigger.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-03-triggered-breakpoint.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-03-triggered-breakpoint.png"
+                 alt="The gutter's right-click menu on a line with no breakpoint yet: Add Breakpoint, Add Conditional Breakpoint, Add Logpoint, Add Triggered Breakpoint (highlighted), and Run to Line."
+                 width="847" height="350">
+            <figcaption>Right-click an empty spot in the gutter for this menu &mdash; a shortcut
+            straight to any breakpoint kind without going through the plain gutter click first.
+            Picking <em>Add Triggered Breakpoint&hellip;</em> opens the same editor shown earlier, with
+            <em>Wait for Breakpoint</em> already selected and a field for naming the trigger.</figcaption>
           </figure>
         </section>
 
