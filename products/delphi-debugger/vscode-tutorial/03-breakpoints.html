@@ -66,7 +66,7 @@
         <h1>3. Breakpoints</h1>
 
         <p>
-          Six kinds, plus one command that is not a breakpoint but belongs here.
+          Seven kinds, plus one command that is not a breakpoint but belongs here.
         </p>
 
         <section id="source-line">
@@ -144,6 +144,28 @@
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-03-breakpoints-view.png">
             <p>Screenshot: the BREAKPOINTS view with a conditional breakpoint, a hit-count breakpoint and a logpoint visible, and the edit-breakpoint popover open on one of them.</p>
             <figcaption>(screenshot to be added — <code>tutorial-03-breakpoints-view.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="triggered">
+          <h2>Triggered breakpoints</h2>
+          <p>
+            Right-click a breakpoint in the editor gutter and choose <em>Add Triggered
+            Breakpoint&hellip;</em>, then pick another breakpoint as the trigger. The one you added
+            stays disarmed until the trigger fires once, then arms itself for the rest of the
+            session &mdash; useful for a bug that only reproduces after some setup routine has run, so
+            you do not have to sit through every hit before it.
+          </p>
+          <p>
+            This is a VS Code editor feature, not a debugger one: the editor is the side keeping track
+            of which trigger has fired, and it works by re-sending the breakpoint list for the file
+            once the trigger stops the program &mdash; the same mechanism behind every other breakpoint
+            edit. Nothing about it is specific to this debugger, and nothing needs to be enabled.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-03-triggered-breakpoint.png">
+            <p>Screenshot: the gutter context menu&rsquo;s <em>Add Triggered Breakpoint&hellip;</em> entry, and the picker it opens for choosing which breakpoint is the trigger.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-03-triggered-breakpoint.png</code>)</figcaption>
           </figure>
         </section>
 
