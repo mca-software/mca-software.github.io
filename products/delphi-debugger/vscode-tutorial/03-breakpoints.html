@@ -142,8 +142,12 @@
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-03-breakpoints-view.png">
-            <p>Screenshot: the BREAKPOINTS view with a conditional breakpoint, a hit-count breakpoint and a logpoint visible, and the edit-breakpoint popover open on one of them.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-03-breakpoints-view.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-03-breakpoints-view.png"
+                 alt="The BREAKPOINTS section, exception filters at the top followed by the source breakpoints for Debugme.dpr. A right-click on one breakpoint opens a context menu: Edit Condition, Remove Breakpoint, Remove All Breakpoints, Enable All Breakpoints, Disable All Breakpoints, Reapply All Breakpoints."
+                 width="590" height="412">
+            <figcaption>The <strong>BREAKPOINTS</strong> section: exception filters on top, then every
+            source breakpoint underneath, grouped by file. Right-click any of them for the bulk
+            commands &mdash; <em>Enable/Disable All</em> and <em>Reapply All Breakpoints</em>.</figcaption>
           </figure>
         </section>
 
@@ -172,8 +176,10 @@
         <section id="address">
           <h2>Address breakpoints</h2>
           <p>
-            Set from the Disassembly View gutter, for when you want to stop at an instruction rather
-            than a line — typically in code with no source at all.
+            Set from the
+            <a href="07-registers-memory-disassembly.html#disassembly">Disassembly View</a> gutter,
+            for when you want to stop at an instruction rather than a line — typically in code with
+            no source at all.
           </p>
           <p>
             They are stored as a <strong>(module, RVA)</strong> pair rather than a bare address. That
