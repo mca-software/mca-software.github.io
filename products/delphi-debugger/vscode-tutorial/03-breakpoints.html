@@ -326,6 +326,11 @@
             <strong>Coming from the Delphi IDE:</strong> the name is not the one you know, and the
             gesture you know does not exist.
             <br><br>
+            It is also not where you would expect to look. Coming from Delphi, the natural place to
+            search is the gutter, next to the breakpoints — but this command lives in the
+            <strong>editor</strong>&rsquo;s right-click menu, buried well down a long, generic list that
+            has nothing else to do with debugging.
+            <br><br>
             There is <strong>no yellow arrow to drag</strong> — dragging the execution marker is a
             Delphi IDE gesture that Visual Studio Code does not implement. And the command is not
             called <em>Set Next Statement</em>; VS Code calls it <strong>Jump to Cursor</strong>.
@@ -344,8 +349,14 @@
           </div>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-03-set-next-statement.png">
-            <p>Screenshot: the editor&rsquo;s right-click context menu on a stopped line, with <strong>Run to Cursor</strong> and <strong>Jump to Cursor</strong> both visible and adjacent — the whole point is that the reader can see the two together and tell them apart.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-03-set-next-statement.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-03-set-next-statement.png"
+                 alt="The editor's full right-click context menu on a stopped line: Go to Definition, Go to Declaration, Go to Implementations, Peek, Find All Implementations, Copilot commands, refactoring commands, clipboard commands, source control commands, Bookmarks, then Evaluate in Debug Console, Add Inline Breakpoint, Add to Watch, and finally Run to Cursor and Jump to Cursor, highlighted, near the bottom."
+                 width="738" height="1237">
+            <figcaption>The whole menu, not a crop of it &mdash; because the point is how far down
+            <strong>Run to Cursor</strong> and <strong>Jump to Cursor</strong> sit. Everything above
+            them is generic editor chrome (go-to, refactor, Copilot, source control) that has nothing
+            to do with debugging; the two commands that matter are two of the last entries before Git
+            history.</figcaption>
           </figure>
         </section>
 
