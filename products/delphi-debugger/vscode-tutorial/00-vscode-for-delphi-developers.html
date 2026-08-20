@@ -134,7 +134,7 @@
                 <tr><td>Watches</td><td><code>Ctrl+Alt+W</code></td><td><strong>WATCH</strong> section</td></tr>
                 <tr><td>Call Stack</td><td><code>Ctrl+Alt+S</code></td><td><strong>CALL STACK</strong> section</td></tr>
                 <tr><td>Breakpoints</td><td><code>Ctrl+Alt+B</code></td><td><strong>BREAKPOINTS</strong> section — which is also where the exception filters live</td></tr>
-                <tr><td>Thread Status</td><td><code>Ctrl+Alt+T</code></td><td><strong>THREADS</strong> section</td></tr>
+                <tr><td>Thread Status</td><td><code>Ctrl+Alt+T</code></td><td>No separate window: threads are the top-level rows of the <strong>CALL STACK</strong> section, and expanding one shows its frames</td></tr>
                 <tr><td>Modules</td><td><code>Ctrl+Alt+M</code></td><td><strong>Delphi Modules</strong> section — added by this extension, not part of VS Code</td></tr>
                 <tr><td>CPU / Disassembly</td><td><code>Ctrl+Alt+C</code> / <code>Ctrl+Alt+D</code></td><td>The <strong>Disassembly View</strong>, opened from the Call Stack&rsquo;s context menu</td></tr>
                 <tr><td>Event Log</td><td><code>Ctrl+Alt+V</code></td><td>Split in two: your program&rsquo;s output goes to the <strong>Debug Console</strong>, the debugger&rsquo;s own messages to an <strong>Output</strong> panel channel</td></tr>
@@ -144,8 +144,15 @@
           </div>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-00-run-and-debug.png">
-            <p>Screenshot: the Run and Debug side bar during a session, with every section expanded and labelled — VARIABLES, WATCH, CALL STACK, BREAKPOINTS, THREADS and Delphi Modules — so a reader can match each one to the Delphi window it replaces. This is the orientation picture for the whole manual.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-00-run-and-debug.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-00-run-and-debug.png"
+                 alt="The Run and Debug side bar during a paused session, all sections expanded: Variables with Locals and Registers scopes, Watch, Call Stack listing two threads with their frames, Breakpoints with the exception filters and two source breakpoints, and the Delphi Modules tree showing per-module paths and debug info."
+                 width="832" height="1468">
+            <figcaption>The whole table above in one picture. Top to bottom: <strong>VARIABLES</strong>
+            (with the <em>Registers</em> scope — the register pane of Delphi&rsquo;s CPU window lives here),
+            <strong>WATCH</strong>, <strong>CALL STACK</strong> with each thread as a top-level row,
+            <strong>BREAKPOINTS</strong> holding both the exception filters and the source breakpoints, and
+            the <strong>Delphi Modules</strong> tree this extension adds. In the editor, the red dots and
+            the yellow arrow work exactly as they do in Delphi.</figcaption>
           </figure>
         </section>
 

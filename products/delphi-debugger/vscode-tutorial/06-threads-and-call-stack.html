@@ -71,9 +71,10 @@
         </p>
 
         <section id="threads">
-          <h2>The Threads view</h2>
+          <h2>Threads</h2>
           <p>
-            Every live thread is listed. Threads that announced a name through
+            There is no separate Thread Status window: every live thread is a top-level row of the
+            <strong>CALL STACK</strong> section, with its frames underneath. Threads that announced a name through
             <code>TThread.NameThreadForDebugging</code> show it: the debugger intercepts that
             announcement as it happens and decodes the name, so a stack full of worker threads is
             readable instead of a list of numbers.
