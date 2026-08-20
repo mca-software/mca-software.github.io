@@ -219,8 +219,13 @@
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-01-launch-json.png">
-            <p>Screenshot: VS Code with <code>launch.json</code> open beside the project in Explorer, the <code>delphi-win64</code> configuration visible.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-01-launch-json.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-01-launch-json.png"
+                 alt="VS Code with launch.json open, the type set to delphi-win64, request launch, program, sourceRoot, mapFile and rsmFile set, and a long generated sourceSearchPaths array."
+                 width="1277" height="1086">
+            <figcaption>A generated <code>launch.json</code>. <code>program</code>, <code>mapFile</code>
+            and <code>rsmFile</code> point at the build output; <code>sourceSearchPaths</code> is the
+            long, mechanical part &mdash; every include path the project used, spelled out so the
+            plugin generates it rather than anyone typing it by hand.</figcaption>
           </figure>
         </section>
 
