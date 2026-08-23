@@ -334,8 +334,12 @@
           </div>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-07-no-source.png">
-            <p>Screenshot: the document that opens on a stop with no source — the address and module header, the stated reason, and the annotated disassembly below it.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-07-no-source.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-07-no-source.png"
+                 alt="A stop in ntdll.dll with no source. The document header states the address, the module, that the debugger IS stopped there, and why: no debug information of any kind was found for this module. Below it, disassembly around the current instruction, each line marked (no symbol), with an arrow and 'current instruction' label on the stopped-at address."
+                 width="916" height="792">
+            <figcaption>All three pieces from the list above, in one document: address and module in
+            the tab title and header, the stated reason, and the disassembly &mdash; the arrow marks
+            the current instruction exactly as in the ordinary Disassembly View.</figcaption>
           </figure>
           <p>
             From there, instruction-granularity stepping (see
