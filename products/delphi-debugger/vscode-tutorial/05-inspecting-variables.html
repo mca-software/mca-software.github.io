@@ -142,8 +142,15 @@
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-05-object-graph.png">
-            <p>Screenshot: the Variables panel with an expanded object graph including a generic collection (<code>TList&lt;T&gt;</code> or <code>TDictionary&lt;K,V&gt;</code>) and a closure&rsquo;s captured fields.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-05-object-graph.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-05-object-graph.png"
+                 alt="The Watch panel with a TList<TfraChatRow> expanded into properties, event handlers and fields groups. Items reads (indexed property); Disposed, Capacity, IsEmpty, List and PList read (expand to evaluate). The fields group is expanded down through FItems into element [0], a TfraChatRow object."
+                 width="644" height="851">
+            <figcaption>A <code>TList&lt;fraChatRow.TfraChatRow&gt;</code> nested three levels deep —
+            the properties/event handlers/fields split, <code>Items</code> as an
+            <code>(indexed property)</code> leaf exactly as described above, and the fields group
+            walked down through the generic collection&rsquo;s own <code>FItems</code> array into one
+            element. Not shown: a closure&rsquo;s captured fields, which the original request for this
+            screenshot also asked for &mdash; still outstanding if you want to add one.</figcaption>
           </figure>
         </section>
 
