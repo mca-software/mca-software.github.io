@@ -100,15 +100,6 @@
             inside the call, so the line you see is the call site.
           </p>
 
-          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-06-call-stack-raw.png">
-            <img src="../../../assets/screenshots/delphi-debugger/tutorial-06-call-stack-raw.png"
-                 alt="The Call Stack panel with two thread rows, Thread 50552 collapsed and Thread 52020 (stopped) expanded showing its real frames down to kernel32.dll and ntdll.dll with no symbols, followed by a block of greyed-out [raw?]-marked entries appended below. The Toggle Raw Stack Scan title-bar icon is called out with an arrow."
-                 width="732" height="796">
-            <figcaption>Threads as the panel&rsquo;s own top-level rows &mdash; no separate window, exactly
-            as <a href="#threads">described above</a>. The stopped thread&rsquo;s real frames end at
-            <code>Vendingservice</code>; everything below the divider is <code>[raw?]</code> stack-scan
-            output, appended and greyed out rather than mixed into the real trace.</figcaption>
-          </figure>
         </section>
 
         <section id="raw-stack-scan">
@@ -127,10 +118,12 @@
           </p>
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-06-call-stack-raw.png">
             <img src="../../../assets/screenshots/delphi-debugger/tutorial-06-call-stack-raw.png"
-                 alt="The Call Stack view's title bar with the mouse hovering the Toggle Raw Stack Scan icon, called out with an arrow, above the panel already showing swept [raw?] entries from a previous scan."
+                 alt="The Call Stack view's title bar with the mouse hovering the Toggle Raw Stack Scan icon, called out with an arrow. Below it, the stopped thread's real frames end at Vendingservice, followed by a block of greyed-out [raw?]-marked entries appended below from a previous scan."
                  width="732" height="796">
-            <figcaption>Same screenshot as <a href="#call-stack">above</a> &mdash; the icon that turns
-            the scan on, title-bar-only and visible here because the mouse is over the view.</figcaption>
+            <figcaption>The title-bar icon that turns the scan on &mdash; visible here because the
+            mouse is over the view &mdash; and its result once toggled: the real frames end at
+            <code>Vendingservice</code>, everything below the divider is <code>[raw?]</code> output,
+            appended and greyed out rather than mixed into the real trace.</figcaption>
           </figure>
 
           <p>
