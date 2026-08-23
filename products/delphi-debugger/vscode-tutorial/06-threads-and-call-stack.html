@@ -153,18 +153,20 @@
         <section id="per-thread-stepping">
           <h2>Stepping and the other threads</h2>
           <p>
-            There is no separate row of step buttons per thread. A step command targets whichever
-            thread is <strong>selected</strong> in the Call Stack panel — click a different thread&rsquo;s
-            row (or one of its frames) first, then the ordinary step over/into/out buttons on the
-            floating debug toolbar act on that thread instead of the one that was originally stopped.
+            Hover a thread&rsquo;s row in the Call Stack panel and it grows its own inline controls —
+            continue and the three step commands, <code>Step Out</code> among them — so you can act on
+            <em>that</em> thread directly from its row, without touching the floating debug toolbar at
+            all. Using one also focuses that thread, which is what then makes the ordinary toolbar
+            track it too.
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-06-per-thread-stepping.png">
-            <p>Screenshot: a non-default thread row selected/highlighted in the Call Stack panel,
-            together with the floating debug toolbar&rsquo;s step over/into/out buttons — making the
-            connection visible between &ldquo;which row is selected&rdquo; and &ldquo;which thread the
-            buttons act on&rdquo;.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-06-per-thread-stepping.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-06-per-thread-stepping.png"
+                 alt="The Thread 52020 (stopped) row in the Call Stack panel with four inline icons on hover: continue, and three step commands, the mouse resting on the last one showing a Step Out tooltip."
+                 width="656" height="87">
+            <figcaption>Inline row controls, visible on hover like the raw-scan toggle earlier &mdash;
+            the rightmost icon is confirmed <code>Step Out</code> by its tooltip; the others follow the
+            same continue/step-over/step-into order as the floating toolbar.</figcaption>
           </figure>
 
           <p>
