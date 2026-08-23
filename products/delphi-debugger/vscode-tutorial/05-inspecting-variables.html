@@ -308,8 +308,12 @@
             the element directly — <code>Arr[50000]</code> — rather than scrolling for it.
           </p>
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-05-safelist-menu.png">
-            <p>Screenshot: a getter-backed property row in the Variables view reading <code>(expand to evaluate)</code>, with the right-click menu open on it showing <em>Always Evaluate This Property (Delphi)</em> and <em>Never Auto-Evaluate This Property (Delphi)</em>. Both the placeholder text and the menu entries need to be visible in one shot.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-05-safelist-menu.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-05-safelist-menu.png"
+                 alt="The ComponentIndex row, reading (expand to evaluate), with its right-click context menu open showing Always Evaluate This Property (Delphi), Never Auto-Evaluate This Property (Delphi), and Forget Evaluation Decision (Delphi), above the ordinary Add Expression / Set Value / Copy Value entries."
+                 width="796" height="580">
+            <figcaption>The three safelist commands, reached by right-clicking a deferred row &mdash;
+            here <code>ComponentIndex</code>, still waiting for a decision. They sit above the
+            ordinary Variables/Watch context menu entries, not in a submenu of their own.</figcaption>
           </figure>
 
           <div class="doc-note">
