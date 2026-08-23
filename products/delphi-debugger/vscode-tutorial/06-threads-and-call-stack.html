@@ -153,6 +153,21 @@
         <section id="per-thread-stepping">
           <h2>Stepping and the other threads</h2>
           <p>
+            There is no separate row of step buttons per thread. A step command targets whichever
+            thread is <strong>selected</strong> in the Call Stack panel — click a different thread&rsquo;s
+            row (or one of its frames) first, then the ordinary step over/into/out buttons on the
+            floating debug toolbar act on that thread instead of the one that was originally stopped.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-06-per-thread-stepping.png">
+            <p>Screenshot: a non-default thread row selected/highlighted in the Call Stack panel,
+            together with the floating debug toolbar&rsquo;s step over/into/out buttons — making the
+            connection visible between &ldquo;which row is selected&rdquo; and &ldquo;which thread the
+            buttons act on&rdquo;.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-06-per-thread-stepping.png</code>)</figcaption>
+          </figure>
+
+          <p>
             A step command targets one OS thread. Every other thread is explicitly suspended for the
             duration of the step, including threads created while the step is in progress, so the
             program cannot run away underneath you between one line and the next. If the stepped
