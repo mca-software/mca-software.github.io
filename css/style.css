@@ -709,6 +709,7 @@ footer {
    frame. Its caption is a sentence rather than a label, and reads better ranged
    left than centred. */
 .doc-figure:has(img) { border-style: solid; padding: 12px; }
+.doc-figure:has(img) img { margin-left: auto; margin-right: auto; }
 .doc-figure:has(img) figcaption { text-align: left; margin-top: 12px; line-height: 1.65; }
 
 /* ── Responsive ── */
