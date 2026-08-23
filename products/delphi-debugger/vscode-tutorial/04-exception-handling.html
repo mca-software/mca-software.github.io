@@ -97,8 +97,16 @@
             that lets you do that by accident is not doing its job.
           </div>
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-exception-filters.png">
-            <p>Screenshot: the BREAKPOINTS view in the Run and Debug side bar, showing the four exception-filter checkboxes with their real labels and default ticks — and, if it can be shown, the pencil/edit affordance that sets the per-class condition on the Delphi filter.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-04-exception-filters.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-04-exception-filters.png"
+                 alt="The BREAKPOINTS view with the four exception filters, their real labels and default ticks. Two title-bar icons are called out: Edit Exception Rules and Add Data Breakpoint at Address."
+                 width="514" height="432">
+            <figcaption>The four filters with their real labels and default ticks. The two callouts are
+            title-bar icons that only appear when the mouse is over the view — <em>Edit Exception
+            Rules&hellip;</em>, covered <a href="#editing-rules">below</a>, and <em>Add Data Breakpoint at
+            Address</em>, which belongs to <a href="03-breakpoints.html#data">data
+            breakpoints</a> and has nothing to do with exceptions. The pencil that edits the
+            <code>delphi</code> filter&rsquo;s class list only shows up on hover over that one row, so it
+            is not visible in this shot.</figcaption>
           </figure>
 
           <p>
@@ -112,6 +120,15 @@
             <code>EAccessViolation,EConvertError</code>. Empty means every Delphi raise. Filters can
             also be set at launch through <code>exceptionFilters</code>, and by an agent over
             <a href="../mcp/tool-reference.html">MCP</a>.
+          </p>
+          <p>
+            VS Code exposes that same allowlist through the standard pencil icon it draws next to a
+            filter row on hover — its own generic mechanism for a per-filter <code>condition</code>
+            string, which this adapter wires up for the <code>delphi</code> filter only. It is not a
+            second, competing rule language: typing there just sets
+            <code>delphiExceptionClasses</code>, the identical field <code>launch.json</code> uses.
+            The <a href="#rules">rule engine</a> below is the tool for anything past a flat class
+            allowlist — per-unit, per-line, by message, or with an action other than break.
           </p>
         </section>
 
