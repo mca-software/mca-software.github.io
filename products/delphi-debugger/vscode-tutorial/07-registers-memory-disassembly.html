@@ -237,8 +237,12 @@
             inline icon at the right-hand end of the row, not an entry in the right-click menu.
           </p>
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-07-view-memory-icon.png">
-            <p>Screenshot: a row in the Variables view with the mouse over it, showing the inline <em>View Memory (Delphi)</em> icon at the right-hand end of the row. The point of the shot is that this is an icon on the row, not an entry in a right-click menu.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-07-view-memory-icon.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-07-view-memory-icon.png"
+                 alt="The FPannelliChat row in the Variables view with the mouse hovering the inline View Memory (Delphi) icon at the right-hand end of the row, its tooltip visible."
+                 width="558" height="274">
+            <figcaption>The icon sits at the row&rsquo;s right-hand end, not in the right-click menu
+            — it only appears on hover, which is why a screenshot rather than a description was
+            needed here.</figcaption>
           </figure>
 
           <div class="doc-note">
@@ -251,8 +255,13 @@
           </div>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-07-memory-view.png">
-            <p>Screenshot: the custom &ldquo;View Memory (Delphi)&rdquo; panel with a byte-extent marker and at least one flashed (changed-since-last-stop) byte visible.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-07-memory-view.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-07-memory-view.png"
+                 alt="The View Memory (Delphi) panel titled Memory: FPannelliChat, header reading FPannelliChat : TList__1&lt;fraChatRow.TfraChatRow&gt; · 0x28851363710 · 88 byte(s) of the value, with back/forward/value start/refresh controls and a column count, and the row at 0x28851363710 boxed to mark offset zero."
+                 width="885" height="775">
+            <figcaption>The offset-zero marker — the boxed byte and the blue row address — on
+            <code>FPannelliChat</code>&rsquo;s own address. No byte has changed since the last
+            comparison point here, so the orange flash this section describes above is not visible in
+            this particular capture.</figcaption>
           </figure>
         </section>
 
