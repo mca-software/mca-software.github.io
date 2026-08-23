@@ -163,6 +163,14 @@
               debug registers and no software fallback. So is a read-only watch, which x86 and x64 do
               not implement. See <a href="03-breakpoints.html#data">chapter 3</a>.
             </li>
+            <li>
+              <strong>Locating an exception handler&rsquo;s block by address needs <code>.pdata</code>,
+              so it is x64 only</strong> — an <code>on E:</code> alias in a project&rsquo;s
+              <code>.dpr</code> main block, and a bare <code>except</code>&rsquo;s <code>$exception</code>
+              staying live past the initial raise, both report why rather than silently not appearing on
+              x86. An alias inside an ordinary function or procedure is unaffected, on either bitness.
+              See <a href="04-exception-handling.html#on-a-stop">chapter 4</a>.
+            </li>
           </ul>
         </section>
 

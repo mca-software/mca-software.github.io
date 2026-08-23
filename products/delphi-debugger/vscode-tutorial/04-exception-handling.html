@@ -147,9 +147,49 @@
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-exception-stop.png">
-            <p>Screenshot: a stop on a raised exception with the <code>$exception</code> row expanded in the Variables panel.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-04-exception-stop.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-04-exception-stop.png"
+                 alt="Stopped on the raise itself, with the $exception row expanded in Locals showing Disposed, BaseException, HelpContext, InnerException, Message = 'Test error', StackTrace and StackInfo, alongside the ordinary locals localdata and foo."
+                 width="1160" height="464">
+            <figcaption>A first-chance stop right on the <code>raise</code> line, before control has reached any
+            handler. <code>$exception</code> is expandable like any other object &mdash; here showing
+            <code>Message</code> plus the rest of <code>Exception</code>&rsquo;s own fields and properties.</figcaption>
           </figure>
+
+          <p>
+            That is the exception object at the instant it was raised. What happens once you are
+            actually inside a handler &mdash; still stopped several lines later, on an ordinary
+            breakpoint that has nothing to do with the exception itself &mdash; is its own thing, and it
+            is deliberately different depending on whether the handler gave the exception a name.
+          </p>
+
+          <h3>Inside the handler: aliased vs. anonymous</h3>
+          <p>
+            <code>on E: Exception do</code> declares <code>E</code> as an ordinary local, scoped to that
+            clause&rsquo;s block &mdash; it shows up in Locals under whatever name you gave it, for as
+            long as the stop is anywhere inside that block, not only at the moment of the raise. A bare
+            <code>except .. end</code> with no <code>on</code> clause names nothing, so there is no local
+            to show; instead the block gets its own <code>$exception</code> row, live for the same
+            extent. The two are mutually exclusive by construction &mdash; a handler is never showing
+            both at once, because a block is either aliased or it is not.
+          </p>
+          <p>
+            Both are ordinary operands past that point: <code>E.Message = 'Test error'</code> or
+            <code>$exception is EMyError</code> work as breakpoint conditions exactly as well as they
+            work in a watch or a hover, because they go through the same expression evaluator either
+            way &mdash; typing <code>$exception</code> into Watch is a shortcut for the same lookup, not
+            a separate mechanism. Stopped somewhere with no exception in scope at all, both report why
+            rather than a bare parse error or an empty value.
+          </p>
+          <div class="doc-note">
+            Locating the handler block this way needs <code>.pdata</code>, so it is <strong>x64
+            only</strong> &mdash; for a handler directly in a project&rsquo;s <code>.dpr</code> main
+            block, and for a bare <code>except</code>&rsquo;s <code>$exception</code> staying live past
+            the raise itself. Neither degrades silently: on x86 both report why rather than just not
+            appearing. An <code>on E:</code> alias <em>inside an ordinary function or procedure</em> is
+            unaffected either way &mdash; it has always worked as a normal local, on both bitnesses, and
+            is not part of what changed here. See <a href="11-known-limitations.html#refusals">chapter
+            11</a>.
+          </div>
         </section>
 
         <section id="rules">
