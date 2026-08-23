@@ -101,7 +101,7 @@
                 <tr><td><code>stopAtEntry</code></td><td>boolean</td><td><code>false</code></td><td>Break at the process entry point before any user code runs</td></tr>
                 <tr><td><code>rawStackScan</code></td><td>boolean</td><td><code>false</code></td><td>Opt-in brute-force stack sweep fallback — <a href="06-threads-and-call-stack.html#raw-stack-scan">chapter 6</a></td></tr>
                 <tr><td><code>modules</code></td><td>object[]</td><td><em>empty</em></td><td><code>{ name (required), map, rsm, dcp }</code> — pre-binds debug info for runtime-loaded DLLs and BPLs</td></tr>
-                <tr><td><code>exceptionRules</code></td><td>object[]</td><td><em>empty</em></td><td>See <a href="#exception-rules">exception rules</a> below</td></tr>
+                <tr><td><code>delphiProjectFile</code></td><td>string</td><td><em>empty</em></td><td>The <code>.dpr</code>/<code>.dpk</code>/<code>.dproj</code> this configuration debugs, written automatically by the IDE plugin. Enables the two project-scoped tiers in <a href="04-exception-handling.html#shared-rules">exception rules</a>.</td></tr>
                 <tr><td><code>useGlobalExceptionRules</code></td><td>boolean</td><td><code>true</code></td><td>Also load the shared machine-wide rules file</td></tr>
                 <tr><td><code>globalExceptionRulesPath</code></td><td>string</td><td><code>%USERPROFILE%\.DelphiWinDebugger\exceptionRules.json</code></td><td>Override the shared rules file location</td></tr>
                 <tr><td><code>progressLocation</code></td><td><code>"statusBar"</code> | <code>"notification"</code></td><td><code>"statusBar"</code></td><td>Where long operations report progress</td></tr>
@@ -117,7 +117,7 @@
           <p>
             Adds the following. <code>program</code>, <code>mapFile</code>, <code>rsmFile</code>,
             <code>sourceRoot</code>, <code>sourceSearchPaths</code>, <code>modules</code>,
-            <code>exceptionRules</code>, <code>useGlobalExceptionRules</code>,
+            <code>delphiProjectFile</code>, <code>useGlobalExceptionRules</code>,
             <code>globalExceptionRulesPath</code>, <code>rawStackScan</code>,
             <code>progressLocation</code>, <code>diagnosticLog</code> and
             <code>diagnosticsLocation</code> all work as they do for launch.
@@ -144,9 +144,13 @@
         <section id="exception-rules">
           <h2>Exception rules</h2>
           <p>
-            An ordered array; first match wins. Each rule is a flat object of optional criteria plus a
-            required <code>action</code>. Criteria present in a rule are AND-ed; omitted criteria are
-            wildcards. <a href="04-exception-handling.html">Chapter 4</a> explains the behaviour.
+            Not a <code>launch.json</code> property — rules live in up to three JSON files (per-project
+            local, per-project shared, machine-wide), never in the launch configuration itself. See
+            <a href="04-exception-handling.html#shared-rules">where rules live</a> for the files and
+            their precedence. Within any of them, the shape below is the same: an ordered array, first
+            match wins, each rule a flat object of optional criteria plus a required
+            <code>action</code>. Criteria present in a rule are AND-ed; omitted criteria are wildcards.
+            <a href="04-exception-handling.html">Chapter 4</a> explains the behaviour.
           </p>
           <div class="doc-scroll">
             <table class="doc-table">
@@ -168,9 +172,12 @@
           </div>
           <p>
             Exception <em>filters</em> — <code>delphi</code>, <code>av</code>, <code>all</code>,
-            <code>unhandled</code> — are set in the BREAKPOINTS view, or at launch through
-            <code>exceptionFilters</code>. The <code>delphi</code> filter narrows to specific classes
-            with <code>delphiExceptionClasses</code>, a comma- or semicolon-separated allowlist.
+            <code>unhandled</code> — are a different thing with no <code>launch.json</code> field of
+            their own: set them in the BREAKPOINTS view, or by an agent over MCP through
+            <code>delphiExceptionClasses</code> on <code>launch_debuggee</code>,
+            <code>attach_from_config</code> or <code>set_exception_filters</code>. The
+            <code>delphi</code> filter narrows to specific classes with that same argument (or the GUI
+            pencil&rsquo;s <code>condition</code> field) — a comma- or semicolon-separated allowlist.
             Defaults are <code>delphi</code>, <code>av</code> and <code>unhandled</code>.
           </p>
         </section>

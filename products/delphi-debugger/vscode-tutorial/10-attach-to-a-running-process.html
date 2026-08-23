@@ -73,6 +73,15 @@
         <section id="config">
           <h2>The attach configuration</h2>
           <p>
+            You will not usually write this by hand. The
+            <a href="../getting-started/index.html">IDE plugin</a> generates an attach configuration
+            for every project alongside its launch one — the same click, the same
+            <code>launch.json</code> — so if you already opened a project in VS Code that way, it is
+            already there, named <em>Attach to &lt;YourExe&gt;.exe</em>. What follows is what it
+            contains, for when you want to understand it, adjust it, or write one from scratch for a
+            case the plugin does not cover.
+          </p>
+          <p>
             Set <code>"request": "attach"</code> and identify the process by id or by name:
           </p>
           <pre><code>{
@@ -86,12 +95,18 @@
           <p>
             <code>program</code> is still worth giving: it is where the debugger reads symbols from.
             The attach configuration shares <code>sourceRoot</code>,
-            <code>sourceSearchPaths</code>, <code>modules</code>, <code>exceptionRules</code>,
+            <code>sourceSearchPaths</code>, <code>modules</code>, <code>delphiProjectFile</code>,
             <code>progressLocation</code> and <code>diagnosticLog</code> with launch, and adds
             <code>processId</code>, <code>processName</code> and <code>killOnDetach</code>. The full
             table is in the
             <a href="12-settings-and-commands-reference.html">settings and commands reference</a>.
           </p>
+          <div class="doc-note">
+            Sharing <code>delphiProjectFile</code> is what keeps <a
+            href="04-exception-handling.html#shared-rules">exception rules</a> identical whichever way
+            you connect &mdash; there is no per-configuration rule storage any more, launch and attach
+            of the same project resolve the same project-scoped files.
+          </div>
         </section>
 
         <section id="picker">
@@ -136,8 +151,11 @@
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-10-process-picker.png">
-            <p>Screenshot: the &ldquo;Pick a Process to Attach To&rdquo; quick-pick list, showing multiple instances of one executable disambiguated by their command lines.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-10-process-picker.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-10-process-picker.png"
+                 alt="The process picker titled 'Select which VendingService.exe to attach to (2 running)', listing two rows: VendingService.exe PID 14604, x64, started 2026-08-23 20:47:51, session 1, with its window caption and full command line below; and a second instance, PID 45372, same architecture and session, a different start time."
+                 width="1005" height="245">
+            <figcaption>Two running instances of the same executable, disambiguated by PID, start
+            time and full command line &mdash; exactly the case this picker exists for.</figcaption>
           </figure>
         </section>
 
