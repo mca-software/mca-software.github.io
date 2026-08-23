@@ -270,8 +270,16 @@
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-05-property-groups.png">
-            <p>Screenshot: an object expanded in the Variables view showing the three group rows — <em>properties</em>, <em>event handlers</em> and <em>fields</em> — with a getter-backed property visibly deferred as <code>(expand to evaluate)</code>.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-05-property-groups.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-05-property-groups.png"
+                 alt="TApplication's properties group expanded, with Disposed, ComObject, ComponentIndex, Observers, ActiveFormHandle, CurrentHelpFile, DialogHandle, ExeName and HintControl all reading (expand to evaluate), and Components reading (indexed property)."
+                 width="657" height="901">
+            <figcaption>The <code>properties</code> group open on <code>TApplication</code> &mdash; most
+            rows are getter-backed and deferred as <code>(expand to evaluate)</code>, the rest evaluate
+            immediately because they read a plain field. <code>Components</code> is the
+            <code>(indexed property)</code> case from earlier. The <code>event handlers</code> and
+            <code>fields</code> rows sit above this scrolled view; see the
+            <a href="#expanding">earlier figure</a> for the three groups together on a different
+            object.</figcaption>
           </figure>
         </section>
 
