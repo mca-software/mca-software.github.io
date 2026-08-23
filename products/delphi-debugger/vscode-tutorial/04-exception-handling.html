@@ -192,16 +192,110 @@
           </div>
         </section>
 
-        <section id="rules">
-          <h2>The rule engine</h2>
+        <section id="editing-rules">
+          <h2>Creating a rule without writing JSON</h2>
           <p>
-            Filters are on/off per category. Rules are what you need when a specific
-            <code>EFileNotFound</code> in one unit is noise but the same class elsewhere is the bug
-            you are chasing.
+            Filters are on/off per category. The moment a specific <code>EFileNotFound</code> in one
+            unit is noise but the same class elsewhere is the bug you are chasing, you need a rule
+            &mdash; and the fastest way to write one is to let the debugger do it, from the exception
+            you are already looking at. Two commands, and you will use the second one far more often.
+          </p>
+
+          <h3>Create a Rule for This Exception&hellip;</h3>
+          <p>
+            Available only while stopped on an exception, from the floating debug toolbar.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-create-rule-button.png">
+            <p>Screenshot: the floating debug toolbar while stopped on an exception, with the extra <em>Create a Rule for This Exception…</em> button visible alongside the standard continue/step controls — it only appears in that situation, so the reader needs to see where it turns up.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-04-create-rule-button.png</code>)</figcaption>
+          </figure>
+
+          <p>
+            It reads the exception in front of you and offers ready-made rules built from it — ignore
+            this class everywhere, ignore it only in this unit, ignore only this exact raise site, log
+            it with its stack instead of breaking, or match on a substring of its message. Pick one and
+            it is written for you.
+          </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-rule-wizard.png">
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-04-rule-wizard.png"
+                 alt="The Create a Rule for This Exception suggestion list: Ignore Exception everywhere, Ignore Exception raised in Debugme, Ignore Exception at Debugme:99, Log Exception with its call stack instead of breaking, Ignore Exception when the message contains &quot;Test error&quot;, and Edit a pre-filled rule in the rules editor."
+                 width="875" height="410">
+            <figcaption>Every suggestion is built from the exception actually stopped on &mdash; class,
+            unit, exact raise site and message all come from it, not from a template. The last entry
+            opens the full editor below with the same information pre-filled, for when none of the
+            ready-made ones is quite right.</figcaption>
+          </figure>
+
+          <p>
+            This is the answer to being interrupted for the third time by something the application
+            handles perfectly well. The new rule is inserted <strong>first</strong>, which matters:
+            first match wins, so it takes effect regardless of what is already in the list.
+          </p>
+
+          <h3>Edit Exception Rules&hellip;</h3>
+          <p>
+            From the title bar of the Breakpoints or Call Stack view — those icons appear when the
+            mouse is over the view. It works with no session running, which is how you edit the
+            shared rules file on its own.
           </p>
           <p>
-            <code>exceptionRules</code> in <code>launch.json</code> is an ordered list. Each rule is
-            a flat object: any number of optional criteria, plus a required <code>action</code>.
+            It first asks <strong>where the rules should live</strong>: any launch configuration in
+            the workspace, or the shared machine-wide file. Each option shows how many rules it
+            currently holds, and the shared one tells you whether the file exists yet, whether it
+            failed to parse, and whether any configuration has switched it off. If there is only one
+            possible target the question is skipped.
+          </p>
+          <p>Then the editor itself, one card per rule:</p>
+          <ul>
+            <li>
+              A plain-language summary of what the rule does, rewritten as you type — <em>class =
+              EAbort AND unit OracleData → ignore</em>, or <em>any exception → break</em> when you
+              have not filled anything in.
+            </li>
+            <li>
+              The nine criteria as labelled fields, each with a hint explaining what it matches, and
+              the action as a dropdown whose help text changes with the selection.
+            </li>
+            <li>
+              Buttons to move the rule up or down — which is what changes the outcome, since
+              evaluation stops at the first match — plus duplicate and delete.
+              <strong>Delete asks nothing</strong>, so be deliberate.
+            </li>
+            <li>
+              Validation on every keystroke. A malformed regular expression, a line range whose end
+              precedes its start, a missing action, a field name that is not one of the nine — all
+              are listed at the bottom, and <strong>the save button stays disabled until they are
+              fixed</strong>.
+            </li>
+          </ul>
+          <div class="doc-note">
+            <strong>Saving does not finish the job.</strong> The editor writes the rules into the
+            target file and opens it beside the editor — <em>and leaves it unsaved</em>. You still
+            have to save that file. This is deliberate: it edits a real
+            <code>launch.json</code> that is yours, so you get to see the change before it lands, and
+            comments and formatting elsewhere in the file survive untouched.
+            <br><br>
+            Closing the editor tab with unsaved edits keeps them: reopen it and it offers to restore
+            what you had. A read-only banner appears instead of the save button if the workspace is
+            not trusted — copy the JSON out in that case.
+          </div>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-rules-editor.png">
+            <p>Screenshot: the &ldquo;Edit Exception Rules…&rdquo; editor UI.</p>
+            <figcaption>(screenshot to be added — <code>tutorial-04-rules-editor.png</code>)</figcaption>
+          </figure>
+        </section>
+
+        <section id="rules">
+          <h2>The rule engine underneath</h2>
+          <p>
+            Both editors above write to the same place: <code>exceptionRules</code> in
+            <code>launch.json</code>, an ordered list of flat objects &mdash; any number of optional
+            criteria, plus a required <code>action</code>. Knowing the shape is what lets you hand-edit
+            a rule faster than reopening the GUI for a one-word change, or write one the editor cannot
+            express yet.
           </p>
           <pre><code>"exceptionRules": [
   { "class": "EAbort", "action": "ignore" },
@@ -359,94 +453,6 @@
             program&rsquo;s behaviour being reported, not the debugger&rsquo;s — but it means a noisy
             <code>log</code> rule shares the pane with your program&rsquo;s own output.
           </p>
-
-          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-rule-wizard.png">
-            <p>Screenshot: the <em>Create a Rule for This Exception…</em> suggestion list, showing the ready-made rules built from the exception currently stopped on — ignore the class everywhere, ignore it in this unit, ignore this exact raise site, log with stack, and so on.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-04-rule-wizard.png</code>)</figcaption>
-          </figure>
-        </section>
-
-        <section id="editing-rules">
-          <h2>Editing rules without writing JSON</h2>
-          <p>
-            Two commands, and you will use the second one far more often.
-          </p>
-
-          <h3>Create a Rule for This Exception…</h3>
-          <p>
-            Available only while stopped on an exception, from the floating debug toolbar. It reads
-            the exception in front of you and offers ready-made rules built from it — ignore this
-            class everywhere, ignore it only in this unit, ignore only this exact raise site, log it
-            with its stack instead of breaking, or match on a substring of its message. Pick one and
-            it is written for you.
-          </p>
-          <p>
-            This is the answer to being interrupted for the third time by something the application
-            handles perfectly well. The new rule is inserted <strong>first</strong>, which matters:
-            first match wins, so it takes effect regardless of what is already in the list.
-          </p>
-          <p>
-            The last entry in the list opens the full editor with every criterion pre-filled from the
-            exception, for when you want to widen or narrow it before saving.
-          </p>
-
-          <h3>Edit Exception Rules…</h3>
-          <p>
-            From the title bar of the Breakpoints or Call Stack view — those icons appear when the
-            mouse is over the view. It works with no session running, which is how you edit the
-            shared rules file on its own.
-          </p>
-          <p>
-            It first asks <strong>where the rules should live</strong>: any launch configuration in
-            the workspace, or the shared machine-wide file. Each option shows how many rules it
-            currently holds, and the shared one tells you whether the file exists yet, whether it
-            failed to parse, and whether any configuration has switched it off. If there is only one
-            possible target the question is skipped.
-          </p>
-          <p>Then the editor itself, one card per rule:</p>
-          <ul>
-            <li>
-              A plain-language summary of what the rule does, rewritten as you type — <em>class =
-              EAbort AND unit OracleData → ignore</em>, or <em>any exception → break</em> when you
-              have not filled anything in.
-            </li>
-            <li>
-              The nine criteria as labelled fields, each with a hint explaining what it matches, and
-              the action as a dropdown whose help text changes with the selection.
-            </li>
-            <li>
-              Buttons to move the rule up or down — which is what changes the outcome, since
-              evaluation stops at the first match — plus duplicate and delete.
-              <strong>Delete asks nothing</strong>, so be deliberate.
-            </li>
-            <li>
-              Validation on every keystroke. A malformed regular expression, a line range whose end
-              precedes its start, a missing action, a field name that is not one of the nine — all
-              are listed at the bottom, and <strong>the save button stays disabled until they are
-              fixed</strong>.
-            </li>
-          </ul>
-          <div class="doc-note">
-            <strong>Saving does not finish the job.</strong> The editor writes the rules into the
-            target file and opens it beside the editor — <em>and leaves it unsaved</em>. You still
-            have to save that file. This is deliberate: it edits a real
-            <code>launch.json</code> that is yours, so you get to see the change before it lands, and
-            comments and formatting elsewhere in the file survive untouched.
-            <br><br>
-            Closing the editor tab with unsaved edits keeps them: reopen it and it offers to restore
-            what you had. A read-only banner appears instead of the save button if the workspace is
-            not trusted — copy the JSON out in that case.
-          </div>
-
-          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-create-rule-button.png">
-            <p>Screenshot: the floating debug toolbar while stopped on an exception, with the extra <em>Create a Rule for This Exception…</em> button visible alongside the standard continue/step controls — it only appears in that situation, so the reader needs to see where it turns up.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-04-create-rule-button.png</code>)</figcaption>
-          </figure>
-
-          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-rules-editor.png">
-            <p>Screenshot: the &ldquo;Edit Exception Rules…&rdquo; editor UI.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-04-rules-editor.png</code>)</figcaption>
-          </figure>
         </section>
 
         <section id="stepping-through">
