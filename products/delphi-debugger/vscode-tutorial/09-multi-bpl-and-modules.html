@@ -144,8 +144,14 @@
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-09-modules-view.png">
-            <p>Screenshot: the &ldquo;Delphi Modules&rdquo; tree view panel listing the host EXE plus at least one loaded BPL, with symbol state indicators.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-09-modules-view.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-09-modules-view.png"
+                 alt="The Delphi Modules view, 150 modules, listing vendingservice.exe first, then a run of system DLLs each marked with a warning triangle and 'no debug information'. advapi32.dll is expanded, showing its path, load address, image size, and 'debug info: none found — breakpoints here cannot bind'."
+                 width="520" height="880">
+            <figcaption>The ordering rule from above, visible in practice: the host executable first,
+            then the no-debug-information modules put where you will actually see them, ahead of the
+            rest of the 150. Not shown in this particular capture: a loaded BPL further down the same
+            list, since <code>vendingservice.exe</code> here has none open at this scroll
+            position.</figcaption>
           </figure>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-09-module-filter.png">
