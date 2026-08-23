@@ -114,20 +114,24 @@
             preventing the handler.
           </p>
           <p>
-            The <code>delphi</code> filter can be narrowed to specific classes with
-            <code>delphiExceptionClasses</code> — a comma- or semicolon-separated allowlist such as
-            <code>EAccessViolation,EConvertError</code>. Empty means every Delphi raise. Filters can
-            also be set at launch through <code>exceptionFilters</code>, and by an agent over
-            <a href="../mcp/tool-reference.html">MCP</a>.
+            The <code>delphi</code> filter can be narrowed to specific classes — a comma- or
+            semicolon-separated allowlist such as <code>EAccessViolation,EConvertError</code>, empty
+            meaning every Delphi raise. There is no <code>launch.json</code> field for this: unlike
+            rules, filters are never configured from the launch configuration. Two ways to set it
+            instead — the GUI pencil below, or an agent over MCP through the
+            <code>delphiExceptionClasses</code> argument on <code>launch_debuggee</code>,
+            <code>attach_from_config</code> or <code>set_exception_filters</code>
+            (<a href="../mcp/tool-reference.html">MCP</a>).
           </p>
           <p>
             VS Code exposes that same allowlist through the standard pencil icon it draws next to a
             filter row on hover — its own generic mechanism for a per-filter <code>condition</code>
             string, which this adapter wires up for the <code>delphi</code> filter only. It is not a
-            second, competing rule language: typing there just sets
-            <code>delphiExceptionClasses</code>, the identical field <code>launch.json</code> uses.
-            The <a href="#rules">rule engine</a> below is the tool for anything past a flat class
-            allowlist — per-unit, per-line, by message, or with an action other than break.
+            second, competing rule language: typing there applies the same narrowing MCP&rsquo;s
+            <code>delphiExceptionClasses</code> does, just through the DAP <code>setExceptionBreakpoints</code>
+            channel instead of a tool call. The <a href="#rules">rule engine</a> below is the tool for
+            anything past a flat class allowlist — per-unit, per-line, by message, or with an action
+            other than break.
           </p>
         </section>
 
@@ -244,12 +248,23 @@
             shared rules file on its own.
           </p>
           <p>
-            It first asks <strong>where the rules should live</strong>: any launch configuration in
-            the workspace, or the shared machine-wide file. Each option shows how many rules it
-            currently holds, and the shared one tells you whether the file exists yet, whether it
-            failed to parse, and whether any configuration has switched it off. If there is only one
-            possible target the question is skipped.
+            It first asks <strong>where the rules should live</strong> — see
+            <a href="#shared-rules">where rules live</a> for the three files behind this and how they
+            rank. Each option shows how many rules it currently holds; a file that does not exist yet
+            says so instead of a count, since saving there creates it. If there is only one possible
+            target the question is skipped.
           </p>
+
+          <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-04-rules-picker.png">
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-04-rules-picker.png"
+                 alt="The Select where the exception rules live picker, listing Debugme.dproj rules (local) with 0 rules and a note that the file will be created, Debugme.dproj rules (shared) with 1 rule and a note that it travels with the project, and Shared rules (all projects) with 22 rules. The Edit Exception Rules title-bar icon is called out with an arrow."
+                 width="1222" height="617">
+            <figcaption>One local and one shared entry per distinct Delphi project named anywhere in
+            the workspace&rsquo;s launch configurations &mdash; not per configuration, since a
+            project&rsquo;s launch and attach configurations name the same project and collapse to one
+            pair &mdash; plus the always-present global entry last.</figcaption>
+          </figure>
+
           <p>Then the editor itself, one card per rule:</p>
           <ul>
             <li>
@@ -276,9 +291,10 @@
           <div class="doc-note">
             <strong>Saving does not finish the job.</strong> The editor writes the rules into the
             target file and opens it beside the editor — <em>and leaves it unsaved</em>. You still
-            have to save that file. This is deliberate: it edits a real
-            <code>launch.json</code> that is yours, so you get to see the change before it lands, and
-            comments and formatting elsewhere in the file survive untouched.
+            have to save that file. This is deliberate: whichever of the three files you picked, you
+            get to see the change before it lands, and a sibling key elsewhere in the file — for a
+            file shaped as <code>{ "exceptionRules": [...] }</code> rather than a bare array — survives
+            untouched, since only the rule array itself is replaced.
             <br><br>
             Closing the editor tab with unsaved edits keeps them: reopen it and it offers to restore
             what you had. A read-only banner appears instead of the save button if the workspace is
@@ -294,13 +310,18 @@
         <section id="rules">
           <h2>The rule engine underneath</h2>
           <p>
-            Both editors above write to the same place: <code>exceptionRules</code> in
-            <code>launch.json</code>, an ordered list of flat objects &mdash; any number of optional
-            criteria, plus a required <code>action</code>. Knowing the shape is what lets you hand-edit
-            a rule faster than reopening the GUI for a one-word change, or write one the editor cannot
-            express yet.
+            Both editors above write into whichever of the three files you picked &mdash;
+            <a href="#shared-rules">where rules live</a> covers exactly which files those are and in
+            what order they rank. Inside any of them a rule is a flat JSON object: any number of
+            optional criteria, plus a required <code>action</code>. Knowing the shape is what lets you
+            hand-edit a file faster than reopening the GUI for a one-word change, or write a rule the
+            editor cannot express yet.
           </p>
-          <pre><code>"exceptionRules": [
+          <p>
+            Each file is either a bare array of rules, or an object with an <code>exceptionRules</code>
+            key holding the same array &mdash; the editor preserves whichever shape it finds:
+          </p>
+          <pre><code>[
   { "class": "EAbort", "action": "ignore" },
   { "messageRegex": "ORA-\\d+", "action": "logStack" },
   { "class": "EAccessViolation", "unit": "OracleData",
@@ -404,45 +425,91 @@
         </section>
 
         <section id="shared-rules">
-          <h2>Rules shared across projects</h2>
+          <h2>Where rules live</h2>
           <p>
-            Some noise is not project-specific — you want <code>EAbort</code> ignored everywhere,
-            forever. A machine-wide rules file does that:
+            Rules come from up to three files, tried in this order &mdash; narrowest scope first,
+            first match wins across the whole chain:
           </p>
-          <pre><code>%USERPROFILE%\.DelphiWinDebugger\exceptionRules.json</code></pre>
+          <div class="doc-scroll">
+            <table class="doc-table">
+              <thead>
+                <tr><th>#</th><th>File</th><th>Scope</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td><code>&lt;Project&gt;.ExceptionSettings.local.json</code></td>
+                  <td>this developer, this machine &mdash; gitignore it</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td><code>&lt;Project&gt;.ExceptionSettings.json</code></td>
+                  <td>the project, shared with its team &mdash; commit it</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td><code>%USERPROFILE%\.DelphiWinDebugger\exceptionRules.json</code></td>
+                  <td>every project on this machine</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <p>
-            It holds either a bare array of rules, or an object with an <code>exceptionRules</code>
-            key — the same rule shape as in <code>launch.json</code>. Turn it off per project with
-            <code>"useGlobalExceptionRules": false</code>, or point somewhere else with
-            <code>globalExceptionRulesPath</code>.
+            <strong>There is no <code>launch.json</code> field for rules</strong> &mdash; that used to
+            exist and was removed on purpose. &ldquo;Debug X&rdquo; and &ldquo;Attach to X&rdquo; are
+            the same program started two different ways, and a rule that applied only through one of
+            them was a trap disguised as a feature: nothing about how you connected the debugger has
+            anything to do with which exceptions matter. If a launch configuration still carries an
+            <code>exceptionRules</code> array from before this changed, it is simply not read any
+            more.
+          </p>
+          <p>
+            Tiers 1 and 2 exist only when a launch or attach configuration names the Delphi project it
+            debugs, through <code>delphiProjectFile</code> &mdash; the <code>.dpr</code>,
+            <code>.dpk</code> or (what RAD Studio&rsquo;s own project services actually report)
+            <code>.dproj</code> path, written automatically by the
+            <a href="../getting-started/index.html">IDE plugin</a> and resolved by VS Code before the
+            adapter ever sees it. All three spellings of a project name the same pair of files: the
+            adapter derives them from the path&rsquo;s directory and base name, so
+            <code>Debugme.dproj</code> and <code>Debugme.dpr</code> both point at
+            <code>Debugme.ExceptionSettings.json</code>. This is the scope a Delphi developer actually
+            works in &mdash; a <code>.dpk</code> loaded by a host that hosts dozens of other packages
+            carries its own rules, wherever it is loaded from and whoever launched the host.
           </p>
           <div class="doc-note">
-            This file is read as <strong>strict JSON</strong>, not JSONC. A <code>//</code> comment or
-            a trailing comma makes the whole file fail to parse, and the failure is silent: you get
-            zero shared rules and no error in the Debug Console. Comments in
+            No <code>delphiProjectFile</code> &mdash; a hand-written <code>launch.json</code>, or a
+            plugin older than this field &mdash; means no tiers 1 and 2 at all: the machine-wide file
+            is the whole chain, same as it always was. Nothing degrades silently; there is simply
+            nothing to derive a project path from.
+          </div>
+          <p>
+            Turn tier 3 off per configuration with <code>"useGlobalExceptionRules": false</code>, or
+            point it somewhere else with <code>globalExceptionRulesPath</code>.
+          </p>
+          <div class="doc-note">
+            All three files are read as <strong>strict JSON</strong>, not JSONC. A <code>//</code>
+            comment or a trailing comma makes the whole file fail to parse, and the failure is silent:
+            zero rules from that file and no error in the Debug Console. Comments in
             <code>launch.json</code> are fine — VS Code strips those before the adapter ever sees
-            them — but not here.
+            them — but none of these three files is <code>launch.json</code>.
           </div>
           <p>
-            The project&rsquo;s own rules are evaluated before the shared ones, and both before the
-            filters: a matching rule overrides what the filters would have done, and if nothing
-            matches the filters decide.
-          </p>
-          <div class="doc-note">
-            Project and shared rules are evaluated as <em>one</em> ordered list with the project&rsquo;s
-            rules in front. So a catch-all rule at the end of a project&rsquo;s
-            <code>exceptionRules</code> — one with no criteria at all — makes every shared rule
-            unreachable. If your machine-wide rules stopped working in one project, look there.
-          </div>
-          <p>
-            The shared file is re-read when it changes: edit it while stopped, continue, and the new
-            rules apply without restarting the session. That is worth using deliberately — when
-            something keeps interrupting you, edit the shared file, press <code>F5</code>, and it is
-            gone, without losing the state you spent twenty minutes reproducing. Project rules in
-            <code>launch.json</code> are <em>not</em> hot-reloaded; those need a restart.
+            All three are re-read on every resume: edit any of them while stopped, continue, and the
+            new rules apply without restarting the session. That is worth using deliberately — when
+            something keeps interrupting you, edit the file, press <code>F5</code>, and it is gone,
+            without losing the state you spent twenty minutes reproducing. This even covers
+            <em>creating</em> a sidecar file that did not exist yet mid-session — the adapter notices
+            the file appear, not just change.
           </p>
 
           <h3>Two things that will bite</h3>
+          <p>
+            <strong>A catch-all rule in a narrower tier hides everything below it.</strong> The three
+            files are evaluated as <em>one</em> ordered list, tier 1 through tier 3 — so a rule with no
+            criteria at all in the local file makes the shared and machine-wide files unreachable, and
+            one in the shared file does the same to the machine-wide file. If a rule you know is in a
+            wider-scoped file stopped firing, look for a catch-all above it first.
+          </p>
           <p>
             <strong>A rule with a bad <code>code</code> is dropped, not widened.</strong> If the
             exception code will not parse, the whole rule is discarded rather than treated as
