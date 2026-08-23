@@ -41,7 +41,7 @@ header {
   z-index: 100;
 }
 
-nav {
+header nav {
   max-width: var(--max-w);
   margin: 0 auto;
   padding: 12px 24px;
@@ -57,9 +57,9 @@ nav {
   padding: 4px 10px;
 }
 
-nav ul { list-style: none; display: flex; gap: 24px; }
-nav ul a { color: var(--text-muted); font-size: 14px; font-weight: 500; transition: color 0.1s; }
-nav ul a:hover { color: var(--text); }
+header nav ul { list-style: none; display: flex; gap: 24px; }
+header nav ul a { color: var(--text-muted); font-size: 14px; font-weight: 500; transition: color 0.1s; }
+header nav ul a:hover { color: var(--text); }
 
 /* ── Buttons ── */
 .btn {
