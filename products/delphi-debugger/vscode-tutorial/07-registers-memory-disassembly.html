@@ -287,8 +287,14 @@
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/tutorial-07-disassembly-view.png">
-            <p>Screenshot: the Disassembly View with the current-instruction marker and a symbolicated function+offset label.</p>
-            <figcaption>(screenshot to be added — <code>tutorial-07-disassembly-view.png</code>)</figcaption>
+            <img src="../../../assets/screenshots/delphi-debugger/tutorial-07-disassembly-view.png"
+                 alt="The Disassembly View interleaving source lines with addresses, raw bytes and decoded instructions. A green highlighted row with an arrow marks the current instruction. Call targets carry symbolicated comments such as Variants._VarClear and Variants.DispInvokeCore+offset, and unreachable padding bytes decode as int3."
+                 width="927" height="800">
+            <figcaption>The green row with the arrow gutter marker is the current instruction. Call
+            targets are symbolicated in the trailing comment &mdash; <code>Variants._VarClear</code>,
+            <code>Variants.DispInvokeCore+&hellip;</code> &mdash; and source lines interleave with the
+            addresses that came from them, right down to the <code>int3</code> padding between
+            routines.</figcaption>
           </figure>
         </section>
 
