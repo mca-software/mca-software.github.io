@@ -307,6 +307,16 @@ header nav ul a:hover { color: var(--text); }
 .doc-table th { color: var(--text); font-weight: 600; font-size: 13px; }
 .doc-table td { color: var(--text-muted); line-height: 1.65; }
 
+/* A long identifier must not be allowed to dictate a column's width: an
+   unbreakable VisualStudioCodeDelphiDebugger.exe in the first column is what
+   pushes the prose column down to a one-word ribbon. Let it break instead. */
+.doc-table code { overflow-wrap: anywhere; }
+
+/* In a two-column table the first cell is a title and the second is the text
+   you are there to read, so the title gets a third of the width at most and
+   the explanation keeps the rest. */
+.doc-table tr:not(:has(td:nth-child(3))) td:first-child { width: 32%; }
+
 .doc-scroll { overflow-x: auto; }
 
 .doc-note {
@@ -736,6 +746,10 @@ footer {
   .doc-table tbody,
   .doc-table tr,
   .doc-table td { display: block; width: 100%; }
+
+  /* Same selector as the two-column title cap above, so it actually loses to
+     the full-width card cell rather than winning on specificity. */
+  .doc-table tr:not(:has(td:nth-child(3))) td:first-child { width: auto; }
 
   .doc-table thead {
     position: absolute;
