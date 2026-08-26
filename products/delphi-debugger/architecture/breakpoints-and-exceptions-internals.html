@@ -162,9 +162,10 @@
               exception rule can ever match it.
             </li>
             <li>
-              <strong>The rule list is evaluated, first match wins.</strong> Project rules and shared
-              machine-wide rules are concatenated into a <em>single</em> ordered list, project rules
-              first. A matching rule&rsquo;s action — <code>ignore</code>, <code>log</code>,
+              <strong>The rule list is evaluated, first match wins.</strong> Every rule file in scope
+              &mdash; the project&rsquo;s local file, the project&rsquo;s shared file, then the
+              machine-wide one &mdash; is concatenated into a <em>single</em> ordered list, narrowest
+              scope first. A matching rule&rsquo;s action — <code>ignore</code>, <code>log</code>,
               <code>logStack</code> or <code>break</code> — is the decision.
             </li>
             <li>
@@ -174,10 +175,10 @@
             </li>
           </ol>
           <div class="doc-note">
-            Because project and shared rules are <em>one</em> list rather than two tiers, a rule with
-            no criteria at the end of a project&rsquo;s <code>exceptionRules</code> matches everything and
-            makes every shared rule unreachable. This is the single most common way a machine-wide
-            rules file appears to stop working in one project.
+            Because those files become <em>one</em> list rather than independent tiers, a rule with no
+            criteria at the end of a project&rsquo;s own rules file matches everything and makes every
+            machine-wide rule unreachable. This is the single most common way a machine-wide rules
+            file appears to stop working in one project.
           </div>
           <p>
             The criteria themselves are flat fields on the rule object, AND-ed when present and

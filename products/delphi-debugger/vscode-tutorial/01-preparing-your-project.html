@@ -203,7 +203,7 @@
                 <tr><td><code>args</code></td><td><em>empty</em></td><td>Command-line arguments passed to the debuggee</td></tr>
                 <tr><td><code>stopAtEntry</code></td><td><code>false</code></td><td>Break at the process entry point before any user code runs</td></tr>
                 <tr><td><code>modules</code></td><td><em>empty</em></td><td>Pre-binds debug-info files for runtime-loaded DLLs and BPLs — see <a href="09-multi-bpl-and-modules.html">chapter 9</a></td></tr>
-                <tr><td><code>exceptionRules</code></td><td><em>empty</em></td><td>Per-exception rule table — see <a href="04-exception-handling.html">chapter 4</a></td></tr>
+                <tr><td><code>delphiProjectFile</code></td><td><em>empty</em></td><td>The <code>.dpr</code>/<code>.dpk</code>/<code>.dproj</code> this configuration debugs — written by the IDE plugin, and what puts a project&rsquo;s own exception rules in scope, see <a href="04-exception-handling.html#shared-rules">chapter 4</a></td></tr>
               </tbody>
             </table>
           </div>
@@ -235,7 +235,7 @@
             Set <code>"request": "attach"</code> and give a <code>processId</code> or
             <code>processName</code> instead of launching the program yourself. The attach
             configuration shares <code>program</code>, <code>sourceRoot</code>,
-            <code>sourceSearchPaths</code>, <code>modules</code> and <code>exceptionRules</code> with
+            <code>sourceSearchPaths</code>, <code>modules</code> and <code>delphiProjectFile</code> with
             launch, and adds <code>killOnDetach</code>.
             <a href="10-attach-to-a-running-process.html">Chapter 10</a> covers it, including one
             mistake worth knowing about before you try it.
