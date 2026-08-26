@@ -77,16 +77,16 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>TD32 section, <code>.map</code>, or JCL data — <strong>any one</strong></td>
-                  <td>No source lines: no breakpoints, no stepping</td>
+                  <td data-label="Artefact">TD32 section, <code>.map</code>, or JCL data — <strong>any one</strong></td>
+                  <td data-label="Without it">No source lines: no breakpoints, no stepping</td>
                 </tr>
                 <tr>
-                  <td><code>.rsm</code></td>
-                  <td>Breakpoints and stepping still work, but local variables, types and expression evaluation are severely limited</td>
+                  <td data-label="Artefact"><code>.rsm</code></td>
+                  <td data-label="Without it">Breakpoints and stepping still work, but local variables, types and expression evaluation are severely limited</td>
                 </tr>
                 <tr>
-                  <td>Optimizations off</td>
-                  <td>Breakpoints land on the wrong line and locals read as garbage, because the code no longer matches the source</td>
+                  <td data-label="Artefact">Optimizations off</td>
+                  <td data-label="Without it">Breakpoints land on the wrong line and locals read as garbage, because the code no longer matches the source</td>
                 </tr>
               </tbody>
             </table>
@@ -106,29 +106,29 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>TD32</strong></td>
-                  <td>Embedded in the binary — Borland&rsquo;s <code>.debug</code> PE section, magic <code>FB09</code></td>
-                  <td>Source lines, file names, symbols. The primary line source when present.</td>
+                  <td data-label="Format"><strong>TD32</strong></td>
+                  <td data-label="Where it lives">Embedded in the binary — Borland&rsquo;s <code>.debug</code> PE section, magic <code>FB09</code></td>
+                  <td data-label="What it carries">Source lines, file names, symbols. The primary line source when present.</td>
                 </tr>
                 <tr>
-                  <td><strong><code>.map</code></strong></td>
-                  <td>Sidecar file, emitted by the linker at <em>Detailed</em></td>
-                  <td>Line numbers and segment/symbol addresses, plus nested-procedure linkage</td>
+                  <td data-label="Format"><strong><code>.map</code></strong></td>
+                  <td data-label="Where it lives">Sidecar file, emitted by the linker at <em>Detailed</em></td>
+                  <td data-label="What it carries">Line numbers and segment/symbol addresses, plus nested-procedure linkage</td>
                 </tr>
                 <tr>
-                  <td><strong><code>.rsm</code></strong></td>
-                  <td>Sidecar file, from <em>Include remote debug symbols</em></td>
-                  <td>Local variables and type information. <strong>Optional</strong> — the debugger works without it, with reduced fidelity.</td>
+                  <td data-label="Format"><strong><code>.rsm</code></strong></td>
+                  <td data-label="Where it lives">Sidecar file, from <em>Include remote debug symbols</em></td>
+                  <td data-label="What it carries">Local variables and type information. <strong>Optional</strong> — the debugger works without it, with reduced fidelity.</td>
                 </tr>
                 <tr>
-                  <td><strong><code>.dcp</code></strong></td>
-                  <td>Sidecar file, produced by a package build</td>
-                  <td>The same format as <code>.rsm</code>, supplying a BPL&rsquo;s debug information</td>
+                  <td data-label="Format"><strong><code>.dcp</code></strong></td>
+                  <td data-label="Where it lives">Sidecar file, produced by a package build</td>
+                  <td data-label="What it carries">The same format as <code>.rsm</code>, supplying a BPL&rsquo;s debug information</td>
                 </tr>
                 <tr>
-                  <td><strong>JCL</strong></td>
-                  <td>A <code>JCLDEBUG</code> PE section, or a sidecar <code>.jdbg</code></td>
-                  <td>Line information. On by default; a fallback line source.</td>
+                  <td data-label="Format"><strong>JCL</strong></td>
+                  <td data-label="Where it lives">A <code>JCLDEBUG</code> PE section, or a sidecar <code>.jdbg</code></td>
+                  <td data-label="What it carries">Line information. On by default; a fallback line source.</td>
                 </tr>
               </tbody>
             </table>

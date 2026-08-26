@@ -92,21 +92,21 @@
                 <tr><th>Property</th><th>Type</th><th>Default</th><th>Notes</th></tr>
               </thead>
               <tbody>
-                <tr><td><code>program</code></td><td>string</td><td><em>required</em></td><td>Path to the <code>.exe</code> to debug</td></tr>
-                <tr><td><code>mapFile</code></td><td>string</td><td>same path as <code>program</code>, <code>.map</code></td><td>Delphi MAP file</td></tr>
-                <tr><td><code>rsmFile</code></td><td>string</td><td>same path, <code>.rsm</code></td><td>Needed for local variable inspection</td></tr>
-                <tr><td><code>sourceRoot</code></td><td>string</td><td><em>empty</em></td><td>Root directory for source lookup</td></tr>
-                <tr><td><code>sourceSearchPaths</code></td><td>string[]</td><td><em>empty</em></td><td>Extra source directories, each searched two levels deep</td></tr>
-                <tr><td><code>args</code></td><td>string[]</td><td><em>empty</em></td><td>Command-line arguments for the debuggee</td></tr>
-                <tr><td><code>stopAtEntry</code></td><td>boolean</td><td><code>false</code></td><td>Break at the process entry point before any user code runs</td></tr>
-                <tr><td><code>rawStackScan</code></td><td>boolean</td><td><code>false</code></td><td>Opt-in brute-force stack sweep fallback — <a href="06-threads-and-call-stack.html#raw-stack-scan">chapter 6</a></td></tr>
-                <tr><td><code>modules</code></td><td>object[]</td><td><em>empty</em></td><td><code>{ name (required), map, rsm, dcp }</code> — pre-binds debug info for runtime-loaded DLLs and BPLs</td></tr>
-                <tr><td><code>delphiProjectFile</code></td><td>string</td><td><em>empty</em></td><td>The <code>.dpr</code>/<code>.dpk</code>/<code>.dproj</code> this configuration debugs, written automatically by the IDE plugin. Enables the two project-scoped tiers in <a href="04-exception-handling.html#shared-rules">exception rules</a>.</td></tr>
-                <tr><td><code>useGlobalExceptionRules</code></td><td>boolean</td><td><code>true</code></td><td>Also load the shared machine-wide rules file</td></tr>
-                <tr><td><code>globalExceptionRulesPath</code></td><td>string</td><td><code>%USERPROFILE%\.DelphiWinDebugger\exceptionRules.json</code></td><td>Override the shared rules file location</td></tr>
-                <tr><td><code>progressLocation</code></td><td><code>"statusBar"</code> | <code>"notification"</code></td><td><code>"statusBar"</code></td><td>Where long operations report progress</td></tr>
-                <tr><td><code>diagnosticLog</code></td><td>boolean</td><td><code>false</code></td><td>Writes <code>%TEMP%\dap_adapter.log</code>. Very verbose. Also enabled by the <code>DAP_LOG=1</code> environment variable.</td></tr>
-                <tr><td><code>diagnosticsLocation</code></td><td><code>"outputChannel"</code> | <code>"debugConsole"</code></td><td><code>"outputChannel"</code></td><td>Where the debugger&rsquo;s own messages go</td></tr>
+                <tr><td data-label="Property"><code>program</code></td><td data-label="Type">string</td><td data-label="Default"><em>required</em></td><td data-label="Notes">Path to the <code>.exe</code> to debug</td></tr>
+                <tr><td data-label="Property"><code>mapFile</code></td><td data-label="Type">string</td><td data-label="Default">same path as <code>program</code>, <code>.map</code></td><td data-label="Notes">Delphi MAP file</td></tr>
+                <tr><td data-label="Property"><code>rsmFile</code></td><td data-label="Type">string</td><td data-label="Default">same path, <code>.rsm</code></td><td data-label="Notes">Needed for local variable inspection</td></tr>
+                <tr><td data-label="Property"><code>sourceRoot</code></td><td data-label="Type">string</td><td data-label="Default"><em>empty</em></td><td data-label="Notes">Root directory for source lookup</td></tr>
+                <tr><td data-label="Property"><code>sourceSearchPaths</code></td><td data-label="Type">string[]</td><td data-label="Default"><em>empty</em></td><td data-label="Notes">Extra source directories, each searched two levels deep</td></tr>
+                <tr><td data-label="Property"><code>args</code></td><td data-label="Type">string[]</td><td data-label="Default"><em>empty</em></td><td data-label="Notes">Command-line arguments for the debuggee</td></tr>
+                <tr><td data-label="Property"><code>stopAtEntry</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>false</code></td><td data-label="Notes">Break at the process entry point before any user code runs</td></tr>
+                <tr><td data-label="Property"><code>rawStackScan</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>false</code></td><td data-label="Notes">Opt-in brute-force stack sweep fallback — <a href="06-threads-and-call-stack.html#raw-stack-scan">chapter 6</a></td></tr>
+                <tr><td data-label="Property"><code>modules</code></td><td data-label="Type">object[]</td><td data-label="Default"><em>empty</em></td><td data-label="Notes"><code>{ name (required), map, rsm, dcp }</code> — pre-binds debug info for runtime-loaded DLLs and BPLs</td></tr>
+                <tr><td data-label="Property"><code>delphiProjectFile</code></td><td data-label="Type">string</td><td data-label="Default"><em>empty</em></td><td data-label="Notes">The <code>.dpr</code>/<code>.dpk</code>/<code>.dproj</code> this configuration debugs, written automatically by the IDE plugin. Enables the two project-scoped tiers in <a href="04-exception-handling.html#shared-rules">exception rules</a>.</td></tr>
+                <tr><td data-label="Property"><code>useGlobalExceptionRules</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>true</code></td><td data-label="Notes">Also load the shared machine-wide rules file</td></tr>
+                <tr><td data-label="Property"><code>globalExceptionRulesPath</code></td><td data-label="Type">string</td><td data-label="Default"><code>%USERPROFILE%\.DelphiWinDebugger\exceptionRules.json</code></td><td data-label="Notes">Override the shared rules file location</td></tr>
+                <tr><td data-label="Property"><code>progressLocation</code></td><td data-label="Type"><code>"statusBar"</code> | <code>"notification"</code></td><td data-label="Default"><code>"statusBar"</code></td><td data-label="Notes">Where long operations report progress</td></tr>
+                <tr><td data-label="Property"><code>diagnosticLog</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>false</code></td><td data-label="Notes">Writes <code>%TEMP%\dap_adapter.log</code>. Very verbose. Also enabled by the <code>DAP_LOG=1</code> environment variable.</td></tr>
+                <tr><td data-label="Property"><code>diagnosticsLocation</code></td><td data-label="Type"><code>"outputChannel"</code> | <code>"debugConsole"</code></td><td data-label="Default"><code>"outputChannel"</code></td><td data-label="Notes">Where the debugger&rsquo;s own messages go</td></tr>
               </tbody>
             </table>
           </div>
@@ -133,9 +133,9 @@
                 <tr><th>Property</th><th>Type</th><th>Default</th><th>Notes</th></tr>
               </thead>
               <tbody>
-                <tr><td><code>processId</code></td><td>number or string</td><td>—</td><td>PID to attach to. Use <code>"${command:delphi-win64.pickProcess}"</code> to pick interactively.</td></tr>
-                <tr><td><code>processName</code></td><td>string</td><td>—</td><td>Executable name, e.g. <code>"MyApp.exe"</code></td></tr>
-                <tr><td><code>killOnDetach</code></td><td>boolean</td><td><code>false</code></td><td>Detaching leaves the process running by default</td></tr>
+                <tr><td data-label="Property"><code>processId</code></td><td data-label="Type">number or string</td><td data-label="Default">—</td><td data-label="Notes">PID to attach to. Use <code>"${command:delphi-win64.pickProcess}"</code> to pick interactively.</td></tr>
+                <tr><td data-label="Property"><code>processName</code></td><td data-label="Type">string</td><td data-label="Default">—</td><td data-label="Notes">Executable name, e.g. <code>"MyApp.exe"</code></td></tr>
+                <tr><td data-label="Property"><code>killOnDetach</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>false</code></td><td data-label="Notes">Detaching leaves the process running by default</td></tr>
               </tbody>
             </table>
           </div>
@@ -158,15 +158,15 @@
                 <tr><th>Key</th><th>Type</th><th>Matches</th></tr>
               </thead>
               <tbody>
-                <tr><td><code>class</code></td><td>string | string[]</td><td>Runtime (leaf) class, exact, case-insensitive</td></tr>
-                <tr><td><code>classIs</code></td><td>string | string[]</td><td>Runtime class or any ancestor</td></tr>
-                <tr><td><code>code</code></td><td>string | integer | array</td><td>Win32 exception code, hex or decimal. The only criterion that matches native exceptions.</td></tr>
-                <tr><td><code>message</code></td><td>string</td><td>Case-insensitive substring of the message</td></tr>
-                <tr><td><code>messageRegex</code></td><td>string</td><td>Case-insensitive regular expression against the message</td></tr>
-                <tr><td><code>unit</code></td><td>string</td><td>Raise-site unit by basename; <code>"*unknown*"</code> for no resolvable location</td></tr>
-                <tr><td><code>line</code></td><td>integer</td><td>Single raise-site line; seeds both range bounds</td></tr>
-                <tr><td><code>lineFrom</code> / <code>lineTo</code></td><td>integer</td><td>Inclusive raise-site line range</td></tr>
-                <tr><td><code>action</code></td><td>string</td><td><strong>Required.</strong> <code>ignore</code>, <code>log</code>, <code>logStack</code> or <code>break</code></td></tr>
+                <tr><td data-label="Key"><code>class</code></td><td data-label="Type">string | string[]</td><td data-label="Matches">Runtime (leaf) class, exact, case-insensitive</td></tr>
+                <tr><td data-label="Key"><code>classIs</code></td><td data-label="Type">string | string[]</td><td data-label="Matches">Runtime class or any ancestor</td></tr>
+                <tr><td data-label="Key"><code>code</code></td><td data-label="Type">string | integer | array</td><td data-label="Matches">Win32 exception code, hex or decimal. The only criterion that matches native exceptions.</td></tr>
+                <tr><td data-label="Key"><code>message</code></td><td data-label="Type">string</td><td data-label="Matches">Case-insensitive substring of the message</td></tr>
+                <tr><td data-label="Key"><code>messageRegex</code></td><td data-label="Type">string</td><td data-label="Matches">Case-insensitive regular expression against the message</td></tr>
+                <tr><td data-label="Key"><code>unit</code></td><td data-label="Type">string</td><td data-label="Matches">Raise-site unit by basename; <code>"*unknown*"</code> for no resolvable location</td></tr>
+                <tr><td data-label="Key"><code>line</code></td><td data-label="Type">integer</td><td data-label="Matches">Single raise-site line; seeds both range bounds</td></tr>
+                <tr><td data-label="Key"><code>lineFrom</code> / <code>lineTo</code></td><td data-label="Type">integer</td><td data-label="Matches">Inclusive raise-site line range</td></tr>
+                <tr><td data-label="Key"><code>action</code></td><td data-label="Type">string</td><td data-label="Matches"><strong>Required.</strong> <code>ignore</code>, <code>log</code>, <code>logStack</code> or <code>break</code></td></tr>
               </tbody>
             </table>
           </div>
@@ -197,18 +197,18 @@
                 <tr><th>Command</th><th>Where it lives</th><th>In palette</th></tr>
               </thead>
               <tbody>
-                <tr><td>Edit Exception Rules…</td><td>Title bar of the Breakpoints and Call Stack views</td><td>yes</td></tr>
-                <tr><td>Create a Rule for This Exception…</td><td>The floating debug toolbar — only while stopped on an exception</td><td>yes, same condition</td></tr>
-                <tr><td>Toggle Raw Stack Scan</td><td>Call Stack view title bar</td><td>yes</td></tr>
-                <tr><td>Refresh Modules</td><td>Delphi Modules view title bar</td><td>yes</td></tr>
-                <tr><td>Filter Modules…</td><td>Delphi Modules view title bar</td><td>yes</td></tr>
-                <tr><td>Clear Module Filter</td><td>Delphi Modules view title bar, once a filter is set</td><td>yes</td></tr>
-                <tr><td>View Memory (Delphi)</td><td><strong>Hover icon on a row</strong> in the Variables or Watch view — not in the right-click menu</td><td>yes</td></tr>
-                <tr><td>Always Evaluate This Property (Delphi)</td><td>Right-click a row in Variables <em>or</em> Watch</td><td><strong>no</strong></td></tr>
-                <tr><td>Never Auto-Evaluate This Property (Delphi)</td><td>Right-click a row in Variables <em>or</em> Watch</td><td><strong>no</strong></td></tr>
-                <tr><td>Forget Evaluation Decision (Delphi)</td><td>Right-click a row in Variables <em>or</em> Watch — undoes a previous allow or deny</td><td><strong>no</strong></td></tr>
-                <tr><td>Copy Path</td><td><strong>Hover icon</strong> on a module row in the Delphi Modules view</td><td><strong>no</strong></td></tr>
-                <tr><td>Pick a Process to Attach To</td><td>Only as <code>${command:delphi-win64.pickProcess}</code> in an attach configuration</td><td><strong>no</strong></td></tr>
+                <tr><td data-label="Command">Edit Exception Rules…</td><td data-label="Where it lives">Title bar of the Breakpoints and Call Stack views</td><td data-label="In palette">yes</td></tr>
+                <tr><td data-label="Command">Create a Rule for This Exception…</td><td data-label="Where it lives">The floating debug toolbar — only while stopped on an exception</td><td data-label="In palette">yes, same condition</td></tr>
+                <tr><td data-label="Command">Toggle Raw Stack Scan</td><td data-label="Where it lives">Call Stack view title bar</td><td data-label="In palette">yes</td></tr>
+                <tr><td data-label="Command">Refresh Modules</td><td data-label="Where it lives">Delphi Modules view title bar</td><td data-label="In palette">yes</td></tr>
+                <tr><td data-label="Command">Filter Modules…</td><td data-label="Where it lives">Delphi Modules view title bar</td><td data-label="In palette">yes</td></tr>
+                <tr><td data-label="Command">Clear Module Filter</td><td data-label="Where it lives">Delphi Modules view title bar, once a filter is set</td><td data-label="In palette">yes</td></tr>
+                <tr><td data-label="Command">View Memory (Delphi)</td><td data-label="Where it lives"><strong>Hover icon on a row</strong> in the Variables or Watch view — not in the right-click menu</td><td data-label="In palette">yes</td></tr>
+                <tr><td data-label="Command">Always Evaluate This Property (Delphi)</td><td data-label="Where it lives">Right-click a row in Variables <em>or</em> Watch</td><td data-label="In palette"><strong>no</strong></td></tr>
+                <tr><td data-label="Command">Never Auto-Evaluate This Property (Delphi)</td><td data-label="Where it lives">Right-click a row in Variables <em>or</em> Watch</td><td data-label="In palette"><strong>no</strong></td></tr>
+                <tr><td data-label="Command">Forget Evaluation Decision (Delphi)</td><td data-label="Where it lives">Right-click a row in Variables <em>or</em> Watch — undoes a previous allow or deny</td><td data-label="In palette"><strong>no</strong></td></tr>
+                <tr><td data-label="Command">Copy Path</td><td data-label="Where it lives"><strong>Hover icon</strong> on a module row in the Delphi Modules view</td><td data-label="In palette"><strong>no</strong></td></tr>
+                <tr><td data-label="Command">Pick a Process to Attach To</td><td data-label="Where it lives">Only as <code>${command:delphi-win64.pickProcess}</code> in an attach configuration</td><td data-label="In palette"><strong>no</strong></td></tr>
               </tbody>
             </table>
           </div>
@@ -229,12 +229,12 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><code>delphi-win64.stockMemoryView</code></td><td>boolean</td><td><code>false</code></td>
-                  <td>Also show VS Code&rsquo;s built-in hex pane alongside the extension&rsquo;s own memory view</td>
+                  <td data-label="Setting"><code>delphi-win64.stockMemoryView</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>false</code></td>
+                  <td data-label="What it does">Also show VS Code&rsquo;s built-in hex pane alongside the extension&rsquo;s own memory view</td>
                 </tr>
                 <tr>
-                  <td><code>delphi-win64.checkForUpdates</code></td><td>boolean</td><td><code>true</code></td>
-                  <td>Daily check of GitHub releases, with a download-link notification. Fails silently when offline.</td>
+                  <td data-label="Setting"><code>delphi-win64.checkForUpdates</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>true</code></td>
+                  <td data-label="What it does">Daily check of GitHub releases, with a download-link notification. Fails silently when offline.</td>
                 </tr>
               </tbody>
             </table>

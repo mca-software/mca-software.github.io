@@ -79,44 +79,44 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>Identifiers</td>
-                  <td>Qualified identifiers, field and property access, array and open-array indexing</td>
+                  <td data-label="Category">Identifiers</td>
+                  <td data-label="Supported">Qualified identifiers, field and property access, array and open-array indexing</td>
                 </tr>
                 <tr>
-                  <td>Arithmetic</td>
-                  <td><code>+ - * /</code>, <code>div</code>, <code>mod</code>, <code>shl</code>, <code>shr</code>, unary <code>-</code>. Mixed integer and float operands promote to <code>Double</code>.</td>
+                  <td data-label="Category">Arithmetic</td>
+                  <td data-label="Supported"><code>+ - * /</code>, <code>div</code>, <code>mod</code>, <code>shl</code>, <code>shr</code>, unary <code>-</code>. Mixed integer and float operands promote to <code>Double</code>.</td>
                 </tr>
                 <tr>
-                  <td>Logic</td>
-                  <td><code>and</code>, <code>or</code>, <code>xor</code>, <code>not</code> — logical for Boolean operands, bitwise for integer ones, as in Delphi</td>
+                  <td data-label="Category">Logic</td>
+                  <td data-label="Supported"><code>and</code>, <code>or</code>, <code>xor</code>, <code>not</code> — logical for Boolean operands, bitwise for integer ones, as in Delphi</td>
                 </tr>
                 <tr>
-                  <td>Comparison</td>
-                  <td>The full set, on every type that supports it</td>
+                  <td data-label="Category">Comparison</td>
+                  <td data-label="Supported">The full set, on every type that supports it</td>
                 </tr>
                 <tr>
-                  <td>Literals</td>
-                  <td><code>True</code>, <code>False</code>, <code>nil</code>, numbers, strings, and bare enum literals — <code>Mode = wmPaused</code> needs no qualifier</td>
+                  <td data-label="Category">Literals</td>
+                  <td data-label="Supported"><code>True</code>, <code>False</code>, <code>nil</code>, numbers, strings, and bare enum literals — <code>Mode = wmPaused</code> needs no qualifier</td>
                 </tr>
                 <tr>
-                  <td>Strings</td>
-                  <td>Concatenation with <code>+</code>. This allocates a real string in the debuggee.</td>
+                  <td data-label="Category">Strings</td>
+                  <td data-label="Supported">Concatenation with <code>+</code>. This allocates a real string in the debuggee.</td>
                 </tr>
                 <tr>
-                  <td>Sets</td>
-                  <td>Set algebra with <code>+</code>, <code>-</code> and <code>*</code></td>
+                  <td data-label="Category">Sets</td>
+                  <td data-label="Supported">Set algebra with <code>+</code>, <code>-</code> and <code>*</code></td>
                 </tr>
                 <tr>
-                  <td>Types</td>
-                  <td>Type casts with the correct semantics per case, and <code>is</code> / <code>as</code>, driven by RTTI</td>
+                  <td data-label="Category">Types</td>
+                  <td data-label="Supported">Type casts with the correct semantics per case, and <code>is</code> / <code>as</code>, driven by RTTI</td>
                 </tr>
                 <tr>
-                  <td>Intrinsics</td>
-                  <td><code>Length</code>, <code>SizeOf</code>, <code>Ord</code>, <code>Low</code>, <code>High</code>, <code>Assigned</code>, <code>Pred</code>, <code>Succ</code>, <code>Abs</code>, <code>Chr</code>, <code>Trunc</code>, <code>Round</code>, <code>Int</code>, <code>Frac</code>, <code>Copy</code>, <code>Pos</code>, <code>UpperCase</code>, <code>LowerCase</code></td>
+                  <td data-label="Category">Intrinsics</td>
+                  <td data-label="Supported"><code>Length</code>, <code>SizeOf</code>, <code>Ord</code>, <code>Low</code>, <code>High</code>, <code>Assigned</code>, <code>Pred</code>, <code>Succ</code>, <code>Abs</code>, <code>Chr</code>, <code>Trunc</code>, <code>Round</code>, <code>Int</code>, <code>Frac</code>, <code>Copy</code>, <code>Pos</code>, <code>UpperCase</code>, <code>LowerCase</code></td>
                 </tr>
                 <tr>
-                  <td>Addresses</td>
-                  <td>Unary <code>@</code> — useful for feeding an address to a <a href="03-breakpoints.html#data">data breakpoint</a> or the memory view</td>
+                  <td data-label="Category">Addresses</td>
+                  <td data-label="Supported">Unary <code>@</code> — useful for feeding an address to a <a href="03-breakpoints.html#data">data breakpoint</a> or the memory view</td>
                 </tr>
               </tbody>
             </table>
@@ -208,16 +208,16 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>The debuggee&rsquo;s own output</td>
-                  <td>Debug Console</td>
+                  <td data-label="Stream">The debuggee&rsquo;s own output</td>
+                  <td data-label="Default destination">Debug Console</td>
                 </tr>
                 <tr>
-                  <td>Debugger-generated output — notably <a href="03-breakpoints.html#logpoints">logpoint</a> text</td>
-                  <td>Debug Console, as a separate channel from the above</td>
+                  <td data-label="Stream">Debugger-generated output — notably <a href="03-breakpoints.html#logpoints">logpoint</a> text</td>
+                  <td data-label="Default destination">Debug Console, as a separate channel from the above</td>
                 </tr>
                 <tr>
-                  <td>The debugger&rsquo;s own diagnostics</td>
-                  <td>A separate &ldquo;Delphi Debugger&rdquo; channel in the Output panel, not the Debug Console. Change with <code>diagnosticsLocation</code>.</td>
+                  <td data-label="Stream">The debugger&rsquo;s own diagnostics</td>
+                  <td data-label="Default destination">A separate &ldquo;Delphi Debugger&rdquo; channel in the Output panel, not the Debug Console. Change with <code>diagnosticsLocation</code>.</td>
                 </tr>
               </tbody>
             </table>

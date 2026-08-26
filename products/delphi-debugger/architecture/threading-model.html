@@ -87,12 +87,12 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>Main loop</td>
-                  <td>Drains the request queue, handles each request, then pumps one debug event. Everything that touches the debuggee happens here.</td>
+                  <td data-label="Thread">Main loop</td>
+                  <td data-label="Job">Drains the request queue, handles each request, then pumps one debug event. Everything that touches the debuggee happens here.</td>
                 </tr>
                 <tr>
-                  <td>Stdin reader</td>
-                  <td>Reads and frames incoming protocol messages and pushes them onto a thread-safe queue. Nothing else.</td>
+                  <td data-label="Thread">Stdin reader</td>
+                  <td data-label="Job">Reads and frames incoming protocol messages and pushes them onto a thread-safe queue. Nothing else.</td>
                 </tr>
               </tbody>
             </table>

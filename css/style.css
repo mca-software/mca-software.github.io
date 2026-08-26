@@ -212,20 +212,24 @@ header nav ul a:hover { color: var(--text); }
 
 .contrib-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
 
+/* The bullet hangs in the left margin rather than being a flex item: a flex
+   row would turn every inline <code> in the text into a flex item of its own,
+   which stops the line wrapping and pushes narrow screens sideways. */
 .contrib-list li {
   font-size: 13.5px;
   color: var(--text-muted);
   line-height: 1.6;
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
+  position: relative;
+  padding-left: 20px;
 }
 
 .contrib-list li::before {
   content: '›';
+  position: absolute;
+  left: 0;
+  top: 0;
   color: var(--accent);
   font-weight: 700;
-  flex-shrink: 0;
 }
 
 /* ── Documentation page ── */
@@ -645,7 +649,7 @@ footer {
   padding: 3px 8px;
 }
 
-.footer-links { display: flex; gap: 24px; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 12px 24px; }
 .footer-links a { font-size: 13px; color: var(--text-muted); transition: color 0.1s; }
 .footer-links a:hover { color: var(--text); }
 
@@ -720,4 +724,56 @@ footer {
   .hero-cta { flex-direction: column; align-items: center; }
   .footer-inner { flex-direction: column; align-items: flex-start; gap: 20px; }
   .features { gap: 64px; padding: 64px 24px; }
+
+  /* A reference table cannot shrink below its longest unbreakable token — a
+     unit name, a path, an .exe — so on a phone the first column takes the
+     screen and the prose column collapses into a one-word ribbon. Stack each
+     row into a card instead: the first cell is its heading, every other cell
+     is introduced by its column header, carried on the cell as data-label. */
+  .doc-scroll { overflow-x: visible; }
+
+  .doc-table,
+  .doc-table tbody,
+  .doc-table tr,
+  .doc-table td { display: block; width: 100%; }
+
+  .doc-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .doc-table tr { border-bottom: 1px solid var(--border); padding: 16px 0; }
+  .doc-table tr:last-child { border-bottom: none; }
+
+  .doc-table td { border-bottom: none; padding: 0; }
+  .doc-table td + td { margin-top: 7px; }
+
+  .doc-table td:first-child {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .doc-table td:not(:first-child)[data-label]::before {
+    content: attr(data-label) '\A0\A0';
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  /* In a two-column table the second cell is plainly the first one's
+     description, so its label is noise — drop it and let the card read as a
+     heading followed by a paragraph. */
+  .doc-table tr:not(:has(td:nth-child(3))) td:nth-child(2)::before { content: none; }
+
+  /* Break long identifiers — a tool signature, a path, an .exe — rather than
+     let one of them push the whole page sideways. Code inside <pre> is
+     unaffected: it stays white-space: pre and scrolls in its own box. */
+  code { overflow-wrap: anywhere; }
 }

@@ -84,12 +84,12 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>x64</td>
-                  <td><code>RIP</code>, <code>RSP</code>, <code>RBP</code>, <code>RAX</code>–<code>RDI</code>, <code>R8</code>–<code>R15</code>, <code>EFlags</code></td>
+                  <td data-label="Target">x64</td>
+                  <td data-label="Registers shown"><code>RIP</code>, <code>RSP</code>, <code>RBP</code>, <code>RAX</code>–<code>RDI</code>, <code>R8</code>–<code>R15</code>, <code>EFlags</code></td>
                 </tr>
                 <tr>
-                  <td>x86</td>
-                  <td><code>EIP</code>, <code>ESP</code>, <code>EBP</code>, <code>EAX</code>–<code>EDI</code>, <code>EFlags</code> — no <code>R8</code>–<code>R15</code></td>
+                  <td data-label="Target">x86</td>
+                  <td data-label="Registers shown"><code>EIP</code>, <code>ESP</code>, <code>EBP</code>, <code>EAX</code>–<code>EDI</code>, <code>EFlags</code> — no <code>R8</code>–<code>R15</code></td>
                 </tr>
               </tbody>
             </table>
@@ -161,12 +161,12 @@
                 <tr><th>Control</th><th>What it does</th></tr>
               </thead>
               <tbody>
-                <tr><td><strong>▲ back</strong> / <strong>▼ forward</strong></td><td>Scroll by a page</td></tr>
-                <tr><td><strong>value start</strong></td><td>Jump back to the value&rsquo;s own address</td></tr>
-                <tr><td><strong>refresh</strong></td><td>Re-read now, and mark what changed since the last time you looked</td></tr>
-                <tr><td><strong>edit: off</strong> / <strong>edit: ON</strong></td><td>Arms byte editing — see below</td></tr>
-                <tr><td><strong>−</strong> / number / <strong>+</strong></td><td>Bytes per row. Match it to a 2D array&rsquo;s row width and the block reads as one.</td></tr>
-                <tr><td>Mouse wheel</td><td>One row; hold <code>Shift</code> for a page</td></tr>
+                <tr><td data-label="Control"><strong>▲ back</strong> / <strong>▼ forward</strong></td><td data-label="What it does">Scroll by a page</td></tr>
+                <tr><td data-label="Control"><strong>value start</strong></td><td data-label="What it does">Jump back to the value&rsquo;s own address</td></tr>
+                <tr><td data-label="Control"><strong>refresh</strong></td><td data-label="What it does">Re-read now, and mark what changed since the last time you looked</td></tr>
+                <tr><td data-label="Control"><strong>edit: off</strong> / <strong>edit: ON</strong></td><td data-label="What it does">Arms byte editing — see below</td></tr>
+                <tr><td data-label="Control"><strong>−</strong> / number / <strong>+</strong></td><td data-label="What it does">Bytes per row. Match it to a 2D array&rsquo;s row width and the block reads as one.</td></tr>
+                <tr><td data-label="Control">Mouse wheel</td><td data-label="What it does">One row; hold <code>Shift</code> for a page</td></tr>
               </tbody>
             </table>
           </div>
@@ -188,20 +188,20 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>Blue <strong>underline</strong></td>
-                  <td>This byte belongs to the value you opened the view on. Nothing is underlined when the extent could not be established — deliberately, so the view never claims a neighbouring variable&rsquo;s bytes are yours.</td>
+                  <td data-label="Mark">Blue <strong>underline</strong></td>
+                  <td data-label="Meaning">This byte belongs to the value you opened the view on. Nothing is underlined when the extent could not be established — deliberately, so the view never claims a neighbouring variable&rsquo;s bytes are yours.</td>
                 </tr>
                 <tr>
-                  <td>Blue <strong>box</strong>, and the row&rsquo;s address in blue</td>
-                  <td>Offset zero — the variable&rsquo;s own address.</td>
+                  <td data-label="Mark">Blue <strong>box</strong>, and the row&rsquo;s address in blue</td>
+                  <td data-label="Meaning">Offset zero — the variable&rsquo;s own address.</td>
                 </tr>
                 <tr>
-                  <td><strong>Orange flash</strong>, fading to orange text</td>
-                  <td>Changed since the last comparison point. The flash fades after a few seconds but the text <em>stays</em> orange until the next comparison, so a change you looked away from is still there when you look back.</td>
+                  <td data-label="Mark"><strong>Orange flash</strong>, fading to orange text</td>
+                  <td data-label="Meaning">Changed since the last comparison point. The flash fades after a few seconds but the text <em>stays</em> orange until the next comparison, so a change you looked away from is still there when you look back.</td>
                 </tr>
                 <tr>
-                  <td>Grey <code>??</code></td>
-                  <td>Not readable at that address.</td>
+                  <td data-label="Mark">Grey <code>??</code></td>
+                  <td data-label="Meaning">Not readable at that address.</td>
                 </tr>
               </tbody>
             </table>

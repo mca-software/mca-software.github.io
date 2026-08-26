@@ -91,14 +91,14 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><code>F5</code></td>
-                  <td>Toggle a breakpoint</td>
-                  <td><strong>Start / continue the program</strong></td>
+                  <td data-label="Key"><code>F5</code></td>
+                  <td data-label="In Delphi">Toggle a breakpoint</td>
+                  <td data-label="In VS Code"><strong>Start / continue the program</strong></td>
                 </tr>
                 <tr>
-                  <td><code>F9</code></td>
-                  <td>Run the program</td>
-                  <td><strong>Toggle a breakpoint</strong></td>
+                  <td data-label="Key"><code>F9</code></td>
+                  <td data-label="In Delphi">Run the program</td>
+                  <td data-label="In VS Code"><strong>Toggle a breakpoint</strong></td>
                 </tr>
               </tbody>
             </table>
@@ -130,15 +130,15 @@
                 <tr><th>Delphi window</th><th></th><th>Where it is now</th></tr>
               </thead>
               <tbody>
-                <tr><td>Local Variables</td><td><code>Ctrl+Alt+L</code></td><td><strong>VARIABLES</strong> section</td></tr>
-                <tr><td>Watches</td><td><code>Ctrl+Alt+W</code></td><td><strong>WATCH</strong> section</td></tr>
-                <tr><td>Call Stack</td><td><code>Ctrl+Alt+S</code></td><td><strong>CALL STACK</strong> section</td></tr>
-                <tr><td>Breakpoints</td><td><code>Ctrl+Alt+B</code></td><td><strong>BREAKPOINTS</strong> section — which is also where the exception filters live</td></tr>
-                <tr><td>Thread Status</td><td><code>Ctrl+Alt+T</code></td><td>No separate window: threads are the top-level rows of the <strong>CALL STACK</strong> section, and expanding one shows its frames</td></tr>
-                <tr><td>Modules</td><td><code>Ctrl+Alt+M</code></td><td><strong>Delphi Modules</strong> section — added by this extension, not part of VS Code</td></tr>
-                <tr><td>CPU / Disassembly</td><td><code>Ctrl+Alt+C</code> / <code>Ctrl+Alt+D</code></td><td>The <strong>Disassembly View</strong>, opened from the Call Stack&rsquo;s context menu</td></tr>
-                <tr><td>Event Log</td><td><code>Ctrl+Alt+V</code></td><td>Split in two: your program&rsquo;s output goes to the <strong>Debug Console</strong>, the debugger&rsquo;s own messages to an <strong>Output</strong> panel channel</td></tr>
-                <tr><td>Raw values in the stack</td><td><code>Ctrl+Alt+R</code></td><td>The <a href="06-threads-and-call-stack.html#raw-stack-scan">raw stack scan</a> — same idea, same caveats, switched on from the Call Stack title bar</td></tr>
+                <tr><td data-label="Delphi window">Local Variables</td><td><code>Ctrl+Alt+L</code></td><td data-label="Where it is now"><strong>VARIABLES</strong> section</td></tr>
+                <tr><td data-label="Delphi window">Watches</td><td><code>Ctrl+Alt+W</code></td><td data-label="Where it is now"><strong>WATCH</strong> section</td></tr>
+                <tr><td data-label="Delphi window">Call Stack</td><td><code>Ctrl+Alt+S</code></td><td data-label="Where it is now"><strong>CALL STACK</strong> section</td></tr>
+                <tr><td data-label="Delphi window">Breakpoints</td><td><code>Ctrl+Alt+B</code></td><td data-label="Where it is now"><strong>BREAKPOINTS</strong> section — which is also where the exception filters live</td></tr>
+                <tr><td data-label="Delphi window">Thread Status</td><td><code>Ctrl+Alt+T</code></td><td data-label="Where it is now">No separate window: threads are the top-level rows of the <strong>CALL STACK</strong> section, and expanding one shows its frames</td></tr>
+                <tr><td data-label="Delphi window">Modules</td><td><code>Ctrl+Alt+M</code></td><td data-label="Where it is now"><strong>Delphi Modules</strong> section — added by this extension, not part of VS Code</td></tr>
+                <tr><td data-label="Delphi window">CPU / Disassembly</td><td><code>Ctrl+Alt+C</code> / <code>Ctrl+Alt+D</code></td><td data-label="Where it is now">The <strong>Disassembly View</strong>, opened from the Call Stack&rsquo;s context menu</td></tr>
+                <tr><td data-label="Delphi window">Event Log</td><td><code>Ctrl+Alt+V</code></td><td data-label="Where it is now">Split in two: your program&rsquo;s output goes to the <strong>Debug Console</strong>, the debugger&rsquo;s own messages to an <strong>Output</strong> panel channel</td></tr>
+                <tr><td data-label="Delphi window">Raw values in the stack</td><td><code>Ctrl+Alt+R</code></td><td data-label="Where it is now">The <a href="06-threads-and-call-stack.html#raw-stack-scan">raw stack scan</a> — same idea, same caveats, switched on from the Call Stack title bar</td></tr>
               </tbody>
             </table>
           </div>
@@ -164,18 +164,18 @@
                 <tr><th>What you want</th><th>Delphi</th><th>VS Code</th></tr>
               </thead>
               <tbody>
-                <tr><td>Run with debugging</td><td><code>F9</code></td><td><code>F5</code></td></tr>
-                <tr><td>Run without debugging</td><td><code>Ctrl+Shift+F9</code></td><td><code>Ctrl+F5</code></td></tr>
-                <tr><td>Toggle breakpoint</td><td><code>F5</code></td><td><code>F9</code></td></tr>
-                <tr><td>Step over</td><td><code>F8</code></td><td><code>F10</code></td></tr>
-                <tr><td>Step into</td><td><code>F7</code> (Trace Into)</td><td><code>F11</code></td></tr>
-                <tr><td>Run until the routine returns</td><td><code>Shift+F8</code></td><td><code>Shift+F11</code></td></tr>
-                <tr><td>Stop the program</td><td><code>Ctrl+F2</code> (Program Reset)</td><td><code>Shift+F5</code></td></tr>
-                <tr><td>Restart</td><td>—</td><td><code>Ctrl+Shift+F5</code></td></tr>
-                <tr><td>Run to the cursor</td><td><code>F4</code></td><td><em>Run to Cursor</em>, from the editor&rsquo;s right-click menu while stopped</td></tr>
-                <tr><td>Move the execution point</td><td>drag the arrow</td><td><em>Jump to Cursor</em>, in that same menu — see <a href="03-breakpoints.html#set-next-statement">chapter 3</a></td></tr>
-                <tr><td>Evaluate / modify a value</td><td><code>Ctrl+F7</code></td><td>Type it in the <strong>Debug Console</strong>, or edit the value in place in VARIABLES</td></tr>
-                <tr><td>Inspect a value</td><td>hover, or Debug Inspector</td><td>Hover — and if you <em>select</em> an expression first, the selection is what gets evaluated, as in Delphi</td></tr>
+                <tr><td data-label="What you want">Run with debugging</td><td data-label="Delphi"><code>F9</code></td><td data-label="VS Code"><code>F5</code></td></tr>
+                <tr><td data-label="What you want">Run without debugging</td><td data-label="Delphi"><code>Ctrl+Shift+F9</code></td><td data-label="VS Code"><code>Ctrl+F5</code></td></tr>
+                <tr><td data-label="What you want">Toggle breakpoint</td><td data-label="Delphi"><code>F5</code></td><td data-label="VS Code"><code>F9</code></td></tr>
+                <tr><td data-label="What you want">Step over</td><td data-label="Delphi"><code>F8</code></td><td data-label="VS Code"><code>F10</code></td></tr>
+                <tr><td data-label="What you want">Step into</td><td data-label="Delphi"><code>F7</code> (Trace Into)</td><td data-label="VS Code"><code>F11</code></td></tr>
+                <tr><td data-label="What you want">Run until the routine returns</td><td data-label="Delphi"><code>Shift+F8</code></td><td data-label="VS Code"><code>Shift+F11</code></td></tr>
+                <tr><td data-label="What you want">Stop the program</td><td data-label="Delphi"><code>Ctrl+F2</code> (Program Reset)</td><td data-label="VS Code"><code>Shift+F5</code></td></tr>
+                <tr><td data-label="What you want">Restart</td><td data-label="Delphi">—</td><td data-label="VS Code"><code>Ctrl+Shift+F5</code></td></tr>
+                <tr><td data-label="What you want">Run to the cursor</td><td data-label="Delphi"><code>F4</code></td><td data-label="VS Code"><em>Run to Cursor</em>, from the editor&rsquo;s right-click menu while stopped</td></tr>
+                <tr><td data-label="What you want">Move the execution point</td><td data-label="Delphi">drag the arrow</td><td data-label="VS Code"><em>Jump to Cursor</em>, in that same menu — see <a href="03-breakpoints.html#set-next-statement">chapter 3</a></td></tr>
+                <tr><td data-label="What you want">Evaluate / modify a value</td><td data-label="Delphi"><code>Ctrl+F7</code></td><td data-label="VS Code">Type it in the <strong>Debug Console</strong>, or edit the value in place in VARIABLES</td></tr>
+                <tr><td data-label="What you want">Inspect a value</td><td data-label="Delphi">hover, or Debug Inspector</td><td data-label="VS Code">Hover — and if you <em>select</em> an expression first, the selection is what gets evaluated, as in Delphi</td></tr>
               </tbody>
             </table>
           </div>

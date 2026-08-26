@@ -75,40 +75,40 @@
               <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code>list_debuggable_processes</code></td>
-                  <td>Running processes with pid, executable name and path, command line, parent pid, start time and architecture. Optional name filter.</td>
+                  <td data-label="Tool"><code>list_debuggable_processes</code></td>
+                  <td data-label="What it does">Running processes with pid, executable name and path, command line, parent pid, start time and architecture. Optional name filter.</td>
                 </tr>
                 <tr>
-                  <td><code>launch_debuggee</code></td>
-                  <td>Start a process under the debugger. Takes <code>program</code> plus optional <code>args</code>, <code>mapFile</code>, <code>rsmFile</code>, <code>sourceRoot</code>, <code>sourceSearchPaths</code>, <code>stopAtEntry</code> and the exception filters.</td>
+                  <td data-label="Tool"><code>launch_debuggee</code></td>
+                  <td data-label="What it does">Start a process under the debugger. Takes <code>program</code> plus optional <code>args</code>, <code>mapFile</code>, <code>rsmFile</code>, <code>sourceRoot</code>, <code>sourceSearchPaths</code>, <code>stopAtEntry</code> and the exception filters.</td>
                 </tr>
                 <tr>
-                  <td><code>launch_from_config</code></td>
-                  <td>Launch from an existing VS Code <code>launch.json</code> — the same file the DAP debugger uses, JSONC and <code>${workspaceFolder}</code> / <code>${env:}</code> included — so nothing has to be restated. Stops at entry.</td>
+                  <td data-label="Tool"><code>launch_from_config</code></td>
+                  <td data-label="What it does">Launch from an existing VS Code <code>launch.json</code> — the same file the DAP debugger uses, JSONC and <code>${workspaceFolder}</code> / <code>${env:}</code> included — so nothing has to be restated. Stops at entry.</td>
                 </tr>
                 <tr>
-                  <td><code>attach_to_process</code></td>
-                  <td>Attach by <code>processId</code> or <code>processName</code>. An ambiguous name fails and <em>lists the candidates</em> rather than picking one. A target of a different architecture is rejected. Detaching leaves the process running by default.</td>
+                  <td data-label="Tool"><code>attach_to_process</code></td>
+                  <td data-label="What it does">Attach by <code>processId</code> or <code>processName</code>. An ambiguous name fails and <em>lists the candidates</em> rather than picking one. A target of a different architecture is rejected. Detaching leaves the process running by default.</td>
                 </tr>
                 <tr>
-                  <td><code>attach_from_config</code></td>
-                  <td>The same, from a <code>launch.json</code> <code>attach</code> configuration.</td>
+                  <td data-label="Tool"><code>attach_from_config</code></td>
+                  <td data-label="What it does">The same, from a <code>launch.json</code> <code>attach</code> configuration.</td>
                 </tr>
                 <tr>
-                  <td><code>get_debug_session_status</code></td>
-                  <td>Session state — none, launching, attaching, running, stopped, exited, detached, terminated — plus the stop reason and location when stopped.</td>
+                  <td data-label="Tool"><code>get_debug_session_status</code></td>
+                  <td data-label="What it does">Session state — none, launching, attaching, running, stopped, exited, detached, terminated — plus the stop reason and location when stopped.</td>
                 </tr>
                 <tr>
-                  <td><code>detach_debugger</code></td>
-                  <td>Detach, leaving the process <strong>running</strong>.</td>
+                  <td data-label="Tool"><code>detach_debugger</code></td>
+                  <td data-label="What it does">Detach, leaving the process <strong>running</strong>.</td>
                 </tr>
                 <tr>
-                  <td><code>terminate_debuggee</code></td>
-                  <td>Kill the debuggee.</td>
+                  <td data-label="Tool"><code>terminate_debuggee</code></td>
+                  <td data-label="What it does">Kill the debuggee.</td>
                 </tr>
                 <tr>
-                  <td><code>stop_debugging</code></td>
-                  <td>End the session: detaches an attached one, terminates a launched one, unless <code>killOnDetach</code> says otherwise.</td>
+                  <td data-label="Tool"><code>stop_debugging</code></td>
+                  <td data-label="What it does">End the session: detaches an attached one, terminates a launched one, unless <code>killOnDetach</code> says otherwise.</td>
                 </tr>
               </tbody>
             </table>
@@ -122,28 +122,28 @@
               <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code>set_breakpoint</code></td>
-                  <td>One source-line breakpoint, with optional <code>condition</code>, <code>hitCondition</code> (<code>"5"</code>, <code>"&gt;5"</code>, <code>"&gt;=5"</code>, <code>"%5"</code>) and <code>logMessage</code>. Reports whether the line resolved to real code.</td>
+                  <td data-label="Tool"><code>set_breakpoint</code></td>
+                  <td data-label="What it does">One source-line breakpoint, with optional <code>condition</code>, <code>hitCondition</code> (<code>"5"</code>, <code>"&gt;5"</code>, <code>"&gt;=5"</code>, <code>"%5"</code>) and <code>logMessage</code>. Reports whether the line resolved to real code.</td>
                 </tr>
                 <tr>
-                  <td><code>set_breakpoints</code></td>
-                  <td>Several at once. <strong>Per file, this replaces that file&rsquo;s previous set</strong>; files not mentioned are untouched.</td>
+                  <td data-label="Tool"><code>set_breakpoints</code></td>
+                  <td data-label="What it does">Several at once. <strong>Per file, this replaces that file&rsquo;s previous set</strong>; files not mentioned are untouched.</td>
                 </tr>
                 <tr>
-                  <td><code>list_breakpoints</code></td>
-                  <td>Everything currently set, source and address, with verified state.</td>
+                  <td data-label="Tool"><code>list_breakpoints</code></td>
+                  <td data-label="What it does">Everything currently set, source and address, with verified state.</td>
                 </tr>
                 <tr>
-                  <td><code>remove_all_breakpoints</code></td>
-                  <td>Clears both kinds.</td>
+                  <td data-label="Tool"><code>remove_all_breakpoints</code></td>
+                  <td data-label="What it does">Clears both kinds.</td>
                 </tr>
                 <tr>
-                  <td><code>set_breakpoint_at_address</code></td>
-                  <td>Break at an absolute address instead of a line — what makes <code>disassemble</code> actionable in a frame with no symbols. Stored as (module, offset), never as the bare address, so it survives a relaunch or an ASLR-rebased package. An address in a module that is not loaded is refused with a reason.</td>
+                  <td data-label="Tool"><code>set_breakpoint_at_address</code></td>
+                  <td data-label="What it does">Break at an absolute address instead of a line — what makes <code>disassemble</code> actionable in a frame with no symbols. Stored as (module, offset), never as the bare address, so it survives a relaunch or an ASLR-rebased package. An address in a module that is not loaded is refused with a reason.</td>
                 </tr>
                 <tr>
-                  <td><code>remove_breakpoint_at_address</code></td>
-                  <td>Removes one address breakpoint by id.</td>
+                  <td data-label="Tool"><code>remove_breakpoint_at_address</code></td>
+                  <td data-label="What it does">Removes one address breakpoint by id.</td>
                 </tr>
               </tbody>
             </table>
@@ -157,16 +157,16 @@
               <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code>set_data_breakpoint</code></td>
-                  <td>Stop when memory is written, or read-or-written. Takes an <code>expression</code>, a <code>size</code> of 1, 2, 4 or 8 bytes, and an <code>access</code> of <code>write</code> or <code>readWrite</code>.</td>
+                  <td data-label="Tool"><code>set_data_breakpoint</code></td>
+                  <td data-label="What it does">Stop when memory is written, or read-or-written. Takes an <code>expression</code>, a <code>size</code> of 1, 2, 4 or 8 bytes, and an <code>access</code> of <code>write</code> or <code>readWrite</code>.</td>
                 </tr>
                 <tr>
-                  <td><code>list_data_breakpoints</code></td>
-                  <td>Every watchpoint with its resolved address, owning module and RVA, size, access, whether it armed, the hardware slot it holds (0–3, or −1 when refused), and a message carrying the refusal reason or the read-or-write caveat.</td>
+                  <td data-label="Tool"><code>list_data_breakpoints</code></td>
+                  <td data-label="What it does">Every watchpoint with its resolved address, owning module and RVA, size, access, whether it armed, the hardware slot it holds (0–3, or −1 when refused), and a message carrying the refusal reason or the read-or-write caveat.</td>
                 </tr>
                 <tr>
-                  <td><code>remove_data_breakpoint</code></td>
-                  <td>Removes one by id and frees its slot. Requires the session to be stopped.</td>
+                  <td data-label="Tool"><code>remove_data_breakpoint</code></td>
+                  <td data-label="What it does">Removes one by id and frees its slot. Requires the session to be stopped.</td>
                 </tr>
               </tbody>
             </table>
@@ -218,28 +218,28 @@
               <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code>continue_and_wait</code></td>
-                  <td>Resume and wait for the next stop or exit, returning a compact snapshot of the new state. <code>timeoutMs</code> defaults to 30000, after which it returns a still-running result.</td>
+                  <td data-label="Tool"><code>continue_and_wait</code></td>
+                  <td data-label="What it does">Resume and wait for the next stop or exit, returning a compact snapshot of the new state. <code>timeoutMs</code> defaults to 30000, after which it returns a still-running result.</td>
                 </tr>
                 <tr>
-                  <td><code>step_over</code></td>
-                  <td>One source line, then wait. Optional <code>threadId</code> steps another thread — only that one advances, the rest stay frozen, and run control afterwards targets it.</td>
+                  <td data-label="Tool"><code>step_over</code></td>
+                  <td data-label="What it does">One source line, then wait. Optional <code>threadId</code> steps another thread — only that one advances, the rest stay frozen, and run control afterwards targets it.</td>
                 </tr>
                 <tr>
-                  <td><code>step_into</code></td>
-                  <td>Into a call on the current line. Same <code>threadId</code> option.</td>
+                  <td data-label="Tool"><code>step_into</code></td>
+                  <td data-label="What it does">Into a call on the current line. Same <code>threadId</code> option.</td>
                 </tr>
                 <tr>
-                  <td><code>step_out</code></td>
-                  <td>Run until the current function returns.</td>
+                  <td data-label="Tool"><code>step_out</code></td>
+                  <td data-label="What it does">Run until the current function returns.</td>
                 </tr>
                 <tr>
-                  <td><code>pause_execution</code></td>
-                  <td>Interrupt a running debuggee.</td>
+                  <td data-label="Tool"><code>pause_execution</code></td>
+                  <td data-label="What it does">Interrupt a running debuggee.</td>
                 </tr>
                 <tr>
-                  <td><code>wait_until_stopped</code></td>
-                  <td>Wait without issuing a command, for a target left running.</td>
+                  <td data-label="Tool"><code>wait_until_stopped</code></td>
+                  <td data-label="What it does">Wait without issuing a command, for a target left running.</td>
                 </tr>
               </tbody>
             </table>
@@ -266,12 +266,12 @@
               <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code>set_exception_filters</code></td>
-                  <td>Change which exceptions break, on the live session: any of <code>delphi</code>, <code>av</code>, <code>all</code>, <code>unhandled</code>. <code>[]</code> means never break on first-chance. <code>delphiExceptionClasses</code> narrows the <code>delphi</code> filter to named classes.</td>
+                  <td data-label="Tool"><code>set_exception_filters</code></td>
+                  <td data-label="What it does">Change which exceptions break, on the live session: any of <code>delphi</code>, <code>av</code>, <code>all</code>, <code>unhandled</code>. <code>[]</code> means never break on first-chance. <code>delphiExceptionClasses</code> narrows the <code>delphi</code> filter to named classes.</td>
                 </tr>
                 <tr>
-                  <td><code>get_exception_details</code></td>
-                  <td>When stopped on an exception: its class, message, description and stack.</td>
+                  <td data-label="Tool"><code>get_exception_details</code></td>
+                  <td data-label="What it does">When stopped on an exception: its class, message, description and stack.</td>
                 </tr>
               </tbody>
             </table>
@@ -290,24 +290,24 @@
               <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code>get_compact_debug_snapshot</code></td>
-                  <td>Session state, stop reason, current thread and location, top frames, top-frame locals and exception info — in one call. The round-trip saver.</td>
+                  <td data-label="Tool"><code>get_compact_debug_snapshot</code></td>
+                  <td data-label="What it does">Session state, stop reason, current thread and location, top frames, top-frame locals and exception info — in one call. The round-trip saver.</td>
                 </tr>
                 <tr>
-                  <td><code>get_current_source_location</code></td>
-                  <td>Function, source file and line at the stop.</td>
+                  <td data-label="Tool"><code>get_current_source_location</code></td>
+                  <td data-label="What it does">Function, source file and line at the stop.</td>
                 </tr>
                 <tr>
-                  <td><code>get_call_stack</code></td>
-                  <td>Innermost frame first, with function, file and line. Optional <code>threadId</code> walks another thread.</td>
+                  <td data-label="Tool"><code>get_call_stack</code></td>
+                  <td data-label="What it does">Innermost frame first, with function, file and line. Optional <code>threadId</code> walks another thread.</td>
                 </tr>
                 <tr>
-                  <td><code>get_threads</code></td>
-                  <td>Threads at the current stop: id, name, whether stopped, and which one is current. After a pause, current is the main application thread, not the transient thread the OS injected to break in.</td>
+                  <td data-label="Tool"><code>get_threads</code></td>
+                  <td data-label="What it does">Threads at the current stop: id, name, whether stopped, and which one is current. After a pause, current is the main application thread, not the transient thread the OS injected to break in.</td>
                 </tr>
                 <tr>
-                  <td><code>get_raw_stack_scan</code></td>
-                  <td>Last resort, and <strong>not a call stack</strong> — see below.</td>
+                  <td data-label="Tool"><code>get_raw_stack_scan</code></td>
+                  <td data-label="What it does">Last resort, and <strong>not a call stack</strong> — see below.</td>
                 </tr>
               </tbody>
             </table>
@@ -331,20 +331,20 @@
               <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code>get_locals</code></td>
-                  <td>A frame&rsquo;s locals with formatted values and types. Anything expandable carries a handle.</td>
+                  <td data-label="Tool"><code>get_locals</code></td>
+                  <td data-label="What it does">A frame&rsquo;s locals with formatted values and types. Anything expandable carries a handle.</td>
                 </tr>
                 <tr>
-                  <td><code>get_variable</code></td>
-                  <td>One named variable. Prefers a frame local — so a class, record or array result carries an expansion handle — and otherwise evaluates the name, including fields, globals and dotted paths.</td>
+                  <td data-label="Tool"><code>get_variable</code></td>
+                  <td data-label="What it does">One named variable. Prefers a frame local — so a class, record or array result carries an expansion handle — and otherwise evaluates the name, including fields, globals and dotted paths.</td>
                 </tr>
                 <tr>
-                  <td><code>expand_variable</code></td>
-                  <td>The child fields of an expandable value, by handle. Nested results carry their own handles, so an object graph is walked step by step. <strong>Handles are valid until the next stop.</strong></td>
+                  <td data-label="Tool"><code>expand_variable</code></td>
+                  <td data-label="What it does">The child fields of an expandable value, by handle. Nested results carry their own handles, so an object graph is walked step by step. <strong>Handles are valid until the next stop.</strong></td>
                 </tr>
                 <tr>
-                  <td><code>evaluate_expression</code></td>
-                  <td>A Pascal expression in the context of a frame: locals, fields, globals, arithmetic, casts, method calls.</td>
+                  <td data-label="Tool"><code>evaluate_expression</code></td>
+                  <td data-label="What it does">A Pascal expression in the context of a frame: locals, fields, globals, arithmetic, casts, method calls.</td>
                 </tr>
               </tbody>
             </table>
@@ -369,12 +369,12 @@
               <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code>get_loaded_modules</code></td>
-                  <td>Every image mapped in the debuggee with load base, size, symbol state and the debug-info formats that actually loaded. <code>symbols</code> is <code>loaded</code>, <code>noSymbols</code> or <code>indexing</code>; <code>formats</code> lists what registered — <code>td32</code>, <code>map</code>, <code>rsm</code>, <code>dcp</code>, <code>jdbg</code>, <code>tds</code> — not what was looked for. Also how you tell whether an unbound breakpoint is waiting for a package that has not loaded yet.</td>
+                  <td data-label="Tool"><code>get_loaded_modules</code></td>
+                  <td data-label="What it does">Every image mapped in the debuggee with load base, size, symbol state and the debug-info formats that actually loaded. <code>symbols</code> is <code>loaded</code>, <code>noSymbols</code> or <code>indexing</code>; <code>formats</code> lists what registered — <code>td32</code>, <code>map</code>, <code>rsm</code>, <code>dcp</code>, <code>jdbg</code>, <code>tds</code> — not what was looked for. Also how you tell whether an unbound breakpoint is waiting for a package that has not loaded yet.</td>
                 </tr>
                 <tr>
-                  <td><code>get_source_files</code></td>
-                  <td>The source files the loaded debug info can name, grouped by module. <strong>This is the file spelling <code>set_breakpoint</code> expects</strong> — use it rather than guessing from a unit name. A <code>listedBy</code> of null means the module&rsquo;s loaded formats cannot enumerate files (<code>.rsm</code>, <code>.dcp</code> and <code>.jdbg</code> map addresses but hold no file index), which means <em>unknown</em>, not <em>no source files</em>; a breakpoint there may still bind.</td>
+                  <td data-label="Tool"><code>get_source_files</code></td>
+                  <td data-label="What it does">The source files the loaded debug info can name, grouped by module. <strong>This is the file spelling <code>set_breakpoint</code> expects</strong> — use it rather than guessing from a unit name. A <code>listedBy</code> of null means the module&rsquo;s loaded formats cannot enumerate files (<code>.rsm</code>, <code>.dcp</code> and <code>.jdbg</code> map addresses but hold no file index), which means <em>unknown</em>, not <em>no source files</em>; a breakpoint there may still bind.</td>
                 </tr>
               </tbody>
             </table>
@@ -388,12 +388,12 @@
               <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code>get_registers</code></td>
-                  <td>General-purpose registers and flags of the stopped thread, named for the <em>target&rsquo;s</em> bitness. Values are hex strings, never bare numbers — a 64-bit register does not survive an IEEE double intact.</td>
+                  <td data-label="Tool"><code>get_registers</code></td>
+                  <td data-label="What it does">General-purpose registers and flags of the stopped thread, named for the <em>target&rsquo;s</em> bitness. Values are hex strings, never bare numbers — a 64-bit register does not survive an IEEE double intact.</td>
                 </tr>
                 <tr>
-                  <td><code>set_register</code></td>
-                  <td>Write one by name; either spelling works on either bitness, and on x64 an E-name writes the low 32 bits and zero-extends as the hardware does. Returns the value <em>re-read from the thread</em>, so the response proves the write instead of echoing the request. Naming a register the target does not have — <code>R8</code>–<code>R15</code> on 32-bit — is an error, not a silent no-op.</td>
+                  <td data-label="Tool"><code>set_register</code></td>
+                  <td data-label="What it does">Write one by name; either spelling works on either bitness, and on x64 an E-name writes the low 32 bits and zero-extends as the hardware does. Returns the value <em>re-read from the thread</em>, so the response proves the write instead of echoing the request. Naming a register the target does not have — <code>R8</code>–<code>R15</code> on 32-bit — is an error, not a silent no-op.</td>
                 </tr>
               </tbody>
             </table>
@@ -407,16 +407,16 @@
               <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code>read_memory</code></td>
-                  <td>1 to 4096 bytes, returned as hex plus little-endian integer interpretations, for structures the evaluator does not surface.</td>
+                  <td data-label="Tool"><code>read_memory</code></td>
+                  <td data-label="What it does">1 to 4096 bytes, returned as hex plus little-endian integer interpretations, for structures the evaluator does not surface.</td>
                 </tr>
                 <tr>
-                  <td><code>write_memory</code></td>
-                  <td>Write contiguous hex bytes at an address. Mutates the live process.</td>
+                  <td data-label="Tool"><code>write_memory</code></td>
+                  <td data-label="What it does">Write contiguous hex bytes at an address. Mutates the live process.</td>
                 </tr>
                 <tr>
-                  <td><code>disassemble</code></td>
-                  <td>Zydis, x86 and x64, from an address or a frame&rsquo;s instruction pointer. Each instruction reports its address, raw bytes, Intel-syntax text and — where a symbol provider knows one — the nearest function plus offset and the source file and line.</td>
+                  <td data-label="Tool"><code>disassemble</code></td>
+                  <td data-label="What it does">Zydis, x86 and x64, from an address or a frame&rsquo;s instruction pointer. Each instruction reports its address, raw bytes, Intel-syntax text and — where a symbol provider knows one — the nearest function plus offset and the source file and line.</td>
                 </tr>
               </tbody>
             </table>
@@ -455,12 +455,12 @@
               <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code>get_debuggee_output</code></td>
-                  <td>The program&rsquo;s own stdout since the previous call. Incremental.</td>
+                  <td data-label="Tool"><code>get_debuggee_output</code></td>
+                  <td data-label="What it does">The program&rsquo;s own stdout since the previous call. Incremental.</td>
                 </tr>
                 <tr>
-                  <td><code>get_debugger_output</code></td>
-                  <td>Debugger-generated output since the previous call — notably logpoint messages. Incremental.</td>
+                  <td data-label="Tool"><code>get_debugger_output</code></td>
+                  <td data-label="What it does">Debugger-generated output since the previous call — notably logpoint messages. Incremental.</td>
                 </tr>
               </tbody>
             </table>

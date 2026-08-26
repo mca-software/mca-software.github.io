@@ -173,16 +173,16 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><code>install\Install.exe</code><br>(built by <code>build_installer.bat</code>)</td>
-                  <td>The interactive installer, built from your own checkout. Same behaviour as the released <code>Setup.exe</code>: detects the editor installs, updates in place.</td>
+                  <td data-label="Method"><code>install\Install.exe</code><br>(built by <code>build_installer.bat</code>)</td>
+                  <td data-label="When to use it">The interactive installer, built from your own checkout. Same behaviour as the released <code>Setup.exe</code>: detects the editor installs, updates in place.</td>
                 </tr>
                 <tr>
-                  <td><code>install-dev.bat</code></td>
-                  <td>Development mode — points the extension straight at your build output, so a rebuild is picked up without reinstalling.</td>
+                  <td data-label="Method"><code>install-dev.bat</code></td>
+                  <td data-label="When to use it">Development mode — points the extension straight at your build output, so a rebuild is picked up without reinstalling.</td>
                 </tr>
                 <tr>
-                  <td>Manual copy</td>
-                  <td>Copy <code>package.json</code> and the built executable into <code>%USERPROFILE%\.vscode\extensions\local.delphi-win64-debug\</code>. The fallback when the installer cannot find your editor.</td>
+                  <td data-label="Method">Manual copy</td>
+                  <td data-label="When to use it">Copy <code>package.json</code> and the built executable into <code>%USERPROFILE%\.vscode\extensions\local.delphi-win64-debug\</code>. The fallback when the installer cannot find your editor.</td>
                 </tr>
               </tbody>
             </table>
@@ -341,11 +341,11 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><code>vscode-workspace-defaults.json</code></td>
+                  <td data-label="File"><code>vscode-workspace-defaults.json</code></td>
                   <td><strong>Yes.</strong> It holds what the team shares — editor settings and recommended extensions. The plugin creates it with sensible defaults and never rewrites it, so edit it freely. See <a href="../vscode-tutorial/00-vscode-for-delphi-developers.html#settings">chapter 0</a> for what belongs in it and why.</td>
                 </tr>
                 <tr>
-                  <td>The generated <code>.code-workspace</code></td>
+                  <td data-label="File">The generated <code>.code-workspace</code></td>
                   <td><strong>No.</strong> It contains machine-specific paths and a per-developer debug configuration. It is regenerated on demand, so there is nothing to lose.</td>
                 </tr>
               </tbody>
@@ -376,20 +376,20 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><a href="#project">Edit in VS Code</a><br>(Delphi IDE plugin)</td>
-                  <td><strong>Effectively required.</strong> It is how your project gets into VS Code with a working debug configuration — covered in full <a href="#project">above</a>. You can write <code>launch.json</code> by hand instead, and <a href="../vscode-tutorial/01-preparing-your-project.html">chapter 1</a> shows the minimum, but on a real project you will not enjoy it.</td>
+                  <td data-label="Tool"><a href="#project">Edit in VS Code</a><br>(Delphi IDE plugin)</td>
+                  <td data-label="Why"><strong>Effectively required.</strong> It is how your project gets into VS Code with a working debug configuration — covered in full <a href="#project">above</a>. You can write <code>launch.json</code> by hand instead, and <a href="../vscode-tutorial/01-preparing-your-project.html">chapter 1</a> shows the minimum, but on a real project you will not enjoy it.</td>
                 </tr>
                 <tr>
-                  <td>DelphiLSP<br><code>embarcaderotechnologies.delphilsp</code></td>
-                  <td>Delphi language support in VS Code — syntax, autocomplete. A separate Embarcadero extension; this one only debugs.</td>
+                  <td data-label="Tool">DelphiLSP<br><code>embarcaderotechnologies.delphilsp</code></td>
+                  <td data-label="Why">Delphi language support in VS Code — syntax, autocomplete. A separate Embarcadero extension; this one only debugs.</td>
                 </tr>
                 <tr>
-                  <td>Hex Editor<br><code>ms-vscode.hexeditor</code></td>
-                  <td>No longer needed. The extension ships its own memory view; the stock pane is only relevant if you turn <code>delphi-win64.stockMemoryView</code> back on. See <a href="../vscode-tutorial/07-registers-memory-disassembly.html">Registers, memory and disassembly</a>.</td>
+                  <td data-label="Tool">Hex Editor<br><code>ms-vscode.hexeditor</code></td>
+                  <td data-label="Why">No longer needed. The extension ships its own memory view; the stock pane is only relevant if you turn <code>delphi-win64.stockMemoryView</code> back on. See <a href="../vscode-tutorial/07-registers-memory-disassembly.html">Registers, memory and disassembly</a>.</td>
                 </tr>
                 <tr>
-                  <td>Delphi 10.3 Rio or later</td>
-                  <td>Needed to build the debugger from source, and to compile the program you want to debug.</td>
+                  <td data-label="Tool">Delphi 10.3 Rio or later</td>
+                  <td data-label="Why">Needed to build the debugger from source, and to compile the program you want to debug.</td>
                 </tr>
               </tbody>
             </table>

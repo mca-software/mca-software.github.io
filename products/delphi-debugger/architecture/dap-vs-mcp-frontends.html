@@ -74,23 +74,23 @@
               <tbody>
                 <tr>
                   <td>Client</td>
-                  <td>VS Code and any other DAP client</td>
-                  <td>Any MCP client — Claude Code, VS Code, others</td>
+                  <td data-label="DAP frontend">VS Code and any other DAP client</td>
+                  <td data-label="MCP frontend">Any MCP client — Claude Code, VS Code, others</td>
                 </tr>
                 <tr>
                   <td>Shape of the API</td>
-                  <td>The Debug Adapter Protocol&rsquo;s requests and events, as specified</td>
-                  <td>Around forty semantic tools, each answering a question rather than fetching a resource</td>
+                  <td data-label="DAP frontend">The Debug Adapter Protocol&rsquo;s requests and events, as specified</td>
+                  <td data-label="MCP frontend">Around forty semantic tools, each answering a question rather than fetching a resource</td>
                 </tr>
                 <tr>
                   <td>Who drives</td>
-                  <td>The editor, in response to a person clicking</td>
-                  <td>A model, in response to a person asking</td>
+                  <td data-label="DAP frontend">The editor, in response to a person clicking</td>
+                  <td data-label="MCP frontend">A model, in response to a person asking</td>
                 </tr>
                 <tr>
                   <td>Optimised for</td>
-                  <td>Interactive latency — many small requests, a UI that re-asks constantly</td>
-                  <td>Round trips and tokens — hence <code>get_compact_debug_snapshot</code>, which answers in one call what DAP would take three or four to assemble</td>
+                  <td data-label="DAP frontend">Interactive latency — many small requests, a UI that re-asks constantly</td>
+                  <td data-label="MCP frontend">Round trips and tokens — hence <code>get_compact_debug_snapshot</code>, which answers in one call what DAP would take three or four to assemble</td>
                 </tr>
               </tbody>
             </table>

@@ -83,10 +83,10 @@
                 <tr><th>Filter</th><th>Stops on</th><th>Default</th></tr>
               </thead>
               <tbody>
-                <tr><td><code>delphi</code></td><td>First-chance Delphi language raises</td><td>on</td></tr>
-                <tr><td><code>av</code></td><td>First-chance access violations</td><td>on</td></tr>
-                <tr><td><code>all</code></td><td>Every first-chance exception, including native ones</td><td>off</td></tr>
-                <tr><td><code>unhandled</code></td><td>Second-chance — the ones that actually crash the program</td><td><strong>always on</strong></td></tr>
+                <tr><td data-label="Filter"><code>delphi</code></td><td data-label="Stops on">First-chance Delphi language raises</td><td data-label="Default">on</td></tr>
+                <tr><td data-label="Filter"><code>av</code></td><td data-label="Stops on">First-chance access violations</td><td data-label="Default">on</td></tr>
+                <tr><td data-label="Filter"><code>all</code></td><td data-label="Stops on">Every first-chance exception, including native ones</td><td data-label="Default">off</td></tr>
+                <tr><td data-label="Filter"><code>unhandled</code></td><td data-label="Stops on">Second-chance — the ones that actually crash the program</td><td data-label="Default"><strong>always on</strong></td></tr>
               </tbody>
             </table>
           </div>
@@ -346,36 +346,36 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><code>class</code></td><td>string or array</td>
-                  <td>The runtime (leaf) class, exactly, case-insensitively. An array matches any of the listed names.</td>
+                  <td data-label="Key"><code>class</code></td><td data-label="Type">string or array</td>
+                  <td data-label="Matches">The runtime (leaf) class, exactly, case-insensitively. An array matches any of the listed names.</td>
                 </tr>
                 <tr>
-                  <td><code>classIs</code></td><td>string or array</td>
-                  <td>The runtime class <em>or any ancestor</em> — Delphi <code>is</code> semantics. Use this to catch a whole family.</td>
+                  <td data-label="Key"><code>classIs</code></td><td data-label="Type">string or array</td>
+                  <td data-label="Matches">The runtime class <em>or any ancestor</em> — Delphi <code>is</code> semantics. Use this to catch a whole family.</td>
                 </tr>
                 <tr>
-                  <td><code>code</code></td><td>string, integer, or array</td>
-                  <td>The Win32 exception code, hex (<code>"0xC0000005"</code>) or decimal. The only criterion that can match a native, non-Delphi exception.</td>
+                  <td data-label="Key"><code>code</code></td><td data-label="Type">string, integer, or array</td>
+                  <td data-label="Matches">The Win32 exception code, hex (<code>"0xC0000005"</code>) or decimal. The only criterion that can match a native, non-Delphi exception.</td>
                 </tr>
                 <tr>
-                  <td><code>message</code></td><td>string</td>
-                  <td>Case-insensitive substring of the exception message.</td>
+                  <td data-label="Key"><code>message</code></td><td data-label="Type">string</td>
+                  <td data-label="Matches">Case-insensitive substring of the exception message.</td>
                 </tr>
                 <tr>
-                  <td><code>messageRegex</code></td><td>string</td>
-                  <td>Regular expression against the message, case-insensitive.</td>
+                  <td data-label="Key"><code>messageRegex</code></td><td data-label="Type">string</td>
+                  <td data-label="Matches">Regular expression against the message, case-insensitive.</td>
                 </tr>
                 <tr>
-                  <td><code>unit</code></td><td>string</td>
-                  <td>The unit the exception was raised in, by basename (the <code>.pas</code> is optional). The special value <code>"*unknown*"</code> matches raises with no resolvable source location.</td>
+                  <td data-label="Key"><code>unit</code></td><td data-label="Type">string</td>
+                  <td data-label="Matches">The unit the exception was raised in, by basename (the <code>.pas</code> is optional). The special value <code>"*unknown*"</code> matches raises with no resolvable source location.</td>
                 </tr>
                 <tr>
-                  <td><code>line</code></td><td>integer</td>
-                  <td>A single source line — shorthand for setting <code>lineFrom</code> and <code>lineTo</code> to the same value.</td>
+                  <td data-label="Key"><code>line</code></td><td data-label="Type">integer</td>
+                  <td data-label="Matches">A single source line — shorthand for setting <code>lineFrom</code> and <code>lineTo</code> to the same value.</td>
                 </tr>
                 <tr>
-                  <td><code>lineFrom</code> / <code>lineTo</code></td><td>integer</td>
-                  <td>Inclusive bounds of a source-line range.</td>
+                  <td data-label="Key"><code>lineFrom</code> / <code>lineTo</code></td><td data-label="Type">integer</td>
+                  <td data-label="Matches">Inclusive bounds of a source-line range.</td>
                 </tr>
               </tbody>
             </table>
@@ -388,10 +388,10 @@
                 <tr><th>Action</th><th>Effect</th></tr>
               </thead>
               <tbody>
-                <tr><td><code>ignore</code></td><td>Resume silently</td></tr>
-                <tr><td><code>log</code></td><td>Write <code>class: message</code> to the console, then resume</td></tr>
-                <tr><td><code>logStack</code></td><td>The same, plus the call stack</td></tr>
-                <tr><td><code>break</code></td><td>Stop in the debugger</td></tr>
+                <tr><td data-label="Action"><code>ignore</code></td><td data-label="Effect">Resume silently</td></tr>
+                <tr><td data-label="Action"><code>log</code></td><td data-label="Effect">Write <code>class: message</code> to the console, then resume</td></tr>
+                <tr><td data-label="Action"><code>logStack</code></td><td data-label="Effect">The same, plus the call stack</td></tr>
+                <tr><td data-label="Action"><code>break</code></td><td data-label="Effect">Stop in the debugger</td></tr>
               </tbody>
             </table>
           </div>
@@ -443,19 +443,19 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>1</td>
-                  <td><code>&lt;Project&gt;.ExceptionSettings.local.json</code></td>
-                  <td>this developer, this machine &mdash; gitignore it</td>
+                  <td data-label="#">1</td>
+                  <td data-label="File"><code>&lt;Project&gt;.ExceptionSettings.local.json</code></td>
+                  <td data-label="Scope">this developer, this machine &mdash; gitignore it</td>
                 </tr>
                 <tr>
-                  <td>2</td>
-                  <td><code>&lt;Project&gt;.ExceptionSettings.json</code></td>
-                  <td>the project, shared with its team &mdash; commit it</td>
+                  <td data-label="#">2</td>
+                  <td data-label="File"><code>&lt;Project&gt;.ExceptionSettings.json</code></td>
+                  <td data-label="Scope">the project, shared with its team &mdash; commit it</td>
                 </tr>
                 <tr>
-                  <td>3</td>
-                  <td><code>%USERPROFILE%\.DelphiWinDebugger\exceptionRules.json</code></td>
-                  <td>every project on this machine</td>
+                  <td data-label="#">3</td>
+                  <td data-label="File"><code>%USERPROFILE%\.DelphiWinDebugger\exceptionRules.json</code></td>
+                  <td data-label="Scope">every project on this machine</td>
                 </tr>
               </tbody>
             </table>

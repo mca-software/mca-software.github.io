@@ -194,14 +194,14 @@
                 <tr><th>Type</th><th>Write it as</th></tr>
               </thead>
               <tbody>
-                <tr><td>Booleans</td><td><code>true</code> / <code>false</code>, or a number. All three widths handled.</td></tr>
-                <tr><td><code>TDateTime</code>, <code>TDate</code>, <code>TTime</code></td><td><code>2026-08-17 14:30:00.000</code> — date alone and time alone both accepted — or the raw float</td></tr>
-                <tr><td>Floats</td><td>A number. Either <code>.</code> or <code>,</code> works as the decimal separator.</td></tr>
-                <tr><td>Chars</td><td><code>'A'</code> — quotes included, one character — or the ordinal</td></tr>
-                <tr><td>Integers</td><td>Decimal, negative included</td></tr>
-                <tr><td>Enums</td><td>The <strong>member name</strong>, or its ordinal — which is range-checked against the type</td></tr>
-                <tr><td>Sets</td><td>The bitmask, as a number</td></tr>
-                <tr><td>Strings</td><td>Bare or quoted; one layer of quotes is stripped</td></tr>
+                <tr><td data-label="Type">Booleans</td><td data-label="Write it as"><code>true</code> / <code>false</code>, or a number. All three widths handled.</td></tr>
+                <tr><td data-label="Type"><code>TDateTime</code>, <code>TDate</code>, <code>TTime</code></td><td data-label="Write it as"><code>2026-08-17 14:30:00.000</code> — date alone and time alone both accepted — or the raw float</td></tr>
+                <tr><td data-label="Type">Floats</td><td data-label="Write it as">A number. Either <code>.</code> or <code>,</code> works as the decimal separator.</td></tr>
+                <tr><td data-label="Type">Chars</td><td data-label="Write it as"><code>'A'</code> — quotes included, one character — or the ordinal</td></tr>
+                <tr><td data-label="Type">Integers</td><td data-label="Write it as">Decimal, negative included</td></tr>
+                <tr><td data-label="Type">Enums</td><td data-label="Write it as">The <strong>member name</strong>, or its ordinal — which is range-checked against the type</td></tr>
+                <tr><td data-label="Type">Sets</td><td data-label="Write it as">The bitmask, as a number</td></tr>
+                <tr><td data-label="Type">Strings</td><td data-label="Write it as">Bare or quoted; one layer of quotes is stripped</td></tr>
               </tbody>
             </table>
           </div>
@@ -250,16 +250,16 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><code>(expand to evaluate)</code></td>
-                  <td>No decision has been made for this property. Expand it, or allow it permanently.</td>
+                  <td data-label="What the row says"><code>(expand to evaluate)</code></td>
+                  <td data-label="What to do">No decision has been made for this property. Expand it, or allow it permanently.</td>
                 </tr>
                 <tr>
-                  <td><code>(expand to evaluate -- automatic evaluation budget spent at this stop)</code></td>
-                  <td>Nothing is wrong with <em>this</em> property — the time allowance for automatic getter calls was used up by the rows above it. Expand it directly, or allow the slow one above so it stops eating the budget.</td>
+                  <td data-label="What the row says"><code>(expand to evaluate -- automatic evaluation budget spent at this stop)</code></td>
+                  <td data-label="What to do">Nothing is wrong with <em>this</em> property — the time allowance for automatic getter calls was used up by the rows above it. Expand it directly, or allow the slow one above so it stops eating the budget.</td>
                 </tr>
                 <tr>
-                  <td><code>(expand to evaluate -- the getter call was cut short)</code></td>
-                  <td>The call started and ran too long. This getter does real work; consider whether you want it evaluated automatically at all.</td>
+                  <td data-label="What the row says"><code>(expand to evaluate -- the getter call was cut short)</code></td>
+                  <td data-label="What to do">The call started and ran too long. This getter does real work; consider whether you want it evaluated automatically at all.</td>
                 </tr>
               </tbody>
             </table>
@@ -295,10 +295,10 @@
                 <tr><th>What</th><th>Limit</th></tr>
               </thead>
               <tbody>
-                <tr><td>Children shown when expanding</td><td>1024, then a line saying how many exist</td></tr>
-                <tr><td>Dynamic-array preview on the collapsed row</td><td>First 50, then the total</td></tr>
-                <tr><td>String rendering</td><td>4096 characters, then the total length</td></tr>
-                <tr><td>Nested-procedure scope climb</td><td>32 levels of enclosing routines</td></tr>
+                <tr><td data-label="What">Children shown when expanding</td><td data-label="Limit">1024, then a line saying how many exist</td></tr>
+                <tr><td data-label="What">Dynamic-array preview on the collapsed row</td><td data-label="Limit">First 50, then the total</td></tr>
+                <tr><td data-label="What">String rendering</td><td data-label="Limit">4096 characters, then the total length</td></tr>
+                <tr><td data-label="What">Nested-procedure scope climb</td><td data-label="Limit">32 levels of enclosing routines</td></tr>
               </tbody>
             </table>
           </div>
