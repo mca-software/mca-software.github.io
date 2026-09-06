@@ -172,12 +172,43 @@
             was a breakpoint, a step landing, an exception, a pause or the entry stop. There is no
             second code path that has to remember.
           </p>
-          <div class="doc-note">
-            <strong>The inherent limit</strong>, the same one VS Code has: if the stepped thread blocks
-            on a lock held by a frozen thread, the step cannot complete. Freezing is what makes
-            single-thread stepping meaningful and it is also what makes this possible; the two cannot
-            be separated.
-          </div>
+          <p>
+            The freeze has an inherent failure mode: the stepped thread blocks on something only a
+            frozen thread can provide, and the step never lands. Rather than giving up the isolation
+            across every stepped-over call (the IDE&rsquo;s choice), the engine keeps it and detects the
+            deadlock. While a step is quiet, a probe runs every 250&nbsp;ms on two tiers:
+          </p>
+          <ul>
+            <li>
+              <strong>Wait Chain Traversal</strong> (<code>GetThreadWaitChain</code>) on the stepped
+              thread. When the chain ends on a thread this step froze &mdash; a critical section, a
+              mutex, a <code>SendMessage</code>, a thread wait &mdash; the frozen threads are released
+              immediately and the announcement names the lock kind and the owner. The probe runs on a
+              helper thread, not on the event pump: called from the pump on a thread that was just
+              waking from its wait, <code>GetThreadWaitChain</code> blocked for about a minute.
+            </li>
+            <li>
+              <strong>No CPU time</strong> (<code>GetThreadTimes</code>, kernel plus user) for
+              <code>stepIsolationReleaseMs</code>, 3000&nbsp;ms by default. A thread in a kernel wait
+              accrues none, so this catches waits with no nameable owner &mdash; an event, a semaphore,
+              I/O &mdash; while a CPU-bound callee never releases anything. The threshold is deliberately
+              long: a stepped-over call may legitimately wait on a slow external event.
+            </li>
+          </ul>
+          <p>
+            A release is announced once through the engine&rsquo;s notice channel (the Delphi Debugger
+            output, <code>get_debugger_output</code> over MCP). The other threads run only until the
+            resume breakpoint lands; single-stepping then freezes them again. The whole mechanism can
+            be switched off for a session &mdash; strict isolation, where such a step simply stalls
+            until Pause &mdash; or on the fly through a custom request
+            (<code>delphiSetStepIsolationRelease</code>) behind the Auto-Release button in the Call
+            Stack title bar, and <code>"stepIsolation": "none"</code> disables freezing altogether.
+          </p>
+          <p>
+            Pause is the escape hatch in every mode, which is why it releases the frozen threads before
+            calling <code>DebugBreakProcess</code>, and why a thread created while a pause is pending
+            is never suspended: the break-in thread Windows injects has to run.
+          </p>
         </section>
 
         <section id="no-freeze">

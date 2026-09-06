@@ -171,15 +171,80 @@
 
           <p>
             A step command targets one OS thread. Every other thread is explicitly suspended for the
-            duration of the step, including threads created while the step is in progress, so the
-            program cannot run away underneath you between one line and the next. If the stepped
-            thread exits mid-step, everything is thawed rather than left frozen.
+            duration of the step &mdash; including threads created while the step is in progress, and
+            including the whole of a call you step <em>over</em> &mdash; so the program cannot run away
+            underneath you between one line and the next. If the stepped thread exits mid-step,
+            everything is thawed rather than left frozen.
+          </p>
+
+          <h3 id="step-isolation">When the stepped-over call needs another thread</h3>
+          <p>
+            Freezing has one consequence you will meet sooner or later: the call you are stepping over
+            may be waiting for one of the threads you just froze. <code>Application.Initialize</code>
+            on an application whose start-up hands work to a worker is a typical case, and so is a
+            constructor that takes a lock another thread holds. Left alone, that step would never land.
           </p>
           <p>
-            The one case this cannot solve: if the thread you are stepping blocks on a lock held by a
-            thread you just froze, the step cannot complete. That is inherent to freezing, and VS
-            Code has the same limitation generally. <a href="../architecture/threading-model.html">The
-            threading model</a> covers the mechanism.
+            The debugger watches for it. While a step is quiet it probes the stepped thread every
+            250&nbsp;ms, on two tiers:
+          </p>
+          <ul>
+            <li>
+              <strong>A lock with an owner.</strong> If Windows can name what the thread is waiting on
+              &mdash; a critical section, a mutex, a <code>SendMessage</code>, another thread &mdash; and
+              the owner is one of the frozen threads, the others are released at once.
+            </li>
+            <li>
+              <strong>An object with no owner.</strong> An event, a semaphore, I/O: nobody can say who
+              will signal it. If the stepped thread has consumed no CPU time for
+              <code>stepIsolationReleaseMs</code> &mdash; three seconds by default, deliberately long so
+              that a slow external event is not mistaken for a deadlock &mdash; the others are released.
+              A call that is busy computing never triggers this.
+            </li>
+          </ul>
+          <p>
+            Every release is announced once in the <strong>Delphi Debugger</strong> output channel,
+            naming the reason (<em>a critical section held by thread 4712, which this step froze</em>,
+            or <em>an object with no owner the debugger can name</em>), so you always know when the
+            isolation was given up. The other threads run only until the step lands; the next
+            single-stepped instruction freezes them again.
+          </p>
+
+          <h3 id="auto-release-button">The Auto-Release button</h3>
+          <p>
+            Sometimes the contention <em>is</em> what you are debugging: two threads cooperating on a
+            lock, and you want to watch exactly one of them without the other moving. For that the
+            Call Stack title bar carries a button next to the raw-scan toggle, whose icon shows the
+            current state:
+          </p>
+          <ul>
+            <li>
+              <strong>Open lock &mdash; Auto-Release: ON</strong> (the default). A stepped-over call
+              found waiting on a frozen thread releases the others as described above. Click to turn
+              it off.
+            </li>
+            <li>
+              <strong>Closed lock &mdash; Auto-Release: OFF.</strong> Strict isolation: every other
+              thread stays frozen for the whole step, even if the stepped-over call waits on one of
+              them. If that happens, the step simply does not land; press <strong>Pause</strong> to
+              break in &mdash; Pause always works, it releases the threads first. Click to turn
+              auto-release back on; a step that is already stalled is released as soon as the
+              detector runs.
+            </li>
+            <li>
+              <strong>Crossed circle &mdash; Step Isolation: none.</strong> The session was started
+              with <code>"stepIsolation": "none"</code> and never freezes other threads for a step,
+              the RAD Studio IDE&rsquo;s behaviour. The button is informational.
+            </li>
+          </ul>
+          <p>
+            The switch takes effect immediately for the running session and shows the state it just
+            selected in the status bar. The same three behaviours can be chosen up front in
+            <code>launch.json</code> with <code>stepIsolationReleaseMs</code> (<code>0</code> starts
+            the session with auto-release off) and <code>stepIsolation</code> &mdash; see the
+            <a href="12-settings-and-commands-reference.html#launch-properties">reference</a>.
+            <a href="../architecture/threading-model.html#per-thread-stepping">The threading model</a>
+            covers the mechanism.
           </p>
         </section>
 

@@ -100,6 +100,8 @@
                 <tr><td data-label="Property"><code>args</code></td><td data-label="Type">string[]</td><td data-label="Default"><em>empty</em></td><td data-label="Notes">Command-line arguments for the debuggee</td></tr>
                 <tr><td data-label="Property"><code>stopAtEntry</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>false</code></td><td data-label="Notes">Break at the process entry point before any user code runs</td></tr>
                 <tr><td data-label="Property"><code>rawStackScan</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>false</code></td><td data-label="Notes">Opt-in brute-force stack sweep fallback — <a href="06-threads-and-call-stack.html#raw-stack-scan">chapter 6</a></td></tr>
+                <tr><td data-label="Property"><code>stepIsolationReleaseMs</code></td><td data-label="Type">number</td><td data-label="Default"><code>3000</code></td><td data-label="Notes">How long a stepped-over call may wait on an object with no owner before the frozen threads are released; a wait on a lock a frozen thread holds is released at once. <code>0</code> = never release (strict isolation, Pause breaks in); negative = never freeze — <a href="06-threads-and-call-stack.html#step-isolation">chapter 6</a></td></tr>
+                <tr><td data-label="Property"><code>stepIsolation</code></td><td data-label="Type"><code>"auto"</code> | <code>"none"</code></td><td data-label="Default"><code>"auto"</code></td><td data-label="Notes"><code>"none"</code> never freezes other threads for a step (the RAD Studio IDE&rsquo;s behaviour); steps still land on the stepped thread</td></tr>
                 <tr><td data-label="Property"><code>modules</code></td><td data-label="Type">object[]</td><td data-label="Default"><em>empty</em></td><td data-label="Notes"><code>{ name (required), map, rsm, dcp }</code> — pre-binds debug info for runtime-loaded DLLs and BPLs</td></tr>
                 <tr><td data-label="Property"><code>delphiProjectFile</code></td><td data-label="Type">string</td><td data-label="Default"><em>empty</em></td><td data-label="Notes">The <code>.dpr</code>/<code>.dpk</code>/<code>.dproj</code> this configuration debugs, written automatically by the IDE plugin. Enables the two project-scoped tiers in <a href="04-exception-handling.html#shared-rules">exception rules</a>.</td></tr>
                 <tr><td data-label="Property"><code>useGlobalExceptionRules</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>true</code></td><td data-label="Notes">Also load the shared machine-wide rules file</td></tr>
@@ -119,6 +121,7 @@
             <code>sourceRoot</code>, <code>sourceSearchPaths</code>, <code>modules</code>,
             <code>delphiProjectFile</code>, <code>useGlobalExceptionRules</code>,
             <code>globalExceptionRulesPath</code>, <code>rawStackScan</code>,
+            <code>stepIsolationReleaseMs</code>, <code>stepIsolation</code>,
             <code>progressLocation</code>, <code>diagnosticLog</code> and
             <code>diagnosticsLocation</code> all work as they do for launch.
           </p>
@@ -200,6 +203,7 @@
                 <tr><td data-label="Command">Edit Exception Rules…</td><td data-label="Where it lives">Title bar of the Breakpoints and Call Stack views</td><td data-label="In palette">yes</td></tr>
                 <tr><td data-label="Command">Create a Rule for This Exception…</td><td data-label="Where it lives">The floating debug toolbar — only while stopped on an exception</td><td data-label="In palette">yes, same condition</td></tr>
                 <tr><td data-label="Command">Toggle Raw Stack Scan</td><td data-label="Where it lives">Call Stack view title bar</td><td data-label="In palette">yes</td></tr>
+                <tr><td data-label="Command">Auto-Release of Frozen Threads: ON / OFF</td><td data-label="Where it lives">Call Stack view title bar, next to the raw-scan toggle — the icon shows the current state (open lock = on, closed lock = off, crossed circle = the session never freezes) and clicking flips it — <a href="06-threads-and-call-stack.html#auto-release-button">chapter 6</a></td><td data-label="In palette">yes</td></tr>
                 <tr><td data-label="Command">Refresh Modules</td><td data-label="Where it lives">Delphi Modules view title bar</td><td data-label="In palette">yes</td></tr>
                 <tr><td data-label="Command">Filter Modules…</td><td data-label="Where it lives">Delphi Modules view title bar</td><td data-label="In palette">yes</td></tr>
                 <tr><td data-label="Command">Clear Module Filter</td><td data-label="Where it lives">Delphi Modules view title bar, once a filter is set</td><td data-label="In palette">yes</td></tr>
