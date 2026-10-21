@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Getting started &mdash; Delphi Debugger for VS Code and AI Agents</title>
-  <meta name="description" content="Download, install and verify the Delphi debugger for Visual Studio Code, and the companion tooling worth installing alongside it.">
+  <meta name="description" content="Install the Delphi debugger for Visual Studio Code from the Marketplace or the setup zip, describe your project to it, and the companion tooling worth installing alongside it.">
   <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
   <link rel="stylesheet" href="../../../css/fonts.css">
   <link rel="stylesheet" href="../../../css/style.css">
@@ -43,7 +43,8 @@
         <a href="#download">Download</a>
         <a href="#install">Install</a>
         <a href="#first-run">First run</a>
-        <a href="#project">Opening your project</a>
+        <a href="#ddk">Opening a DDK project</a>
+        <a href="#project">Opening your project from Delphi</a>
         <a href="#companions">Companion tooling</a>
         <a href="#updates">Staying up to date</a>
       </aside>
@@ -58,73 +59,108 @@
         <h1>Getting started</h1>
 
         <p>
-          If you only want to <em>use</em> the debugger, do not build anything. The release ships the
-          debug adapter, the MCP server and the VS Code extension already compiled, and the installer
-          puts all three where they belong. No Delphi toolchain is needed on the machine you install
-          on — only on the machine that compiles the program you want to debug.
+          If you only want to <em>use</em> the debugger, do not build anything. The VS Code extension
+          on the Marketplace arrives with the debug adapter and the MCP server already compiled
+          inside it, and the setup zip ships the same three pieces for the editors and machines the
+          Marketplace does not reach. No Delphi toolchain is needed on the machine you install on —
+          only on the machine that compiles the program you want to debug.
         </p>
         <section id="prerequisite">
           <h2>Important prerequisite</h2>
           <p>
-            <strong>Today, a Delphi project only becomes a properly configured VS Code workspace
-            through the
-            <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a>
-            Delphi IDE plugin.</strong> Treat it as required, not as a nice extra.
-          </p>
-          <p>
-            Nothing in VS Code can read a <code>.dproj</code>. Everything that makes your project
+            <strong>The debugger needs something that knows your project to describe it.</strong>
+            It needs the executable (or the host application of a package), its symbol files, the
+            source search paths and the project&rsquo;s packages. Everything that makes your project
             <em>your project</em> — the output directory for this platform and configuration, the
             source root, the unit search paths accumulated over years, the BPL list on a package
-            project — lives in the Delphi IDE and has to be handed over. The plugin is what hands it
-            over.
+            project — lives in the project options and has to be handed over. A real Delphi project
+            can carry a couple of hundred search paths; that is not something anyone wants to write
+            by hand.
           </p>
-          <p>That configuration is not only for debugging. It carries two things at once:</p>
+          <p>Any <strong>one</strong> of these supplies it:</p>
           <ul>
             <li>
-              <strong>Editing.</strong> This is what the plugin was originally built for, before this
-              debugger existed. Without the generated configuration, DelphiLSP has no search paths,
-              so code navigation, completion and Copilot are all working half-blind on a codebase
-              they cannot resolve.
+              <strong><a href="https://marketplace.visualstudio.com/items?itemName=Snowcaloid.delphi-devkit" target="_blank" rel="noopener">delphi-devkit (DDK)</a></strong>,
+              2.7.0 or later — a VS Code extension that manages Delphi projects and compilers from
+              inside VS Code, without RAD Studio needing to be open. With DDK installed there is no
+              <code>launch.json</code> to write: right-click a project in DDK&rsquo;s tree and choose
+              <strong>Debug</strong> or <strong>Attach Debugger</strong>. See
+              <a href="#ddk">Opening a DDK project</a>.
             </li>
             <li>
-              <strong>Debugging.</strong> The <code>launch.json</code> and attach configurations this
-              debugger needs, derived from the same project options. On a real project that is a few
-              hundred entries.
+              <strong>The <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a>
+              Delphi IDE plugin</strong>, for working from RAD Studio. Its
+              <em>Tools → Edit in Visual Studio Code</em> command generates the workspace and the
+              launch configuration for the current project or project group. See
+              <a href="#project">Opening your project from Delphi</a>.
+            </li>
+            <li>
+              <strong>A <code>launch.json</code> you write yourself</strong>, with nothing else to
+              install. Fine for a small project —
+              <a href="../vscode-tutorial/01-preparing-your-project.html#launch-json">chapter 1</a>
+              shows the minimum.
             </li>
           </ul>
-          <div class="doc-note">
-            So the order is: install the debugger (below), install the plugin, then open your project
-            <em>from Delphi</em> — see <a href="#project">Opening your project</a>. Install the
-            debugger alone and it works, but with nothing to point it at. The rest of this manual
-            assumes you took that route.
-          </div>
           <p>
-            <strong>On the roadmap:</strong> not requiring the Delphi IDE at all. There is a
-            third-party extension,
-            <a href="https://github.com/valentin-baron/delphi-devkit" target="_blank" rel="noopener">Delphi DevKit</a>,
-            that manages Delphi projects and compilers from inside VS Code — including generating the
-            DelphiLSP configuration — without RAD Studio needing to be open. Interoperating with it,
-            so this debugger can be configured from a workspace it set up, is planned. It is not
-            supported yet; for now the plugin is the way.
+            The project configuration is not only for debugging. Both DDK and the IDE plugin also
+            give DelphiLSP the search paths it needs; without them, code navigation, completion and
+            Copilot are all working half-blind on a codebase they cannot resolve.
           </p>
+          <div class="doc-note">
+            So the order is: install the debugger (below), pick one of the three routes, then open
+            your project through it. Install the debugger alone and it works, but with nothing to
+            point it at.
+          </div>
         </section>
 
         <section id="download">
           <h2>Download</h2>
           <p>
-            Grab <code>delphi-win64-debugger-setup-*.zip</code> from the
-            <a href="https://github.com/csm101/delphi-visual-studio-code-debugger/releases" target="_blank" rel="noopener">latest release</a>
-            and extract it anywhere. The zip contains <code>Setup.exe</code> and the prebuilt binaries
-            it installs.
+            There are two routes, and they deliver the same extension.
           </p>
+          <ul>
+            <li>
+              <strong>The VS Code Marketplace</strong> — the ordinary route for Visual Studio Code. The
+              extension is listed as
+              <a href="https://marketplace.visualstudio.com/items?itemName=mca-software.delphi-debugger" target="_blank" rel="noopener">Delphi Debugger</a>,
+              id <code>mca-software.delphi-debugger</code>. Nothing to download by hand, and VS Code
+              keeps it updated.
+            </li>
+            <li>
+              <strong>The setup zip</strong> — grab <code>delphi-win64-debugger-setup-*.zip</code> from
+              the
+              <a href="https://github.com/csm101/delphi-visual-studio-code-debugger/releases" target="_blank" rel="noopener">latest release</a>
+              and extract it anywhere. The zip contains <code>Setup.exe</code> and the prebuilt
+              binaries it installs. This is the route for Cursor, Windsurf, VSCodium and Trae, which
+              the Microsoft Marketplace does not serve; for offline machines; for Claude Desktop; and
+              for machines without VS Code at all.
+            </li>
+          </ul>
         </section>
 
         <section id="install">
           <h2>Install</h2>
+
+          <h3>From the Marketplace</h3>
           <p>
-            Run <code>Setup.exe</code>. It detects the installed Visual Studio Code family editors,
-            installs the extension and the adapter, and updates an existing installation in place.
-            At the end it offers to register the MCP server as well.
+            In VS Code, open the Extensions view (<code>Ctrl+Shift+X</code>), search for
+            <strong>Delphi Debugger</strong>, check that the publisher is
+            <code>mca-software</code>, and click <strong>Install</strong>. The extension bundles the
+            debug adapter and the MCP server; there is nothing else to install for debugging.
+          </p>
+          <p>
+            Agents hosted by VS Code see the bundled MCP server with no further setup. For Claude
+            Code, run <strong>Delphi: Register MCP Server with Claude Code</strong> once from the
+            Command Palette — see
+            <a href="../mcp/installing-and-registering.html#marketplace">Installing and registering the MCP server</a>.
+          </p>
+
+          <h3>From the setup zip</h3>
+          <p>
+            Run <code>Setup.exe</code>. It detects the installed Visual Studio Code family editors and
+            installs the bundled <code>.vsix</code> into each one with that editor&rsquo;s own
+            <code>&lt;editor cli&gt; --install-extension</code>, updating an existing installation in
+            place. At the end it offers to register the MCP server as well.
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/getting-started-setup.png">
@@ -153,13 +189,21 @@
             <a href="../mcp/installing-and-registering.html">Installing and registering the MCP server</a>.
           </p>
 
-          <h3>The extension is not on the Marketplace</h3>
+          <h3>Marketplace or setup zip</h3>
           <p>
-            The extension is <code>delphi-win64-debug</code>, publisher <code>local</code>, and it is
-            installed by the setup rather than pulled from the Visual Studio Marketplace. That is
-            deliberate: the same installer reaches Cursor, Windsurf, VSCodium and Trae through their
-            own extension paths, not only Microsoft's editor.
+            Both routes install the same extension, <code>mca-software.delphi-debugger</code>; it has
+            been on the Visual Studio Marketplace since version 0.7.1. What differs is how it is kept
+            up to date: VS Code updates a Marketplace install itself, while a setup-zip install is
+            told about new releases by the extension — see <a href="#updates">Staying up to date</a>,
+            which also covers moving an existing setup-zip install over to Marketplace updates.
           </p>
+          <div class="doc-note">
+            <strong>Upgrading from an older release?</strong> Older releases installed the extension
+            as <code>local.delphi-win64-debug</code>. That sideloaded copy must never stay installed
+            beside the current one: both contribute the same debug types. The extension notices it
+            on activation and offers to remove it — accept, then reload the window.
+            <code>Setup.exe</code> removes it on its own.
+          </div>
 
           <h3>Installing from a source checkout</h3>
           <p>
@@ -173,16 +217,16 @@
               </thead>
               <tbody>
                 <tr>
-                  <td data-label="Method"><code>install\Install.exe</code><br>(built by <code>build_installer.bat</code>)</td>
+                  <td data-label="Method"><code>install\Install.exe</code><br>(built by <code>scripts\build_installer.bat</code>)</td>
                   <td data-label="When to use it">The interactive installer, built from your own checkout. Same behaviour as the released <code>Setup.exe</code>: detects the editor installs, updates in place.</td>
                 </tr>
                 <tr>
-                  <td data-label="Method"><code>install-dev.bat</code></td>
+                  <td data-label="Method"><code>scripts\install-dev.bat</code></td>
                   <td data-label="When to use it">Development mode — points the extension straight at your build output, so a rebuild is picked up without reinstalling.</td>
                 </tr>
                 <tr>
-                  <td data-label="Method">Manual copy</td>
-                  <td data-label="When to use it">Copy <code>package.json</code> and the built executable into <code>%USERPROFILE%\.vscode\extensions\local.delphi-win64-debug\</code>. The fallback when the installer cannot find your editor.</td>
+                  <td data-label="Method"><code>scripts\build_vsix.bat</code></td>
+                  <td data-label="When to use it">Packages <code>dist\mca-software.delphi-debugger-&lt;version&gt;.vsix</code> with <code>vsce</code> — the same artefact the Marketplace and the setup zip carry. Install it with the editor&rsquo;s <code>--install-extension</code>. Needs Node.js on <code>PATH</code>.</td>
                 </tr>
               </tbody>
             </table>
@@ -199,10 +243,11 @@
               The extension shows up in the Extensions view as installed and enabled.
             </li>
             <li>
-              A debug configuration of type <code>delphi-win64</code> is offered — the label in the
-              picker is <strong>Delphi (Win32/Win64)</strong>. The type id is <code>delphi-win64</code>
-              regardless of the target bitness; it was never renamed when Win32 support shipped, so
-              existing configurations keep working.
+              A debug configuration of type <code>delphi</code> is offered — the label in the picker
+              is <strong>Delphi (Win32/Win64)</strong>. The original type name,
+              <code>delphi-win64</code>, is kept as an alias with the same attributes, so an existing
+              <code>launch.json</code> — hand-written or generated by the IDE plugin — needs no
+              change. Both names debug both bitnesses.
             </li>
             <li>
               Gutter breakpoints can be set in your <code>.pas</code> files. The debugger claims the
@@ -217,10 +262,13 @@
                  width="1262" height="783">
             <figcaption>
               Three things to look for after installing: the debugger itself under
-              <strong>Installed</strong> — publisher <code>local</code>, because it does not come from
-              the Marketplace — <strong>DelphiLSP</strong> beside it, and, if you accepted the
-              registration offer, <code>delphi-win64-debugger</code> under
+              <strong>Installed</strong>, <strong>DelphiLSP</strong> beside it, and — after a setup-zip
+              install where you accepted the registration offer — the MCP server under
               <strong>MCP Servers</strong>. The details pane confirms the version you are running.
+              This screenshot predates the Marketplace listing: a current install shows
+              <strong>Delphi Debugger</strong> from publisher <code>mca-software</code>, identifier
+              <code>mca-software.delphi-debugger</code>, and the MCP server as
+              <code>delphi-debugger</code>.
             </figcaption>
           </figure>
 
@@ -238,20 +286,54 @@
           </p>
         </section>
 
+        <section id="ddk">
+          <h2>Opening a DDK project</h2>
+          <p>
+            With
+            <a href="https://marketplace.visualstudio.com/items?itemName=Snowcaloid.delphi-devkit" target="_blank" rel="noopener">delphi-devkit</a>
+            2.7.0 or later installed, there is no <code>launch.json</code> to write. Right-click a
+            project in DDK&rsquo;s tree and choose <strong>Debug</strong> or
+            <strong>Attach Debugger</strong>, or pick the project from the debug dropdown in
+            <strong>Run and Debug</strong>.
+          </p>
+          <p>
+            If you would rather keep a configuration of your own, it names the project and nothing
+            else:
+          </p>
+          <pre><code>{ "type": "delphi", "request": "launch", "name": "Debug MyApp", "ddkProject": "MyApp" }</code></pre>
+          <p>
+            <code>ddkProject</code> is a DDK project name, id, or the path of a <code>.dproj</code> /
+            <code>.dpr</code> / <code>.dpk</code>. When the session starts, DDK is asked for the
+            project&rsquo;s debug target and the configuration is completed from it:
+            <code>program</code> (for a package or DLL project, its Host Application),
+            <code>mapFile</code> / <code>rsmFile</code>, <code>sourceRoot</code>,
+            <code>sourceSearchPaths</code>, <code>modules</code> (the project&rsquo;s own
+            <code>.bpl</code> / <code>.dll</code> with their symbols), <code>args</code> and
+            <code>delphiProjectFile</code>. Anything you write yourself stays as written.
+          </p>
+          <p>
+            <code>"request": "attach"</code> attaches to the running executable, through the process
+            picker when several instances run. DDK&rsquo;s own warnings — a stale <code>.rsm</code>, a
+            package not built — are shown as notifications. DDK&rsquo;s <strong>Debug</strong> /
+            <strong>Attach Debugger</strong> context-menu entries and its entries in the debug
+            dropdown start exactly this configuration.
+          </p>
+        </section>
+
         <section id="project">
-          <h2>Opening your project: the Edit in VS Code plugin</h2>
+          <h2>Opening your project from Delphi: the Edit in VS Code plugin</h2>
           <p>
             A Delphi project carries its configuration in the IDE: output directories per platform
             and per configuration, unit search paths accumulated over years, and for a package
-            project the list of BPLs. VS Code knows none of it, and transcribing it into
+            project the list of BPLs. VS Code on its own knows none of it, and transcribing it into
             <code>launch.json</code> by hand is not an afternoon anyone should spend.
           </p>
           <p>
             The <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a>
             plugin reads it out of the project options you already have and writes the workspace for
             you — including both the <strong>launch and attach</strong> configurations this debugger
-            uses. It is a separate project of the same author, and it is the piece that makes the
-            debugger practical rather than merely possible.
+            uses. It is a separate project of the same author, and the route to take when you work
+            from RAD Studio.
           </p>
 
           <h3>Installing it</h3>
@@ -376,8 +458,12 @@
               </thead>
               <tbody>
                 <tr>
+                  <td data-label="Tool"><a href="#ddk">delphi-devkit</a><br><code>Snowcaloid.delphi-devkit</code>, 2.7.0 or later</td>
+                  <td data-label="Why">One of the three ways to describe your project to the debugger — the one that needs neither RAD Studio nor a <code>launch.json</code>. Covered <a href="#ddk">above</a>.</td>
+                </tr>
+                <tr>
                   <td data-label="Tool"><a href="#project">Edit in VS Code</a><br>(Delphi IDE plugin)</td>
-                  <td data-label="Why"><strong>Effectively required.</strong> It is how your project gets into VS Code with a working debug configuration — covered in full <a href="#project">above</a>. You can write <code>launch.json</code> by hand instead, and <a href="../vscode-tutorial/01-preparing-your-project.html">chapter 1</a> shows the minimum, but on a real project you will not enjoy it.</td>
+                  <td data-label="Why">One of the three ways to describe your project to the debugger — the one for working from RAD Studio, covered in full <a href="#project">above</a>. Without it or DDK you write <code>launch.json</code> by hand; <a href="../vscode-tutorial/01-preparing-your-project.html">chapter 1</a> shows the minimum, but on a real project you will not enjoy it.</td>
                 </tr>
                 <tr>
                   <td data-label="Tool">DelphiLSP<br><code>embarcaderotechnologies.delphilsp</code></td>
@@ -399,11 +485,16 @@
         <section id="updates">
           <h2>Staying up to date</h2>
           <p>
-            The extension checks GitHub releases once a day. When a newer version exists you get a
-            notification offering two things: <strong>Download</strong>, which opens the release page,
-            and <strong>Skip this version</strong>, which silences that particular version for good —
-            useful when you have decided to stay where you are. It fails silently when the machine is
-            offline or behind a proxy: no error, no repeated prompting.
+            A Marketplace install is updated by VS Code itself, like any other extension.
+          </p>
+          <p>
+            A setup-zip install is not. VS Code records an extension installed from a
+            <code>.vsix</code> as pinned, so it is never auto-updated from the Marketplace. Instead
+            the extension itself checks GitHub releases once a day. When a newer version exists you
+            get a notification offering two things: <strong>Download</strong>, which opens the
+            release page, and <strong>Skip this version</strong>, which silences that particular
+            version for good — useful when you have decided to stay where you are. It fails silently
+            when the machine is offline or behind a proxy: no error, no repeated prompting.
           </p>
           <p>
             Turn it off entirely with <code>delphi-win64.checkForUpdates</code> — the full settings
@@ -418,8 +509,12 @@
             check has run yet. Start a session once and everything is there.
           </div>
           <p>
-            Updating is the same operation as installing: run the new <code>Setup.exe</code>, it
-            replaces the previous version in place.
+            Updating a setup-zip install is the same operation as installing: run the new
+            <code>Setup.exe</code>, it replaces the previous version in place.
+          </p>
+          <p>
+            To move a setup-zip install in VS Code over to Marketplace updates, uninstall the
+            extension, then install it from the Marketplace. From then on VS Code keeps it current.
           </p>
         </section>
 

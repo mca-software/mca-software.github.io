@@ -77,9 +77,14 @@
             <a href="../getting-started/index.html">IDE plugin</a> generates an attach configuration
             for every project alongside its launch one — the same click, the same
             <code>launch.json</code> — so if you already opened a project in VS Code that way, it is
-            already there, named <em>Attach to &lt;YourExe&gt;.exe</em>. What follows is what it
-            contains, for when you want to understand it, adjust it, or write one from scratch for a
-            case the plugin does not cover.
+            already there, named <em>Attach to &lt;YourExe&gt;.exe</em>. With
+            <a href="../getting-started/index.html#ddk">delphi-devkit</a> there is nothing to
+            generate: right-click the project in DDK&rsquo;s tree and choose
+            <strong>Attach Debugger</strong>, or write <code>"request": "attach"</code> next to
+            <code>ddkProject</code>; it attaches to the project&rsquo;s running executable, through
+            the process picker when several instances run. What follows is what an attach
+            configuration contains, for when you want to understand it, adjust it, or write one from
+            scratch for a case neither covers.
           </p>
           <p>
             Set <code>"request": "attach"</code> and identify the process by id or by name:

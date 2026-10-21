@@ -170,17 +170,20 @@
         <section id="launch-json">
           <h2>The launch configuration</h2>
           <p>
-            <code>.vscode/launch.json</code> in the project being debugged. The
+            <code>.vscode/launch.json</code> in the project being debugged. You rarely write it whole:
+            with delphi-devkit a configuration is one line naming the project, or none at all, and
+            the
             <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a>
-            IDE plugin writes this for you from the real Delphi project, which is what you want on
-            anything with a non-trivial search path. Here is the minimum by hand:
+            IDE plugin writes the full one for you from the real Delphi project — see
+            <a href="#generating-it">below</a>. Either is what you want on anything with a
+            non-trivial search path. Here is the minimum by hand:
           </p>
           <pre><code>{
   "version": "0.2.0",
   "configurations": [
     {
       "name": "Debug Delphi Win64",
-      "type": "delphi-win64",
+      "type": "delphi",
       "request": "launch",
       "program": "${workspaceFolder}/Win64/Debug/MyApp.exe",
       "sourceRoot": "${workspaceFolder}",
@@ -188,6 +191,11 @@
     }
   ]
 }</code></pre>
+          <p>
+            <code>delphi-win64</code>, the original type name, is kept as an alias with the same
+            attributes, so existing configurations — including the ones the IDE plugin generates —
+            work unchanged.
+          </p>
           <p>The properties you will actually reach for:</p>
           <div class="doc-scroll">
             <table class="doc-table">
@@ -204,6 +212,7 @@
                 <tr><td data-label="Property"><code>stopAtEntry</code></td><td data-label="Default"><code>false</code></td><td data-label="What it does">Break at the process entry point before any user code runs</td></tr>
                 <tr><td data-label="Property"><code>modules</code></td><td data-label="Default"><em>empty</em></td><td data-label="What it does">Pre-binds debug-info files for runtime-loaded DLLs and BPLs — see <a href="09-multi-bpl-and-modules.html">chapter 9</a></td></tr>
                 <tr><td data-label="Property"><code>delphiProjectFile</code></td><td data-label="Default"><em>empty</em></td><td data-label="What it does">The <code>.dpr</code>/<code>.dpk</code>/<code>.dproj</code> this configuration debugs — written by the IDE plugin, and what puts a project&rsquo;s own exception rules in scope, see <a href="04-exception-handling.html#shared-rules">chapter 4</a></td></tr>
+                <tr><td data-label="Property"><code>ddkProject</code></td><td data-label="Default"><em>empty</em></td><td data-label="What it does">A delphi-devkit project name, id, or <code>.dproj</code>/<code>.dpr</code>/<code>.dpk</code> path. <code>program</code>, <code>mapFile</code>, <code>rsmFile</code>, <code>sourceRoot</code>, <code>sourceSearchPaths</code>, <code>modules</code>, <code>args</code> and <code>delphiProjectFile</code> then come from DDK when the session starts; anything written by hand wins — see <a href="#generating-it">below</a></td></tr>
               </tbody>
             </table>
           </div>
@@ -236,22 +245,42 @@
             <code>processName</code> instead of launching the program yourself. The attach
             configuration shares <code>program</code>, <code>sourceRoot</code>,
             <code>sourceSearchPaths</code>, <code>modules</code> and <code>delphiProjectFile</code> with
-            launch, and adds <code>killOnDetach</code>.
+            launch, and adds <code>killOnDetach</code>. With <code>ddkProject</code>, an attach
+            configuration attaches to the project&rsquo;s running executable, through the process
+            picker when several instances run.
             <a href="10-attach-to-a-running-process.html">Chapter 10</a> covers it, including one
             mistake worth knowing about before you try it.
           </p>
         </section>
 
         <section id="generating-it">
-          <h2>Letting the IDE write it</h2>
+          <h2>Letting DDK or the IDE write it</h2>
           <p>
             A real Delphi project carries a couple of hundred unit search paths, an output directory
             that depends on the configuration, and a list of runtime packages. Transcribing that by
-            hand is not a good use of an afternoon. The
+            hand is not a good use of an afternoon. Two tools do it for you; you need only one.
+          </p>
+          <p>
+            <strong><a href="https://marketplace.visualstudio.com/items?itemName=Snowcaloid.delphi-devkit" target="_blank" rel="noopener">delphi-devkit (DDK)</a></strong>,
+            2.7.0 or later, needs no <code>launch.json</code> at all: right-click a project in
+            DDK&rsquo;s tree and choose <strong>Debug</strong> or <strong>Attach Debugger</strong>. A
+            configuration of your own is one line:
+          </p>
+          <pre><code>{ "type": "delphi", "request": "launch", "name": "Debug MyApp", "ddkProject": "MyApp" }</code></pre>
+          <p>
+            The rest — <code>program</code> (for a package or DLL project, its Host Application),
+            <code>mapFile</code> / <code>rsmFile</code>, <code>sourceRoot</code>,
+            <code>sourceSearchPaths</code>, <code>modules</code>, <code>args</code> and
+            <code>delphiProjectFile</code> — comes from DDK when the session starts, and anything you
+            write yourself stays as written.
+            <a href="../getting-started/index.html#ddk">Getting started</a> has the details.
+          </p>
+          <p>
+            The
             <a href="https://github.com/csm101/EditInVsCodeDelphiPlugin" target="_blank" rel="noopener">Edit in VS Code</a>
-            plugin adds an <em>Open in Visual Studio Code</em> command to the Delphi IDE that
-            generates the workspace file, <code>launch.json</code> and <code>tasks.json</code> from
-            the currently open project.
+            plugin, for working from RAD Studio, adds a <em>Tools → Edit in Visual Studio Code</em>
+            command to the Delphi IDE that generates the workspace file, <code>launch.json</code> and
+            <code>tasks.json</code> from the currently open project or project group.
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/getting-started-open-in-vscode.png">

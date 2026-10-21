@@ -75,10 +75,10 @@
           <div class="doc-scroll">
             <table class="doc-table">
               <tbody>
-                <tr><td>Type id</td><td><code>delphi-win64</code> — used for 32-bit targets too; it was never renamed when Win32 support shipped, so existing configurations keep working</td></tr>
+                <tr><td>Type id</td><td><code>delphi</code>, for 32-bit and 64-bit targets alike. The original name, <code>delphi-win64</code>, is kept as an alias with the same attributes, so existing configurations — including the ones the IDE plugin generates — keep working</td></tr>
                 <tr><td>Label</td><td>Delphi (Win32/Win64)</td></tr>
                 <tr><td>Languages</td><td><code>objectpascal</code>, <code>pascal</code>; breakpoints also work in files typed as <code>delphi</code></td></tr>
-                <tr><td>Extension</td><td><code>delphi-win64-debug</code>, publisher <code>local</code></td></tr>
+                <tr><td>Extension</td><td><code>mca-software.delphi-debugger</code>, listed on the <a href="https://marketplace.visualstudio.com/items?itemName=mca-software.delphi-debugger" target="_blank" rel="noopener">VS Code Marketplace</a> as <em>Delphi Debugger</em></td></tr>
               </tbody>
             </table>
           </div>
@@ -104,6 +104,7 @@
                 <tr><td data-label="Property"><code>stepIsolation</code></td><td data-label="Type"><code>"auto"</code> | <code>"none"</code></td><td data-label="Default"><code>"auto"</code></td><td data-label="Notes"><code>"none"</code> never freezes other threads for a step (the RAD Studio IDE&rsquo;s behaviour); steps still land on the stepped thread</td></tr>
                 <tr><td data-label="Property"><code>modules</code></td><td data-label="Type">object[]</td><td data-label="Default"><em>empty</em></td><td data-label="Notes"><code>{ name (required), map, rsm, dcp }</code> — pre-binds debug info for runtime-loaded DLLs and BPLs</td></tr>
                 <tr><td data-label="Property"><code>delphiProjectFile</code></td><td data-label="Type">string</td><td data-label="Default"><em>empty</em></td><td data-label="Notes">The <code>.dpr</code>/<code>.dpk</code>/<code>.dproj</code> this configuration debugs, written automatically by the IDE plugin. Enables the two project-scoped tiers in <a href="04-exception-handling.html#shared-rules">exception rules</a>.</td></tr>
+                <tr><td data-label="Property"><code>ddkProject</code></td><td data-label="Type">string</td><td data-label="Default"><em>empty</em></td><td data-label="Notes">A delphi-devkit (2.7.0 or later) project name, id, or <code>.dproj</code>/<code>.dpr</code>/<code>.dpk</code> path. At session start <code>program</code>, <code>mapFile</code>, <code>rsmFile</code>, <code>sourceRoot</code>, <code>sourceSearchPaths</code>, <code>modules</code>, <code>args</code> and <code>delphiProjectFile</code> come from DDK; anything written by hand wins — <a href="../getting-started/index.html#ddk">Getting started</a></td></tr>
                 <tr><td data-label="Property"><code>useGlobalExceptionRules</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>true</code></td><td data-label="Notes">Also load the shared machine-wide rules file</td></tr>
                 <tr><td data-label="Property"><code>globalExceptionRulesPath</code></td><td data-label="Type">string</td><td data-label="Default"><code>%USERPROFILE%\.DelphiWinDebugger\exceptionRules.json</code></td><td data-label="Notes">Override the shared rules file location</td></tr>
                 <tr><td data-label="Property"><code>progressLocation</code></td><td data-label="Type"><code>"statusBar"</code> | <code>"notification"</code></td><td data-label="Default"><code>"statusBar"</code></td><td data-label="Notes">Where long operations report progress</td></tr>
@@ -119,7 +120,7 @@
           <p>
             Adds the following. <code>program</code>, <code>mapFile</code>, <code>rsmFile</code>,
             <code>sourceRoot</code>, <code>sourceSearchPaths</code>, <code>modules</code>,
-            <code>delphiProjectFile</code>, <code>useGlobalExceptionRules</code>,
+            <code>delphiProjectFile</code>, <code>ddkProject</code>, <code>useGlobalExceptionRules</code>,
             <code>globalExceptionRulesPath</code>, <code>rawStackScan</code>,
             <code>stepIsolationReleaseMs</code>, <code>stepIsolation</code>,
             <code>progressLocation</code>, <code>diagnosticLog</code> and
@@ -188,9 +189,11 @@
         <section id="commands">
           <h2>Commands</h2>
           <p>
-            Twelve commands, all in the <strong>Delphi Debugger</strong> category — so in the Command
-            Palette (<code>Ctrl+Shift+P</code>) they read
-            <code>Delphi Debugger: Edit Exception Rules…</code> and so on. Four of them are
+            Thirteen commands. Twelve are in the <strong>Delphi Debugger</strong> category — so in the
+            Command Palette (<code>Ctrl+Shift+P</code>) they read
+            <code>Delphi Debugger: Edit Exception Rules…</code> and so on; the MCP registration
+            command is in the <strong>Delphi</strong> category and reads
+            <code>Delphi: Register MCP Server with Claude Code</code>. Four of them are
             deliberately <em>not</em> in the palette, because they only make sense on the thing you
             clicked; those are marked below.
           </p>
@@ -213,6 +216,7 @@
                 <tr><td data-label="Command">Forget Evaluation Decision (Delphi)</td><td data-label="Where it lives">Right-click a row in Variables <em>or</em> Watch — undoes a previous allow or deny</td><td data-label="In palette"><strong>no</strong></td></tr>
                 <tr><td data-label="Command">Copy Path</td><td data-label="Where it lives"><strong>Hover icon</strong> on a module row in the Delphi Modules view</td><td data-label="In palette"><strong>no</strong></td></tr>
                 <tr><td data-label="Command">Pick a Process to Attach To</td><td data-label="Where it lives">Only as <code>${command:delphi-win64.pickProcess}</code> in an attach configuration</td><td data-label="In palette"><strong>no</strong></td></tr>
+                <tr><td data-label="Command">Register MCP Server with Claude Code</td><td data-label="Where it lives">Command Palette. Registers the extension&rsquo;s stable copy of the MCP server with the <code>claude</code> CLI at user scope — <a href="../mcp/installing-and-registering.html#marketplace">Installing and registering</a></td><td data-label="In palette">yes</td></tr>
               </tbody>
             </table>
           </div>
@@ -238,7 +242,7 @@
                 </tr>
                 <tr>
                   <td data-label="Setting"><code>delphi-win64.checkForUpdates</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>true</code></td>
-                  <td data-label="What it does">Daily check of GitHub releases, with a download-link notification. Fails silently when offline.</td>
+                  <td data-label="What it does">Daily check of GitHub releases, with a download-link notification. Fails silently when offline. A Marketplace install is updated by VS Code itself; this check is what tells a setup-zip install, which VS Code pins, about a new release.</td>
                 </tr>
               </tbody>
             </table>
