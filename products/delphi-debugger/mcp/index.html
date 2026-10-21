@@ -57,7 +57,7 @@
         <p>
           An AI coding agent reading your source can tell you what the code <em>should</em> do. It
           cannot tell you what the program <em>did</em>. The MCP server closes that gap: the same
-          debug engine the VS Code extension drives, exposed to an agent as around forty tools, so it
+          debug engine the VS Code extension drives, exposed to an agent as semantic tools, so it
           can launch your program, stop it, and read the real state.
         </p>
 
@@ -107,10 +107,12 @@ flowchart LR
           <p>The typical cycle, which is worth knowing because it explains the tool names:</p>
           <ol>
             <li>
-              <code>launch_debuggee</code> or <code>launch_from_config</code> — the latter reads the
-              same <code>launch.json</code> the VS Code debugger uses, so the agent starts with the
-              project&rsquo;s real symbol and source paths instead of a hand-built approximation. Both
-              stop at entry.
+              <code>launch_project</code>, <code>launch_from_config</code> or
+              <code>launch_debuggee</code>. The first asks delphi-devkit for the project&rsquo;s debug
+              target, the second reads the same <code>launch.json</code> the VS Code debugger uses,
+              so either way the agent starts with the project&rsquo;s real symbol and source paths
+              instead of a hand-built approximation. The first two always stop at entry;
+              <code>launch_debuggee</code> does with <code>stopAtEntry: true</code>.
             </li>
             <li><code>set_breakpoint</code>, while parked at entry.</li>
             <li><code>continue_and_wait</code> — runs, and returns when the program next stops.</li>

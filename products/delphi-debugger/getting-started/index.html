@@ -149,9 +149,12 @@
             debug adapter and the MCP server; there is nothing else to install for debugging.
           </p>
           <p>
-            Agents hosted by VS Code see the bundled MCP server with no further setup. For Claude
-            Code, run <strong>Delphi: Register MCP Server with Claude Code</strong> once from the
-            Command Palette — see
+            Agents hosted by VS Code see the bundled MCP server with no further setup. Since 0.7.3
+            Claude Code needs none either: at the first VS Code start after the install, if the
+            <code>claude</code> CLI is on <code>PATH</code>, the extension registers the server with
+            it and says so in one notification. On 0.7.2, run
+            <strong>Delphi: Register MCP Server with Claude Code</strong> once from the Command
+            Palette instead — see
             <a href="../mcp/installing-and-registering.html#marketplace">Installing and registering the MCP server</a>.
           </p>
 
@@ -160,7 +163,13 @@
             Run <code>Setup.exe</code>. It detects the installed Visual Studio Code family editors and
             installs the bundled <code>.vsix</code> into each one with that editor&rsquo;s own
             <code>&lt;editor cli&gt; --install-extension</code>, updating an existing installation in
-            place. At the end it offers to register the MCP server as well.
+            place. At the end it offers to register the MCP server with Claude Code as well.
+          </p>
+          <p>
+            Since 0.7.3 it leaves an editor alone when that editor already has the extension from the
+            Marketplace, and tells you to uninstall that copy first if you want the zip&rsquo;s: one
+            source per editor. It never downgrades a newer copy either. In both cases the MCP step
+            is left to the copy that editor already has.
           </p>
 
           <figure class="doc-figure" data-screenshot="assets/screenshots/delphi-debugger/getting-started-setup.png">
@@ -196,6 +205,8 @@
             up to date: VS Code updates a Marketplace install itself, while a setup-zip install is
             told about new releases by the extension — see <a href="#updates">Staying up to date</a>,
             which also covers moving an existing setup-zip install over to Marketplace updates.
+            Use one source per editor: to switch, uninstall the extension in the Extensions view
+            first, then install it the other way.
           </p>
           <div class="doc-note">
             <strong>Upgrading from an older release?</strong> Older releases installed the extension
@@ -205,9 +216,28 @@
             <code>Setup.exe</code> removes it on its own.
           </div>
 
+          <h3>Uninstalling</h3>
+          <p>
+            Uninstall the extension from the Extensions view like any other. Since 0.7.3 its
+            uninstall hook also removes the MCP server&rsquo;s Claude Code registration and
+            its stable copy in <code>%LOCALAPPDATA%\DelphiWin64Debugger\</code> — but VS Code runs
+            that hook only when it deletes the extension from disk, at a restart after the uninstall
+            (after a command-line uninstall, the second start), and nothing is removed while another
+            VS Code-family editor still has the extension.
+          </p>
+          <p>
+            A setup-zip install can also be removed from every editor at once with
+            <code>Setup.exe --uninstall</code> (since 0.7.3). It removes its copy from each detected
+            editor, then — unless an editor still has the extension —
+            the Claude Code registration and the stable folder. A Marketplace copy, or an editor
+            whose CLI is not on <code>PATH</code>, is reported and kept. Either way, a Claude Code
+            registration pointing at another executable, such as a development build, is never
+            touched.
+          </p>
+
           <h3>Installing from a source checkout</h3>
           <p>
-            Only relevant if you are building the debugger yourself. Delphi 10.3 Rio or later is
+            Only relevant if you are building the debugger yourself. Delphi 12 Athens or later is
             required to compile it.
           </p>
           <div class="doc-scroll">
@@ -261,14 +291,14 @@
                  alt="The Visual Studio Code Extensions view. Under Installed, Delphi Debugger (Win32 and Win64) from publisher local is highlighted, with DelphiLSP from Embarcadero Technologies directly below it. Further down, an MCP Servers - Installed section lists delphi-win64-debugger. The details pane on the right shows the extension's description, version 0.6.2 and identifier local.delphi-win64-debug."
                  width="1262" height="783">
             <figcaption>
-              Three things to look for after installing: the debugger itself under
-              <strong>Installed</strong>, <strong>DelphiLSP</strong> beside it, and — after a setup-zip
-              install where you accepted the registration offer — the MCP server under
-              <strong>MCP Servers</strong>. The details pane confirms the version you are running.
-              This screenshot predates the Marketplace listing: a current install shows
-              <strong>Delphi Debugger</strong> from publisher <code>mca-software</code>, identifier
-              <code>mca-software.delphi-debugger</code>, and the MCP server as
-              <code>delphi-debugger</code>.
+              What to look for after installing: the debugger itself under
+              <strong>Installed</strong>, with <strong>DelphiLSP</strong> beside it. The details pane
+              confirms the version you are running. This screenshot predates the Marketplace
+              listing: it shows the old identifier <code>local.delphi-win64-debug</code>, and under
+              <strong>MCP Servers</strong> the <code>mcp.json</code> entry that older installers
+              wrote. A current install shows <strong>Delphi Debugger</strong> from publisher
+              <code>mca-software</code>, identifier <code>mca-software.delphi-debugger</code>, and
+              VS Code gets the MCP server, <code>delphi-debugger</code>, from the extension itself.
             </figcaption>
           </figure>
 
@@ -474,8 +504,8 @@
                   <td data-label="Why">No longer needed. The extension ships its own memory view; the stock pane is only relevant if you turn <code>delphi-win64.stockMemoryView</code> back on. See <a href="../vscode-tutorial/07-registers-memory-disassembly.html">Registers, memory and disassembly</a>.</td>
                 </tr>
                 <tr>
-                  <td data-label="Tool">Delphi 10.3 Rio or later</td>
-                  <td data-label="Why">Needed to build the debugger from source, and to compile the program you want to debug.</td>
+                  <td data-label="Tool">Delphi 12 Athens or later</td>
+                  <td data-label="Why">Needed to build the debugger from source, and the supported minimum for the program you want to debug.</td>
                 </tr>
               </tbody>
             </table>
@@ -485,16 +515,24 @@
         <section id="updates">
           <h2>Staying up to date</h2>
           <p>
-            A Marketplace install is updated by VS Code itself, like any other extension.
+            A Marketplace install is updated by VS Code itself, like any other extension, and since
+            0.7.3 it never asks GitHub. (On 0.7.2 a Marketplace install also showed the GitHub
+            notice described below; ignore it there, VS Code updates that copy itself.)
           </p>
           <p>
             A setup-zip install is not. VS Code records an extension installed from a
             <code>.vsix</code> as pinned, so it is never auto-updated from the Marketplace. Instead
             the extension itself checks GitHub releases once a day. When a newer version exists you
-            get a notification offering two things: <strong>Download</strong>, which opens the
-            release page, and <strong>Skip this version</strong>, which silences that particular
-            version for good — useful when you have decided to stay where you are. It fails silently
-            when the machine is offline or behind a proxy: no error, no repeated prompting.
+            get a notification — <em>Delphi Debugger &lt;version&gt; is available</em> — offering two
+            things: <strong>Download</strong>, which opens the release page, and
+            <strong>Skip this version</strong>, which silences that particular version for good —
+            useful when you have decided to stay where you are. It fails silently when the machine is
+            offline or behind a proxy: no error, no repeated prompting.
+          </p>
+          <p>
+            Since 0.7.3 an update also refreshes the MCP server&rsquo;s stable copy at the next VS Code
+            start. The Claude Code registration keeps working, since its path does not change, but a
+            Claude Code session that is already running keeps the old server until it is restarted.
           </p>
           <p>
             Turn it off entirely with <code>delphi-win64.checkForUpdates</code> — the full settings
@@ -502,11 +540,12 @@
             <a href="../vscode-tutorial/12-settings-and-commands-reference.html">settings and commands reference</a>.
           </p>
           <div class="doc-note">
-            <strong>The extension is dormant until you first use it.</strong> Like most VS Code
-            extensions it does not load when the editor starts: it wakes on the first Delphi debug
-            session, or when the Delphi Modules view is opened. So immediately after installing,
-            <em>Delphi Debugger</em> commands may not appear in the Command Palette and no update
-            check has run yet. Start a session once and everything is there.
+            <strong>When the extension wakes up.</strong> Since 0.7.3 it activates once VS Code has
+            finished starting, so the update check, the refresh of the MCP server&rsquo;s stable copy
+            and the Claude Code registration all happen at startup. Version 0.7.2 stayed dormant
+            until the first Delphi debug session or until the Delphi Modules view was opened, so
+            immediately after installing it, no update check had run yet; start a session once and
+            everything is there.
           </div>
           <p>
             Updating a setup-zip install is the same operation as installing: run the new

@@ -204,9 +204,10 @@
           <p>
             <code>set_exception_filters(filters=["unhandled"])</code> — turns off the first-chance
             <code>delphi</code>, <code>av</code> and <code>all</code> breaks and leaves only the
-            second-chance stop. For anything finer-grained than a whole category, the rule engine in
-            <code>launch.json</code> is the right tool; see
-            <a href="../vscode-tutorial/04-exception-handling.html">Exception handling</a>.
+            second-chance stop. Over MCP the categories are as fine as it gets: the per-exception
+            rule engine, with its project and machine-wide rule files, belongs to the VS Code
+            debugger and is not loaded by an MCP session; see
+            <a href="../vscode-tutorial/04-exception-handling.html#rules">Exception handling</a>.
           </p>
         </section>
 

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Installing and registering &mdash; Delphi Debugger for VS Code and AI Agents</title>
-  <meta name="description" content="Getting the MCP server in front of an agent: bundled with the Marketplace extension, registered by the setup zip installer, register-mcp.ps1 or a hand written configuration.">
+  <meta name="description" content="Getting the MCP server in front of an agent: bundled with the Marketplace extension and registered with Claude Code automatically, registered by the setup zip installer, register-mcp.ps1 or a hand written configuration.">
   <link rel="icon" type="image/x-icon" href="../../../assets/favicon.ico">
   <link rel="stylesheet" href="../../../css/fonts.css">
   <link rel="stylesheet" href="../../../css/style.css">
@@ -81,17 +81,44 @@
               whenever the bundled exe is newer.
             </li>
           </ul>
+
+          <h3>Claude Code is registered for you</h3>
           <p>
-            For Claude Code, run <strong>Delphi: Register MCP Server with Claude Code</strong> once
-            from the Command Palette (<code>Ctrl+Shift+P</code>). It removes a registration under the
-            legacy name <code>delphi-win64-debugger</code>, then runs
+            Since 0.7.3, the first time VS Code starts after the extension is installed or
+            reinstalled, the extension registers the stable copy with Claude Code without asking,
+            at user scope, and shows one notification — provided the <code>claude</code> CLI is on
+            <code>PATH</code> and nothing is registered as <code>delphi-debugger</code> yet:
           </p>
           <pre><code>claude mcp add delphi-debugger -s user -- "%LOCALAPPDATA%\DelphiWin64Debugger\DelphiDebuggerMcp.exe"</code></pre>
           <p>
-            with the path expanded. Because it registers the stable copy, the registration survives
-            extension updates. It needs the <code>claude</code> CLI on <code>PATH</code>; without it,
-            the command registers nothing and shows the line to run by hand instead. Restart Claude
-            Code afterwards.
+            A <code>delphi-debugger</code> registration that points at another executable, such as a
+            development build, is never touched. The check runs once per install, so a registration
+            you remove by hand stays removed until the next install. Restart Claude Code to pick the
+            server up.
+          </p>
+          <p>
+            <strong>Updates</strong> need nothing. Since 0.7.3 the extension activates at VS Code
+            startup and refreshes the stable copy then (0.7.2 waited for the first Delphi debug
+            session); the registration keeps working because the path does not change. A Claude
+            Code session that is already running keeps the old server until it is restarted.
+          </p>
+          <p>
+            <strong>Uninstalling</strong> the extension removes the Claude Code registration and the
+            stable copy (since 0.7.3), through the extension&rsquo;s uninstall hook. VS Code runs that
+            hook only when it deletes the extension from disk, at a restart after the uninstall —
+            after a command-line uninstall, the second start — and it removes nothing while another
+            VS Code-family editor still has the extension. Registrations pointing elsewhere are kept.
+          </p>
+
+          <h3>Registering by hand</h3>
+          <p>
+            The command <strong>Delphi: Register MCP Server with Claude Code</strong>, in the
+            Command Palette (<code>Ctrl+Shift+P</code>), runs the same <code>claude mcp add</code> on
+            the stable copy, replacing whatever <code>delphi-debugger</code> pointed at, after
+            removing a registration under the legacy name <code>delphi-win64-debugger</code>. It is
+            the way on 0.7.2, and the way to restore a registration you removed. It needs the
+            <code>claude</code> CLI on <code>PATH</code>; without it, the command registers nothing
+            and shows the line to run by hand instead. Restart Claude Code afterwards.
           </p>
         </section>
 
@@ -100,25 +127,53 @@
           <p>
             <code>Setup.exe</code> offers to register the MCP server at the end of an install. Say
             yes and there is nothing else to do: it copies the server to the same stable folder,
-            <code>%LOCALAPPDATA%\DelphiWin64Debugger\</code>, and registers it with Claude Code and
-            with VS Code&rsquo;s user <code>mcp.json</code> through <code>register-mcp.ps1</code>,
-            described below. This is the route for a machine without VS Code, for Claude Desktop and
-            for offline installs —
+            <code>%LOCALAPPDATA%\DelphiWin64Debugger\</code>, and registers it with Claude Code
+            through <code>register-mcp.ps1</code>, described below. This is the route for a machine
+            without VS Code, for Claude Desktop and for offline installs —
             <a href="../getting-started/index.html">Getting started</a> covers the install itself.
           </p>
+          <ul>
+            <li>
+              Since 0.7.3 it no longer writes VS Code&rsquo;s user <code>mcp.json</code>: the
+              extension registers the server with VS Code itself, and an <code>mcp.json</code> entry
+              beside it listed the server twice.
+            </li>
+            <li>
+              When an editor keeps its own copy of the extension — one from the Marketplace, or a
+              newer one — <code>Setup.exe</code> skips the MCP step: that copy looks after the stable
+              folder and the Claude Code registration.
+            </li>
+            <li>
+              <code>Setup.exe</code> 0.7.0 to 0.7.2 skipped this registration even when you said yes,
+              because it looked for the script in the wrong folder; it is fixed in 0.7.3. After one
+              of those versions, register by hand as below.
+            </li>
+            <li>
+              <code>Setup.exe --uninstall</code> (since 0.7.3) removes the extension from each
+              editor and then, unless an editor still has it, the Claude Code registration and the
+              stable folder.
+            </li>
+          </ul>
         </section>
 
         <section id="script">
           <h2>Registering it yourself</h2>
           <p>
-            From a source checkout, or to register a copy the installer did not, run the same script
-            the installer uses (in the setup zip it sits next to <code>Setup.exe</code>). Build the
-            server first if you are working from source:
+            To register a copy the installer did not, run the same script the installer uses. In
+            the setup zip it sits next to <code>Setup.exe</code>; run it from the folder you
+            extracted the zip into:
+          </p>
+          <pre><code>powershell -ExecutionPolicy Bypass -File register-mcp.ps1 ^
+  "%LOCALAPPDATA%\DelphiWin64Debugger\DelphiDebuggerMcp.exe"</code></pre>
+          <p>
+            From a source checkout the script is <code>scripts\register-mcp.ps1</code>. Build the
+            server first; <code>-VsCode</code> also points VS Code at the build output (see
+            below):
           </p>
           <pre><code>cmd /c scripts\build_mcp.bat
 
 powershell -ExecutionPolicy Bypass -File scripts\register-mcp.ps1 ^
-  MCPDebugger\Win64\Debug\DelphiDebuggerMcp.exe</code></pre>
+  MCPDebugger\Win64\Debug\DelphiDebuggerMcp.exe -VsCode</code></pre>
           <p>
             The script takes the path to <code>DelphiDebuggerMcp.exe</code> as its argument, resolves
             it to an absolute path, and registers it under the name <code>delphi-debugger</code>; a
@@ -126,7 +181,13 @@ powershell -ExecutionPolicy Bypass -File scripts\register-mcp.ps1 ^
             idempotent — re-running it is safe and simply refreshes the registration.
           </p>
           <p>To remove it:</p>
-          <pre><code>powershell -ExecutionPolicy Bypass -File scripts\register-mcp.ps1 -Unregister</code></pre>
+          <pre><code>powershell -ExecutionPolicy Bypass -File register-mcp.ps1 -Unregister ^
+  "%LOCALAPPDATA%\DelphiWin64Debugger\DelphiDebuggerMcp.exe"</code></pre>
+          <p>
+            With a path, <code>-Unregister</code> removes only the registrations that point at that
+            exe, so a development build registered under the same name is kept. Without a path it
+            removes the names whatever they point at.
+          </p>
           <p>
             Restart Claude Code, or reload VS Code, for either change to take effect.
           </p>
@@ -151,8 +212,10 @@ powershell -ExecutionPolicy Bypass -File scripts\register-mcp.ps1 ^
 
           <h3>VS Code and VS Code Insiders</h3>
           <p>
-            No CLI needed — the script merges an entry into the user
-            <code>mcp.json</code>, in the format VS Code 1.102 and later expects:
+            Only with <code>-VsCode</code>, which is meant for a development build
+            (<code>scripts\install-dev.bat</code> passes it): the script merges an entry into the
+            user <code>mcp.json</code>, in the format VS Code 1.102 and later expects. No CLI is
+            needed.
           </p>
           <pre><code>%APPDATA%\Code\User\mcp.json
 %APPDATA%\Code - Insiders\User\mcp.json</code></pre>
@@ -168,8 +231,12 @@ powershell -ExecutionPolicy Bypass -File scripts\register-mcp.ps1 ^
           <p>
             It merges rather than overwrites: other servers already in the file are left alone. An
             editor that is not installed is skipped, and if neither is found the script says so.
-            With the Marketplace extension installed, VS Code 1.101 or later already sees the bundled
-            server through its MCP registry, and this entry is not needed.
+          </p>
+          <p>
+            Without <code>-VsCode</code> the script only removes the <code>mcp.json</code> entries
+            that point at the given exe — the duplicates earlier <code>Setup.exe</code> versions
+            wrote. With the extension installed, VS Code 1.101 or later already sees the bundled
+            server through its MCP registry, and an entry here would list it twice.
           </p>
           <div class="doc-note">
             Any other MCP client is configured the same way — point it at

@@ -216,7 +216,7 @@
                 <tr><td data-label="Command">Forget Evaluation Decision (Delphi)</td><td data-label="Where it lives">Right-click a row in Variables <em>or</em> Watch — undoes a previous allow or deny</td><td data-label="In palette"><strong>no</strong></td></tr>
                 <tr><td data-label="Command">Copy Path</td><td data-label="Where it lives"><strong>Hover icon</strong> on a module row in the Delphi Modules view</td><td data-label="In palette"><strong>no</strong></td></tr>
                 <tr><td data-label="Command">Pick a Process to Attach To</td><td data-label="Where it lives">Only as <code>${command:delphi-win64.pickProcess}</code> in an attach configuration</td><td data-label="In palette"><strong>no</strong></td></tr>
-                <tr><td data-label="Command">Register MCP Server with Claude Code</td><td data-label="Where it lives">Command Palette. Registers the extension&rsquo;s stable copy of the MCP server with the <code>claude</code> CLI at user scope — <a href="../mcp/installing-and-registering.html#marketplace">Installing and registering</a></td><td data-label="In palette">yes</td></tr>
+                <tr><td data-label="Command">Register MCP Server with Claude Code</td><td data-label="Where it lives">Command Palette. Registers the extension&rsquo;s stable copy of the MCP server with the <code>claude</code> CLI at user scope, by hand. Since 0.7.3 the extension also does this by itself once per install — <a href="../mcp/installing-and-registering.html#marketplace">Installing and registering</a></td><td data-label="In palette">yes</td></tr>
               </tbody>
             </table>
           </div>
@@ -242,7 +242,7 @@
                 </tr>
                 <tr>
                   <td data-label="Setting"><code>delphi-win64.checkForUpdates</code></td><td data-label="Type">boolean</td><td data-label="Default"><code>true</code></td>
-                  <td data-label="What it does">Daily check of GitHub releases, with a download-link notification. Fails silently when offline. A Marketplace install is updated by VS Code itself; this check is what tells a setup-zip install, which VS Code pins, about a new release.</td>
+                  <td data-label="What it does">Daily check of GitHub releases, with a download-link notification. Fails silently when offline. Runs only for a setup-zip (<code>.vsix</code>) install, which VS Code pins and never updates. Since 0.7.3 a Marketplace install, which VS Code updates itself, never asks GitHub.</td>
                 </tr>
               </tbody>
             </table>

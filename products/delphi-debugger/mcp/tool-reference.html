@@ -57,9 +57,9 @@
         <h1>MCP tool reference</h1>
 
         <p>
-          Forty-four tools, grouped by what you would be doing when you reach for them. Most take no
-          arguments beyond the obvious ones; where a tool <em>refuses</em> something, that refusal is
-          noted, because it is usually the interesting part.
+          Every tool the server exposes, grouped by what you would be doing when you reach for it.
+          Most take no arguments beyond the obvious ones; where a tool <em>refuses</em> something,
+          that refusal is noted, because it is usually the interesting part.
         </p>
         <div class="doc-note">
           Nearly everything below requires the session to be <strong>stopped</strong>.
@@ -79,12 +79,20 @@
                   <td data-label="What it does">Running processes with pid, executable name and path, command line, parent pid, start time and architecture. Optional name filter.</td>
                 </tr>
                 <tr>
+                  <td data-label="Tool"><code>launch_project</code></td>
+                  <td data-label="What it does">Launch a project known to <a href="../getting-started/index.html#ddk">delphi-devkit</a> (DDK), named by <code>project</code>: a DDK project id, a project name, or a <code>.dproj</code>/<code>.dpr</code>/<code>.dpk</code> path. DDK supplies the executable (for a package or DLL project, its Host Application), the <code>.map</code>/<code>.rsm</code>, the source root and search paths, the project&rsquo;s own <code>.bpl</code>/<code>.dll</code> with their symbols, and the run arguments — no <code>launch.json</code> needed. The preferred way in when DDK is installed. Optional <code>args</code> overrides the run parameters DDK reports. Stops at entry. The reply carries DDK&rsquo;s warnings (missing or stale <code>.map</code>/<code>.rsm</code>, a package not built); DDK&rsquo;s errors — an ambiguous reference with its candidates, an unknown project, <code>ddk.exe</code> not found — come back verbatim.</td>
+                </tr>
+                <tr>
+                  <td data-label="Tool"><code>attach_to_project</code></td>
+                  <td data-label="What it does">Attach to the running executable of a DDK project — the program, or the Host Application of a package or DLL project — with symbols, sources and modules supplied as for <code>launch_project</code>. One running instance is attached to directly; several fail with the candidate list unless <code>processId</code> names one. Detaching leaves the process running unless <code>killOnDetach</code> is set.</td>
+                </tr>
+                <tr>
                   <td data-label="Tool"><code>launch_debuggee</code></td>
                   <td data-label="What it does">Start a process under the debugger. Takes <code>program</code> plus optional <code>args</code>, <code>mapFile</code>, <code>rsmFile</code>, <code>sourceRoot</code>, <code>sourceSearchPaths</code>, <code>stopAtEntry</code> and the exception filters.</td>
                 </tr>
                 <tr>
                   <td data-label="Tool"><code>launch_from_config</code></td>
-                  <td data-label="What it does">Launch from an existing VS Code <code>launch.json</code> — the same file the DAP debugger uses, JSONC and <code>${workspaceFolder}</code> / <code>${env:}</code> included — so nothing has to be restated. Stops at entry.</td>
+                  <td data-label="What it does">Launch from an existing VS Code <code>launch.json</code> or <code>.code-workspace</code> — the same file the DAP debugger uses, JSONC and <code>${workspaceFolder}</code> / <code>${env:}</code> included — so nothing has to be restated. Stops at entry.</td>
                 </tr>
                 <tr>
                   <td data-label="Tool"><code>attach_to_process</code></td>
@@ -92,7 +100,7 @@
                 </tr>
                 <tr>
                   <td data-label="Tool"><code>attach_from_config</code></td>
-                  <td data-label="What it does">The same, from a <code>launch.json</code> <code>attach</code> configuration.</td>
+                  <td data-label="What it does">The same, from an <code>attach</code> configuration in a <code>launch.json</code> or <code>.code-workspace</code>.</td>
                 </tr>
                 <tr>
                   <td data-label="Tool"><code>get_debug_session_status</code></td>
@@ -241,6 +249,10 @@
                   <td data-label="Tool"><code>wait_until_stopped</code></td>
                   <td data-label="What it does">Wait without issuing a command, for a target left running.</td>
                 </tr>
+                <tr>
+                  <td data-label="Tool"><code>set_step_isolation_release</code></td>
+                  <td data-label="What it does">Switch the step-isolation deadlock detector for the rest of the session. A step keeps every other thread frozen; with auto-release on, the default, the frozen threads are released when the stepped thread is found waiting on one of them — at once when the lock&rsquo;s owner is known, after <code>releaseMs</code> of an unowned wait otherwise. <code>enabled: false</code> is strict isolation: the others stay frozen for the whole step, and <code>pause_execution</code> is the way to break in. Applies to a step already in flight; the current state is in <code>get_debug_session_status</code>.</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -277,9 +289,13 @@
             </table>
           </div>
           <p>
-            The rule engine itself is configured in <code>launch.json</code>, not through a tool —
-            see <a href="../vscode-tutorial/04-exception-handling.html">Exception handling</a>. An
-            agent reaches it via <code>launch_from_config</code>.
+            Over MCP the filters are the whole story. The per-exception rule engine belongs to the
+            VS Code debugger: its rules live in the project&rsquo;s
+            <code>&lt;Project&gt;.ExceptionSettings.json</code> /
+            <code>.ExceptionSettings.local.json</code> files and in the machine-wide
+            <code>%USERPROFILE%\.DelphiWinDebugger\exceptionRules.json</code> — never in
+            <code>launch.json</code> — and an MCP session does not load them. See
+            <a href="../vscode-tutorial/04-exception-handling.html#rules">Exception handling</a>.
           </p>
         </section>
 
